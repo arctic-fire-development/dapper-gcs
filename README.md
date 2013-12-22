@@ -1,4 +1,4 @@
-## Poker Flat Ground Control Station
+## unBase Unmanned Ground Control Station
 
 UAV ground station software emphasizing data collection and mission operations.
 
@@ -19,7 +19,7 @@ sudo npm install -g nodemon
 After installing prerequisites, clone this project and install dependencies, then build runtime files with ```grunt```:
 
 ```
-git clone git@github.com:acuasi/ground-control-station.git
+git clone git@github.com:arctic-fire-development/unbase-gcs.git
 npm install
 grunt
 ```
