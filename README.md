@@ -4,6 +4,14 @@ UAV ground station software emphasizing data collection and mission operations.
 
 ### Installation (for development)
 
+#### ArduPilot SITL
+
+Follow the instructions from [here](http://dev.ardupilot.com/wiki/setting-up-sitl-on-linux/)
+
+When building jsbsim, you may have to install these additional packages
+
+```apt-get install expat libexpat1-dev gnome-terminal```
+
 #### Prerequisites
 
 You need ```git```, ```node```, ```npm``` (distributed with node, usually), and ```grunt```.  On OSX, [install Node.js from an installer](http://nodejs.org/#download), then the rest with brew and npm:
