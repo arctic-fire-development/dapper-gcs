@@ -239,6 +239,18 @@ buf.push('<div id="widgets"><div id="speedWidget" class="widget"></div><div id="
 return buf.join("");
 };
 
+exports["Templates"]["signalStrengthWidget"] = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<h3>Signal Strength</h3><img');
+buf.push(attrs({ 'src':(icon) }, {"src":true}));
+buf.push('/>');
+}
+return buf.join("");
+};
+
 exports["Templates"]["speedWidget"] = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
