@@ -718,7 +718,7 @@ define('Models/Platform',['backbone'], function(Backbone) {
     validate: function(attrs) {
       attrs.lat /= 1e07;
       attrs.lon /= 1e07;
-      attrs.alt /=100;
+      attrs.alt /= 100;
     }
 
   });
@@ -981,6 +981,18 @@ buf.push('<div id="widgets"><div id="speedWidget" class="widget"></div><div id="
 return buf.join("");
 };
 
+exports["Templates"]["signalStrengthWidget"] = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<h3>Signal Strength</h3><img');
+buf.push(attrs({ 'src':(icon) }, {"src":true}));
+buf.push('/>');
+}
+return buf.join("");
+};
+
 exports["Templates"]["speedWidget"] = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
 var buf = [];
@@ -1006,7 +1018,8 @@ define('Views/Widgets/Speed',['backbone', 'Templates'], function(Backbone, templ
 
     render: function() {
 
-      this.$el.html(template['speedWidget']({groundspeed: Math.round(this.model.get('groundspeed'), 2)}));
+      this.$el.html(template['speedWidget'](
+        {groundspeed: Number(this.model.get('groundspeed')).toFixed(0)}));
     
     }
     
@@ -1379,7 +1392,8 @@ define('Views/Widgets/Altitude',['backbone', 'Templates'], function(Backbone, te
       this.model.on("change:alt", this.render, this);
     },
     render: function() {
-      this.$el.html(template['altitudeWidget']({alt: this.model.get('alt')}));
+      this.$el.html(template['altitudeWidget'](
+        {alt: Number(this.model.get('alt')).toFixed(1)}));
     }
     
   });
@@ -1573,9 +1587,6 @@ define('Views/Mission',['backbone', 'Templates',
       this.healthWidget = new HealthWidget({model: this.model.get('platform')});
       this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
 
-      // Connection reflects information not entirely derived from the platform
-      this.commsWidget = new CommsWidget({model: this.model.get('connection')});
-
       // Render party
       this.speedWidget.render();
       this.mapWidget.render();
@@ -1583,7 +1594,6 @@ define('Views/Mission',['backbone', 'Templates',
       this.batteryWidget.render();
       this.healthWidget.render();
       this.gpsWidget.render();
-      this.commsWidget.render();
 
     }
 
