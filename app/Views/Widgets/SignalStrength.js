@@ -18,7 +18,7 @@ define(['require', 'backbone', 'Templates'], function(require, Backbone, templat
     getIcon: function() {
         // This generates a path to the images relative to the directory containing
         // the html, so the correct path should be automatically generated.
-        var imagesDir = require.toUrl("./images/");
+        var imagesDir = require.toUrl("../../../../images/");
 
         if(!this.model.get('connected')) {
             return imagesDir + "no-signal.svg";
