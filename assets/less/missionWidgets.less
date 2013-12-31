@@ -14,29 +14,29 @@
     }
 
     .value {
-    padding-left: 1ex;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
-    font-size: 48pt;
+        padding-left: 1ex;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+        font-size: 48pt;
     }
 
     .units {
-    color: #ff8;
-    text-shadow: 4px 4px #000;
-        }
+        color: #ff8;
+        text-shadow: 4px 4px #000;
+    }
 
-    h3 { 
-    display: none;
+    h3 {
+        //display: none;
     }
 
   }
 
   #gpsWidget {
-  display: none;
+    //display: none;
     z-index: 100;
     position: absolute;
     top: 10px;
     left: 100px;
-    background-color: rgba(0, 0, 0, .75);
+    background-color: rgba(0, 0, 0, .28);
     .value {
       font-size: 30px;
       font-weight: 500;
@@ -48,7 +48,7 @@
     .value {
       font-size: 64pt;
       font-weight: 400;
-      
+
     }
     div {
       color: #fff;
@@ -66,18 +66,18 @@
     }
   }
 
-  #widgets {  
+  #widgets {
     z-index: 100;
     position: absolute;
     left: 0;
     bottom: 0;
 
-    #speedWidget, #altitudeWidget {
+    #speedWidget, #altitudeWidget, #signalStrengthWidget, #batteryWidget {
       .value {
         font-size: 48px;
         font-weight: 600;
       }
     }
 
-  } 
+  }
 }
