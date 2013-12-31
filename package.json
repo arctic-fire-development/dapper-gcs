@@ -23,7 +23,7 @@
     "now": "*",
     "backbone" : "*",
     "nconf": "*",
-    "underscore": "*",
+    "underscore": "~1.4.4",
     "winston": "*",
     "jade": "*",
     "jspack": "",
