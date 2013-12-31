@@ -11,7 +11,8 @@ define(['backbone', 'Templates',
   'Views/Widgets/Gps',
   'Views/Widgets/Health',
   'Views/Widgets/State',
-  'Views/Widgets/Battery'
+  'Views/Widgets/Battery',
+  'Views/Widgets/SignalStrength'
 
   ], function(Backbone, template,
     // Models
@@ -25,9 +26,10 @@ define(['backbone', 'Templates',
     GpsWidget,
     HealthWidget,
     StateWidget,
-    BatteryWidget
+    BatteryWidget,
+    SignalStrengthWidget
   ) {
-  
+
   var MissionView = Backbone.View.extend({
 
     model: Mission,
@@ -37,11 +39,11 @@ define(['backbone', 'Templates',
     initialize: function() {
       _.bindAll(this);
     },
-    
+
     render: function() {
-      
+
       if(false === this.hasRendered) { this.renderLayout(); }
-      
+
     },
 
     // Meant to be run only once; renders scaffolding and subviews.
@@ -49,7 +51,7 @@ define(['backbone', 'Templates',
 
       // Render scaffolding
       this.$el.html(template['missionLayout']());
-      
+
       // Instantiate subviews, now that their elements are present on the page
       this.speedWidget = new SpeedWidget({model: this.model.get('platform')});
       this.mapWidget = new MapWidget({model: this.model.get('platform')});
@@ -57,6 +59,7 @@ define(['backbone', 'Templates',
       this.batteryWidget = new BatteryWidget({model: this.model.get('platform')});
       this.healthWidget = new HealthWidget({model: this.model.get('platform')});
       this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
+      this.signalStrengthWidget = new SignalStrengthWidget({model: this.model.get('platform')});
 
       // Render party
       this.speedWidget.render();
@@ -65,6 +68,7 @@ define(['backbone', 'Templates',
       this.batteryWidget.render();
       this.healthWidget.render();
       this.gpsWidget.render();
+      this.signalStrengthWidget.render();
 
     }
 

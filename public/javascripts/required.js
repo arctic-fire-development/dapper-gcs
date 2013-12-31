@@ -976,7 +976,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div id="widgets"><div id="speedWidget" class="widget"></div><div id="altitudeWidget" class="widget"></div><div id="commsWidget" class="widget"></div><div id="healthWidget" class="widget"></div></div><div id="mapWidget"></div><div id="gpsWidget" class="widget"></div>');
+buf.push('<div id="widgets"><div id="speedWidget" class="widget"></div><div id="altitudeWidget" class="widget"></div><div id="commsWidget" class="widget"></div><div id="signalStrengthWidget" class="widget"></div><div id="batteryWidget" class="widget"></div><div id="healthWidget" class="widget"></div></div><div id="mapWidget"></div><div id="gpsWidget" class="widget"></div>');
 }
 return buf.join("");
 };
@@ -1527,6 +1527,54 @@ define('Views/Widgets/Battery',['backbone', 'Templates'], function(Backbone, tem
   return BatteryWidget;
 
 });
+// Widget to display the radio signal strength
+define('Views/Widgets/SignalStrength',['require', 'backbone', 'Templates'], function(require, Backbone, template) {
+  var SignalStrengthWidget = Backbone.View.extend({
+
+    el: '#signalStrengthWidget',
+    className: 'widget',
+
+    initialize: function() {
+      _.bindAll(this);
+      this.model.on("change:strength change:connected", this.render, this);
+    },
+
+    render: function() {
+      this.$el.html(template['signalStrengthWidget'](
+        {icon: this.getIcon()}));
+    },
+
+    getIcon: function() {
+        // This generates a path to the images relative to the directory containing
+        // the html, so the correct path should be automatically generated.
+        var imagesDir = require.toUrl("./images/");
+
+        if(!this.model.get('connected')) {
+            return imagesDir + "no-signal.svg";
+        }
+        else {
+            var signalStrength = this.model.get('strength');
+            if(signalStrength >= 90) {
+                return imagesDir + "4-bars.svg";
+            }
+            else if(signalStrength >= 60) {
+                return imagesDir + "3-bars.svg";
+            }
+            else if(signalStrength >= 30) {
+                return imagesDir + "2-bars.svg";
+            }
+            else {
+                return imagesDir + "1-bar.svg";
+            }
+        }
+    }
+
+  });
+
+  return SignalStrengthWidget;
+
+});
+
 define('Views/Mission',['backbone', 'Templates',
 
   // Models
@@ -1540,7 +1588,8 @@ define('Views/Mission',['backbone', 'Templates',
   'Views/Widgets/Gps',
   'Views/Widgets/Health',
   'Views/Widgets/State',
-  'Views/Widgets/Battery'
+  'Views/Widgets/Battery',
+  'Views/Widgets/SignalStrength'
 
   ], function(Backbone, template,
     // Models
@@ -1554,9 +1603,10 @@ define('Views/Mission',['backbone', 'Templates',
     GpsWidget,
     HealthWidget,
     StateWidget,
-    BatteryWidget
+    BatteryWidget,
+    SignalStrengthWidget
   ) {
-  
+
   var MissionView = Backbone.View.extend({
 
     model: Mission,
@@ -1566,11 +1616,11 @@ define('Views/Mission',['backbone', 'Templates',
     initialize: function() {
       _.bindAll(this);
     },
-    
+
     render: function() {
-      
+
       if(false === this.hasRendered) { this.renderLayout(); }
-      
+
     },
 
     // Meant to be run only once; renders scaffolding and subviews.
@@ -1578,7 +1628,7 @@ define('Views/Mission',['backbone', 'Templates',
 
       // Render scaffolding
       this.$el.html(template['missionLayout']());
-      
+
       // Instantiate subviews, now that their elements are present on the page
       this.speedWidget = new SpeedWidget({model: this.model.get('platform')});
       this.mapWidget = new MapWidget({model: this.model.get('platform')});
@@ -1586,6 +1636,7 @@ define('Views/Mission',['backbone', 'Templates',
       this.batteryWidget = new BatteryWidget({model: this.model.get('platform')});
       this.healthWidget = new HealthWidget({model: this.model.get('platform')});
       this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
+      this.signalStrengthWidget = new SignalStrengthWidget({model: this.model.get('platform')});
 
       // Render party
       this.speedWidget.render();
@@ -1594,6 +1645,7 @@ define('Views/Mission',['backbone', 'Templates',
       this.batteryWidget.render();
       this.healthWidget.render();
       this.gpsWidget.render();
+      this.signalStrengthWidget.render();
 
     }
 
