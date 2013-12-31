@@ -1203,9 +1203,9 @@ define("leaflet", (function (global) {
 }(this)));
 
 define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
-  
+
   var MapWidget = Backbone.View.extend({
-    
+
     el: '#mapWidget',
     className: 'widget',
     hasRendered: false,
@@ -1226,14 +1226,14 @@ define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
         // Do initial map setup
         this.renderLayout();
         this.hasRendered = true;
-    
+
       }
 
       var LatLng = new L.LatLng(lat, lon);
 
       var m = new L.CircleMarker(LatLng).setRadius(10);
       this.breadcrumb.unshift(m);
-      
+
       if(this.breadcrumb.length>50){
         this.breadcrumb[1].addTo(this.map);
         this.map.removeLayer(this.breadcrumb.pop());
@@ -1246,10 +1246,10 @@ define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
       }
 
       this.map.panTo( LatLng );
-      
+
       this.marker.setLatLng( LatLng );
       this.marker.setIconAngle( this.model.get('heading'));
-      
+
     },
 
     renderLayout: function() {
@@ -1284,7 +1284,7 @@ define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
       $(window).resize(_.debounce(_.bind(function() {
         $('#mapWidget').width($(window).width()).height($(window).height());
         this.map.invalidateSize();
-      }, this), 250))
+      }, this), 250));
 
     }
   });

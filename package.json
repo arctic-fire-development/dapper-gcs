@@ -21,17 +21,16 @@
     "express": "3.x",
     "serialport": "*",
     "now": "*",
-    "backbone" : "*",
+    "backbone": "*",
     "nconf": "*",
     "underscore": "~1.4.4",
     "winston": "*",
     "jade": "*",
     "jspack": "",
     "less-middleware": "*",
-    "winston": "*",
     "colors": "*",
     "requirejs": "*",
-    "q":"*",
+    "q": "*",
     "mavlink_ardupilotmega_v1.0": "0.0.2"
   },
   "devDependencies": {
@@ -45,9 +44,14 @@
     "grunt-contrib-concat": "<0.1.2",
     "grunt-contrib-watch": "<0.2.0",
     "grunt-jade-plugin": "<0.4",
-    "grunt-linter":"<0.4",
-    "grunt-contrib-less":"<0.4",
-    "grunt-contrib-mincss":"<0.4"
+    "grunt-linter": "<0.4",
+    "grunt-contrib-less": "<0.4",
+    "grunt-contrib-mincss": "<0.4",
+    "grunt-jasmine-task": "~0.2.3"
   },
-  "keywords": ["drone", "mavlink", "geospatial"]
+  "keywords": [
+    "drone",
+    "mavlink",
+    "geospatial"
+  ]
 }
