@@ -66,13 +66,22 @@
     }
   }
 
+  #signalStrengthWidget {
+    z-index: 100;
+
+    img{
+        width: 40px;
+        height: 40px;
+    }
+  }
+
   #widgets {
     z-index: 100;
     position: absolute;
     left: 0;
     bottom: 0;
 
-    #speedWidget, #altitudeWidget, #signalStrengthWidget, #batteryWidget {
+    #speedWidget, #altitudeWidget, #batteryWidget {
       .value {
         font-size: 48px;
         font-weight: 600;
