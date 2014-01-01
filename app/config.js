@@ -18,18 +18,18 @@ require.config({
 
     // Templates.js is created during the build process, move it outside the
     // app directory so our watch task can work properly.
-    Templates: "../build/Templates",
+    JST: "Templates/templates",
 
     // Required Libraries.
-    jquery: "../assets/js/vendor/jquery",
-    underscore: "../assets/js/vendor/underscore",
-    backbone: "../assets/js/vendor/backbone",
-    jade: "../assets/js/vendor/jade",
+    jquery: "../node_modules/jquery/dist/jquery",
+    underscore: "../node_modules/underscore/underscore",
+    backbone: "../node_modules/backbone/backbone",
+    jade: "../node_modules/grunt-contrib-jade/node_modules/jade/runtime",
 
     // Libraries where we modify the source code in one way or another
     leaflet: "../assets/js/libs/leaflet",
     now: "../assets/js/libs/now" // we just don't talk about this one.
-    
+
   },
 
   shim: {

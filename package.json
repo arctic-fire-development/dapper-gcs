@@ -2,14 +2,14 @@
   "name": "dapper",
   "description": "DataMapper Ground Control Station",
   "version": "0.0.1",
-  "homepage": "https://github.com/acuasi/ground-control-station",
+  "homepage": "https://github.com/arctic-fire-development/unbase-gcs",
   "repository": {
     "type": "git",
-    "url": "git://github.com/acuasi/ground-control-station.git"
+    "url": "git://github.com/arctic-fire-development/unbase-gcs.git"
   },
-  "private": false,
+  "private": true,
   "bugs": {
-    "url": "https://github.com/acuasi/ground-control-station/issues"
+    "url": "https://github.com/arctic-fire-development/unbase-gcs/issues"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -18,36 +18,29 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "express": "3.x",
-    "serialport": "*",
-    "now": "*",
-    "backbone": "*",
-    "nconf": "*",
+    "express": "~3.4.7",
+    "serialport": "~1.2.5",
+    "now": "~0.8.1",
+    "leaflet": "~0.7.1",
+    "backbone": "~1.1.0",
+    "nconf": "~0.6.9",
     "underscore": "~1.4.4",
-    "winston": "*",
-    "jade": "*",
-    "jspack": "",
+    "winston": "~0.7.2",
+    "jspack": "0.0.1",
+    "jquery": "~2.1.0-beta3",
     "less-middleware": "*",
     "colors": "*",
-    "requirejs": "*",
+    "requirejs": "~2.1.9",
     "q": "*",
     "mavlink_ardupilotmega_v1.0": "0.0.2"
   },
   "devDependencies": {
-    "mocha": "",
-    "grunt-simple-mocha": "",
-    "should": "",
-    "sinon": "",
-    "grunt": "~0.3.17",
-    "grunt-contrib": "<0.4",
-    "grunt-contrib-requirejs": "~0.3.4",
-    "grunt-contrib-concat": "<0.1.2",
-    "grunt-contrib-watch": "<0.2.0",
-    "grunt-jade-plugin": "<0.4",
-    "grunt-linter": "<0.4",
-    "grunt-contrib-less": "<0.4",
-    "grunt-contrib-mincss": "<0.4",
-    "grunt-jasmine-task": "~0.2.3"
+    "mocha": "~1.16.2",
+    "grunt-simple-mocha": "~0.4.0",
+    "should": "~2.1.1",
+    "sinon": "~1.7.3",
+    "grunt": "~0.4.2",
+    "grunt-contrib": "~0.8.0"
   },
   "keywords": [
     "drone",
