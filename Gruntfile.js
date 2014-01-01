@@ -38,15 +38,17 @@ module.exports = function(grunt) {
     },
 
     jade: {
-      amd: {
         options: {
           amd: true,
-          client: true
+          client: true,
+          pretty: true,
+          compileDebug: false
         },
         files: {
-          'build/Templates.js': ['app/Templates/*.jade']
+            expand: false,
+            src: ['app/**/*.jade'],
+            dest: 'app/Templates/templates.js'
         }
-      }
     },
 
     jasmine : {
@@ -87,11 +89,11 @@ module.exports = function(grunt) {
   });
 
   // Load additional tasks.
-  grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
   //grunt.loadNpmTasks('grunt-jade-plugin');
   grunt.loadNpmTasks('grunt-contrib-jade');
-  grunt.loadNpmTasks('grunt-jasmine-task');
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
+  grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
 
