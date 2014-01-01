@@ -1,10 +1,11 @@
-define(['backbone', 'Templates'], function(Backbone, template) {
-  
+define(['backbone', 'JST'], function(Backbone, template) {
+
   var GpsWidget = Backbone.View.extend({
-    
+
     el: '#gpsWidget',
+    template: template['app/Templates/gpsWidget'],
     className: 'widget',
-    
+
     initialize: function() {
 
       _.bindAll(this);
@@ -17,7 +18,7 @@ define(['backbone', 'Templates'], function(Backbone, template) {
 
     render: function() {
 
-        this.$el.html(template['gpsWidget'](
+        this.$el.html(this.template(
         {
             lat: this.model.get('lat'),
             lon: this.model.get('lon'),
@@ -25,9 +26,9 @@ define(['backbone', 'Templates'], function(Backbone, template) {
             satellites_visible: this.model.get('satellites_visible')
         }
         ));
-    
+
     }
-    
+
   });
   return GpsWidget;
 
