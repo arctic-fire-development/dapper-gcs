@@ -21,6 +21,7 @@
     "express": "3.x",
     "serialport": "*",
     "now": "*",
+    "leaflet": "*",
     "backbone": "*",
     "nconf": "*",
     "underscore": "~1.4.4",
@@ -34,20 +35,12 @@
     "mavlink_ardupilotmega_v1.0": "0.0.2"
   },
   "devDependencies": {
-    "mocha": "",
+    "mocha": "~1.16.2",
     "grunt-simple-mocha": "",
-    "should": "",
-    "sinon": "",
-    "grunt": "~0.3.17",
-    "grunt-contrib": "<0.4",
-    "grunt-contrib-requirejs": "~0.3.4",
-    "grunt-contrib-concat": "<0.1.2",
-    "grunt-contrib-watch": "<0.2.0",
-    "grunt-jade-plugin": "<0.4",
-    "grunt-linter": "<0.4",
-    "grunt-contrib-less": "<0.4",
-    "grunt-contrib-mincss": "<0.4",
-    "grunt-jasmine-task": "~0.2.3"
+    "should": "~2.1.1",
+    "sinon": "~1.7.3",
+    "grunt": "~0.4.2",
+    "grunt-contrib": "~0.8.0"
   },
   "keywords": [
     "drone",
