@@ -1,8 +1,9 @@
 // Widget to display the radio signal strength
-define(['require', 'backbone', 'Templates'], function(require, Backbone, template) {
+define(['require', 'backbone', 'JST'], function(require, Backbone, template) {
   var SignalStrengthWidget = Backbone.View.extend({
 
     el: '#signalStrengthWidget',
+    template: template['app/Templates/signalStrengthWidget'],
     className: 'widget',
 
     initialize: function() {
@@ -11,7 +12,7 @@ define(['require', 'backbone', 'Templates'], function(require, Backbone, templat
     },
 
     render: function() {
-      this.$el.html(template['signalStrengthWidget'](
+      this.$el.html(this.template(
         {icon: this.getIcon()}));
     },
 

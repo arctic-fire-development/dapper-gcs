@@ -1,4 +1,4 @@
-define(['backbone', 'Templates',
+define(['backbone', 'JST',
 
   // Models
   'Models/Mission',
@@ -34,6 +34,7 @@ define(['backbone', 'Templates',
 
     model: Mission,
     el: '#missionView',
+    template: template['app/Templates/missionLayout'],
     hasRendered: false,
 
     initialize: function() {
@@ -50,7 +51,7 @@ define(['backbone', 'Templates',
     renderLayout: function() {
 
       // Render scaffolding
-      this.$el.html(template['missionLayout']());
+      this.$el.html(this.template);
 
       // Instantiate subviews, now that their elements are present on the page
       this.speedWidget = new SpeedWidget({model: this.model.get('platform')});

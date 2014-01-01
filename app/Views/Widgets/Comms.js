@@ -1,15 +1,16 @@
-define(['backbone', 'Templates','now'], function(Backbone, template, now) {
-  
+define(['backbone', 'JST','now'], function(Backbone, template, now) {
+
   var CommsWidget = Backbone.View.extend({
-    
+
     el: '#commsWidget',
+    template: template['app/Templates/commsWidget'],
     className: 'widget',
     events: {
       'click #loadParams': 'loadParameters',
       'click #loadMission': 'loadMission',
       'click #startMission': 'startMission'
     },
-    
+
     initialize: function() {
       _.bindAll(this);
       this.model.on('change:status', this.render);
@@ -43,9 +44,9 @@ define(['backbone', 'Templates','now'], function(Backbone, template, now) {
         var heartbeatMessage = '';
         if( this.model.get('time_since_last_heartbeat') > 5000 ) {
           heartbeatMessage = ', disconnected for ' + this.model.get('time_since_last_heartbeat') + ' s';
-        } 
+        }
 
-        this.$el.html(template['commsWidget'](
+        this.$el.html(this.template(
           {
               time_since_last_heartbeat: heartbeatMessage,
               drop_rate_comm: this.model.get('drop_rate_comm'),
@@ -81,7 +82,7 @@ define(['backbone', 'Templates','now'], function(Backbone, template, now) {
       }
 
     }
-    
+
   });
 
   return CommsWidget;

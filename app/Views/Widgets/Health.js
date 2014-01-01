@@ -1,10 +1,11 @@
-define(['backbone', 'Templates'], function(Backbone, template) {
-  
+define(['backbone', 'JST'], function(Backbone, template) {
+
   var HealthWidget = Backbone.View.extend({
-    
+
     el: '#healthWidget',
+    template: template['app/Templates/healthWidget'],
     className: 'widget',
-    
+
     initialize: function() {
 
       _.bindAll(this);
@@ -17,22 +18,22 @@ define(['backbone', 'Templates'], function(Backbone, template) {
     },
 
     render: function() {
-        
-        this.$el.html(template['healthWidget'](
+
+        this.$el.html(this.template(
             {
                 stateMode: this.model.get('mode')
             }
         ));
-        
-        if( true == this.model.get('armed')) {
+
+        if( true === this.model.get('armed')) {
           this.$el.find('.flightModeArmed').show();
           this.$el.find('.flightModeDisarmed').hide();
         } else {
            this.$el.find('.flightModeArmed').hide();
-           this.$el.find('.flightModeDisarmed').show();     
+           this.$el.find('.flightModeDisarmed').show();
         }
     }
-    
+
   });
   return HealthWidget;
 
