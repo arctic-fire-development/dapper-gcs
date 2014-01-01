@@ -18,7 +18,7 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      
+
       all: {
         files: ['./app/**/*.js', './app/Templates/**/*.jade', './spec/**/*.js', 'assets/js/libs/**/*.js'],
         tasks: ['jade requirejs'],
@@ -38,15 +38,17 @@ module.exports = function(grunt) {
     },
 
     jade: {
-      amd: {
         options: {
           amd: true,
-          runtimeName: 'jade'
+          client: true,
+          pretty: true,
+          compileDebug: false
         },
         files: {
-          'build/Templates.js': 'app/Templates/*.jade'
+            expand: false,
+            src: ['app/**/*.jade'],
+            dest: 'app/Templates/templates.js'
         }
-      }
     },
 
     jasmine : {
@@ -70,14 +72,14 @@ module.exports = function(grunt) {
     less: {
       all: {
         files: {
-          'build/less.css' : 'assets/less/assets.less'
+          'build/less.css' : ['assets/less/assets.less']
         }
       }
     },
 
     // Must be after the less task, or that won't get minified
     // into the final client file.
-    mincss: {
+    cssmin: {
       compress: {
         files: {
           "public/stylesheets/min.css": ["build/less.css", "assets/css/**/*.css"]
@@ -87,16 +89,17 @@ module.exports = function(grunt) {
   });
 
   // Load additional tasks.
-  grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-jade-plugin');
-  grunt.loadNpmTasks('grunt-jasmine-task');
+  //grunt.loadNpmTasks('grunt-jade-plugin');
+  grunt.loadNpmTasks('grunt-contrib-jade');
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
+  grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-contrib-mincss');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   // Task registration.
   // Jade must be compiled to templates before the requirejs task can run,
   // because the Backbone views require templates.
-  grunt.registerTask('default', 'jade requirejs less mincss');
+  grunt.registerTask('default', ['jade', 'requirejs', 'less', 'cssmin']);
 
 };

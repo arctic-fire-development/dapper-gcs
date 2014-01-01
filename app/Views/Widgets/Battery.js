@@ -1,10 +1,11 @@
-define(['backbone', 'Templates'], function(Backbone, template) {
-  
+define(['backbone', 'JST'], function(Backbone, template) {
+
   var BatteryWidget = Backbone.View.extend({
-    
+
     el: '#batteryWidget',
+    template: template['app/Templates/batteryWidget'],
     className: 'widget',
-    
+
     initialize: function() {
 
       _.bindAll(this);
@@ -15,17 +16,17 @@ define(['backbone', 'Templates'], function(Backbone, template) {
     },
 
     render: function() {
-      
-      this.$el.html(template['batteryWidget'](
+
+      this.$el.html(this.template(
         {
           battery_remaining: this.model.get('battery_remaining'),
           voltage_battery: this.model.get('voltage_battery') / 1000,
           current_battery: this.model.get('current_battery') / -100
         }
       ));
-    
+
     }
-    
+
   });
   return BatteryWidget;
 
