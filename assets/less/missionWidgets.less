@@ -1,92 +1,88 @@
 #missionView {
 
-  .widget {
-    margin: 5px;
-    width: 15em;
-    text-align: left;
-    padding-right: 20px;
+    .widget {
+        margin: 5px;
+        width: 10em;
+        text-align: left;
+        padding-right: 20px;
+        text-shadow: 0px 0px 5px rgba(0,0,0,0.75);
 
-    h3 {
-      font-weight: 400;
-      color: @ok;
-      margin: 0;
-      padding: 0;
-    }
+        h3 {
+            font-weight: 400;
+            color: rgba(127,255,255,0.75);
+            margin: 0;
+            padding: 0;
+        }
 
-    .value {
-        padding-left: 1ex;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
-        font-size: 48pt;
-    }
+        .value {
+            padding-left: 1ex;
+            font-size: 30px;
+        }
 
-    .units {
-        color: #ff8;
-        text-shadow: 4px 4px #000;
-    }
-
-    h3 {
-        //display: none;
-    }
-
-  }
-
-  #gpsWidget {
-    //display: none;
-    z-index: 100;
-    position: absolute;
-    top: 10px;
-    left: 100px;
-    background-color: rgba(0, 0, 0, .28);
-    .value {
-      font-size: 30px;
-      font-weight: 500;
-    }
-  }
-
-  #commsWidget {
-    z-index: 100;
-    .value {
-      font-size: 64pt;
-      font-weight: 400;
+        .units {
+            color: #ff8;
+        }
 
     }
-    div {
-      color: #fff;
-      font-weight: 400;
-      padding: 1em;
-      .disconnected {
-        background-color: rgba(255, 0, 0, .28);
-      }
-      .connecting {
-        background-color: rgba(255, 128, 0, .28);
-      }
-      .connected {
-        background-color: rgba(0, 255, 0, .28);
-      }
-    }
-  }
 
-  #signalStrengthWidget {
-    z-index: 100;
-
-    img{
-        width: 40px;
-        height: 40px;
-    }
-  }
-
-  #widgets {
-    z-index: 100;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-
-    #speedWidget, #altitudeWidget, #batteryWidget {
-      .value {
-        font-size: 48px;
-        font-weight: 600;
-      }
+    #gpsWidget {
+        z-index: 100;
+        position: absolute;
+        top: 60px;
+        left: 0px;
+        box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
+        border: 1px solid rgba(127,255,255,0.75);
     }
 
-  }
+    #commsWidget {
+        z-index: 100;
+        .value {
+            font-size: 64pt;
+            font-weight: 400;
+        }
+
+        div {
+            color: #fff;
+            font-weight: 400;
+            padding: 1em;
+            .disconnected {
+                background-color: rgba(255, 0, 0, .28);
+            }
+            .connecting {
+                background-color: rgba(255, 128, 0, .28);
+            }
+            .connected {
+                background-color: rgba(0, 255, 0, .28);
+            }
+        }
+    }
+
+    #signalStrengthWidget {
+        z-index: 100;
+        img{
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    #widgets {
+        z-index: 100;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
+        border: 1px solid rgba(127,255,255,0.75);
+
+        #speedWidget, #altitudeWidget, #batteryWidget, #healthWidget {
+            .value {
+                font-size: 35px;
+                font-weight: 600;
+            }
+
+            .flightMode{
+
+            }
+        }
+
+    }
 }
