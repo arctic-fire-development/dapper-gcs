@@ -22,6 +22,7 @@ require.config({
 
     // Required Libraries.
     jquery: "../node_modules/jquery/dist/jquery",
+    jqueryToolbar: "../assets/js/vendor/jquery.toolbar",
     underscore: "../node_modules/underscore/underscore",
     backbone: "../node_modules/backbone/backbone",
     jade: "../node_modules/grunt-contrib-jade/node_modules/jade/runtime",

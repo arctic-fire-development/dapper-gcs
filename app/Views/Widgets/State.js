@@ -2,7 +2,7 @@ define(['backbone', 'JST'], function(Backbone, template) {
 
   var StateWidget = Backbone.View.extend({
 
-    el: '#StateWidget',
+    el: '#stateWidget',
     template: template['app/Templates/stateWidget'],
     className: 'widget',
 

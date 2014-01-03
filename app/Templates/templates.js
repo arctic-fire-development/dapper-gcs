@@ -29,13 +29,13 @@ buf.push("\n<h3>GPS</h3>\n<div id=\"position\"><span class=\"units\">lat &nbsp;<
 this["JST"]["app/Templates/healthWidget"] = function anonymous(locals) {
 var buf = [];
 var locals_ = (locals || {}),stateMode = locals_.stateMode;jade.indent = [];
-buf.push("\n<div class=\"flightMode\">Flight Mode:&nbsp;<span>" + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</span></div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
+buf.push("\n<div class=\"flightMode\">Flight Mode: " + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/missionLayout"] = function anonymous(locals) {
 var buf = [];
 jade.indent = [];
-buf.push("\n<div id=\"widgets\">\n  <div id=\"speedWidget\" class=\"widget\"></div>\n  <div id=\"altitudeWidget\" class=\"widget\"></div>\n  <div id=\"commsWidget\" class=\"widget\"></div>\n  <div id=\"signalStrengthWidget\" class=\"widget\"></div>\n  <div id=\"batteryWidget\" class=\"widget\"></div>\n  <div id=\"healthWidget\" class=\"widget\"></div>\n  <div id=\"stateWidget\" class=\"widget\"></div>\n</div>\n<div id=\"mapWidget\"></div>\n<div id=\"gpsWidget\" class=\"widget\"></div>");;return buf.join("");
+buf.push("\n<div id=\"widgets\">\n  <div id=\"speedWidget\" class=\"widget\"></div>\n  <div id=\"altitudeWidget\" class=\"widget\"></div>\n  <div id=\"signalStrengthWidget\" class=\"widget\"></div>\n  <div id=\"batteryWidget\" class=\"widget\"></div>\n  <div id=\"healthWidget\" class=\"widget\"></div>\n  <div id=\"stateWidget\" class=\"widget\"></div>\n</div>\n<div id=\"mapWidget\"></div>\n<div id=\"gpsWidget\" class=\"widget\"></div>\n<div id=\"toolbarWidget\"></div>\n<div id=\"commsWidget\" class=\"widget\"></div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/signalStrengthWidget"] = function anonymous(locals) {
@@ -53,7 +53,13 @@ buf.push("\n<h3>Ground Speed</h3><span class=\"value\">" + (((jade.interp = grou
 this["JST"]["app/Templates/stateWidget"] = function anonymous(locals) {
 var buf = [];
 jade.indent = [];
-buf.push("\n<h3>State</h3><span class=\"value\">some state</span><span class=\"units\">&nbsp;woot</span>");;return buf.join("");
+buf.push("\n<h3>State</h3><span class=\"value\">state</span>");;return buf.join("");
+};
+
+this["JST"]["app/Templates/toolbarWidget"] = function anonymous(locals) {
+var buf = [];
+jade.indent = [];
+buf.push("\n<div id=\"settingsUser\" class=\"settings-button\"><img src=\"images/icon-cog-shadow.png\"/></div>\n<div id=\"user-toolbar-options\" class=\"toolbar-icons\"><a href=\"#\"><i class=\"icon-user\"></i></a><a href=\"#\"><i class=\"icon-star\"></i></a><a href=\"#\"><i class=\"icon-edit\"></i></a><a href=\"#\"><i class=\"icon-delete\"></i></a><a href=\"#\"><i class=\"icon-ban\"></i></a></div>");;return buf.join("");
 };
 
 return this["JST"];

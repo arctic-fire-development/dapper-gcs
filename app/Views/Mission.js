@@ -12,7 +12,8 @@ define(['backbone', 'JST',
   'Views/Widgets/Health',
   'Views/Widgets/State',
   'Views/Widgets/Battery',
-  'Views/Widgets/SignalStrength'
+  'Views/Widgets/SignalStrength',
+  'Views/Widgets/Toolbar',
 
   ], function(Backbone, template,
     // Models
@@ -27,7 +28,8 @@ define(['backbone', 'JST',
     HealthWidget,
     StateWidget,
     BatteryWidget,
-    SignalStrengthWidget
+    SignalStrengthWidget,
+    ToolbarWidget
   ) {
 
   var MissionView = Backbone.View.extend({
@@ -55,21 +57,27 @@ define(['backbone', 'JST',
 
       // Instantiate subviews, now that their elements are present on the page
       this.speedWidget = new SpeedWidget({model: this.model.get('platform')});
+      this.commsWidget = new CommsWidget({model: this.model.get('platform')});
       this.mapWidget = new MapWidget({model: this.model.get('platform')});
       this.altitudeWidget = new AltitudeWidget({model: this.model.get('platform')});
       this.batteryWidget = new BatteryWidget({model: this.model.get('platform')});
       this.healthWidget = new HealthWidget({model: this.model.get('platform')});
       this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
       this.signalStrengthWidget = new SignalStrengthWidget({model: this.model.get('platform')});
+      this.stateWidget = new StateWidget({model: this.model.get('platform')});
+      this.toolbarWidget = new ToolbarWidget({model: this.model.get('platform')});
 
       // Render party
       this.speedWidget.render();
+      this.commsWidget.render();
       this.mapWidget.render();
       this.altitudeWidget.render();
       this.batteryWidget.render();
       this.healthWidget.render();
       this.gpsWidget.render();
       this.signalStrengthWidget.render();
+      this.stateWidget.render();
+      this.toolbarWidget.render();
 
     }
 

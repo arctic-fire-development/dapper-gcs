@@ -30,16 +30,37 @@
         position: absolute;
         top: 60px;
         left: 0px;
+        border-radius: 5px;
         box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
         border: 1px solid rgba(127,255,255,0.75);
     }
 
+    #toolbarWidget{
+        z-index: 100;
+        position: absolute;
+        top: 250px;
+        left: 50px;
+        .settings-button {
+            width: 38px;
+            height: 38px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
+            border: 1px solid rgba(127,255,255,0.75);
+            display: block;
+        }
+        #user-toolbar-options{
+            display: none;
+        }
+    }
+
     #commsWidget {
         z-index: 100;
-        .value {
-            font-size: 64pt;
-            font-weight: 400;
-        }
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        border-radius: 5px;
+        box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
+        border: 1px solid rgba(127,255,255,0.75);
 
         div {
             color: #fff;
@@ -57,21 +78,22 @@
         }
     }
 
-    #signalStrengthWidget {
-        z-index: 100;
-        img{
-            width: 40px;
-            height: 40px;
-        }
-    }
-
     #widgets {
         z-index: 100;
         position: absolute;
         left: 0;
         bottom: 0;
+        border-radius: 5px;
         box-shadow: 0px 0px 12px rgba(0,255,255,0.75);
         border: 1px solid rgba(127,255,255,0.75);
+
+        #signalStrengthWidget {
+            z-index: 100;
+            img{
+                width: 40px;
+                height: 40px;
+            }
+        }
 
         #speedWidget, #altitudeWidget, #batteryWidget, #healthWidget {
             .value {
