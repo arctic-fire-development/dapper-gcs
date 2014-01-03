@@ -10,8 +10,8 @@ buf.push("\n<h3>Altitude</h3>\n<div><span class=\"value\">" + (((jade.interp = a
 
 this["JST"]["app/Templates/batteryWidget"] = function anonymous(locals) {
 var buf = [];
-var locals_ = (locals || {}),battery_remaining = locals_.battery_remaining,voltage_battery = locals_.voltage_battery,current_battery = locals_.current_battery;jade.indent = [];
-buf.push("\n<h3>Battery</h3>\n<div><span class=\"value\">" + (((jade.interp = battery_remaining) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;%</span></div>\n<div><span class=\"value\">" + (((jade.interp = voltage_battery) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;v</span></div>\n<div><span class=\"value\">" + (((jade.interp = current_battery) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;A</span></div>");;return buf.join("");
+var locals_ = (locals || {}),icon = locals_.icon,battery_remaining = locals_.battery_remaining,voltage_battery = locals_.voltage_battery,current_battery = locals_.current_battery;jade.indent = [];
+buf.push("\n<h3>Battery</h3><a><img" + (jade.attrs({ 'id':('battery_image'), 'src':(icon), "class": [('svg')] }, {"src":true})) + "/></a>\n<div><span class=\"value\">" + (((jade.interp = battery_remaining) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;%</span></div>\n<div><span class=\"value\">" + (((jade.interp = voltage_battery) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;v</span></div>\n<div><span class=\"value\">" + (((jade.interp = current_battery) == null ? '' : jade.interp)) + "</span><span class=\"units\">&nbsp;A</span></div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/commsWidget"] = function anonymous(locals) {
@@ -29,7 +29,7 @@ buf.push("\n<h3>GPS</h3>\n<div id=\"position\"><span class=\"units\">lat &nbsp;<
 this["JST"]["app/Templates/healthWidget"] = function anonymous(locals) {
 var buf = [];
 var locals_ = (locals || {}),stateMode = locals_.stateMode;jade.indent = [];
-buf.push("\n<div class=\"flightMode\">Flight Mode: " + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
+buf.push("\n<div class=\"flightMode\">Flight Mode:&nbsp;<span>" + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</span></div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/missionLayout"] = function anonymous(locals) {
