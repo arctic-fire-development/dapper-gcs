@@ -12899,13 +12899,13 @@ buf.push("\n<h3>GPS</h3>\n<div id=\"position\"><span class=\"units\">lat &nbsp;<
 this["JST"]["app/Templates/healthWidget"] = function anonymous(locals) {
 var buf = [];
 var locals_ = (locals || {}),stateMode = locals_.stateMode;jade.indent = [];
-buf.push("\n<div class=\"flightMode\">Flight Mode:&nbsp;<span>" + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</span></div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
+buf.push("\n<div class=\"flightMode\">Flight Mode: " + (((jade.interp = stateMode) == null ? '' : jade.interp)) + "</div>\n<div class=\"flightModeArmed\">Armed</div>\n<div class=\"flightModeDisarmed\">Disarmed</div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/missionLayout"] = function anonymous(locals) {
 var buf = [];
 jade.indent = [];
-buf.push("\n<div id=\"widgets\">\n  <div id=\"speedWidget\" class=\"widget\"></div>\n  <div id=\"altitudeWidget\" class=\"widget\"></div>\n  <div id=\"commsWidget\" class=\"widget\"></div>\n  <div id=\"signalStrengthWidget\" class=\"widget\"></div>\n  <div id=\"batteryWidget\" class=\"widget\"></div>\n  <div id=\"healthWidget\" class=\"widget\"></div>\n  <div id=\"stateWidget\" class=\"widget\"></div>\n</div>\n<div id=\"mapWidget\"></div>\n<div id=\"gpsWidget\" class=\"widget\"></div>");;return buf.join("");
+buf.push("\n<div id=\"widgets\">\n  <div id=\"speedWidget\" class=\"widget\"></div>\n  <div id=\"altitudeWidget\" class=\"widget\"></div>\n  <div id=\"signalStrengthWidget\" class=\"widget\"></div>\n  <div id=\"batteryWidget\" class=\"widget\"></div>\n  <div id=\"healthWidget\" class=\"widget\"></div>\n  <div id=\"stateWidget\" class=\"widget\"></div>\n</div>\n<div id=\"mapWidget\"></div>\n<div id=\"gpsWidget\" class=\"widget\"></div>\n<div id=\"toolbarWidget\"></div>\n<div id=\"commsWidget\" class=\"widget\"></div>");;return buf.join("");
 };
 
 this["JST"]["app/Templates/signalStrengthWidget"] = function anonymous(locals) {
@@ -12923,7 +12923,13 @@ buf.push("\n<h3>Ground Speed</h3><span class=\"value\">" + (((jade.interp = grou
 this["JST"]["app/Templates/stateWidget"] = function anonymous(locals) {
 var buf = [];
 jade.indent = [];
-buf.push("\n<h3>State</h3><span class=\"value\">some state</span><span class=\"units\">&nbsp;woot</span>");;return buf.join("");
+buf.push("\n<h3>State</h3><span class=\"value\">state</span>");;return buf.join("");
+};
+
+this["JST"]["app/Templates/toolbarWidget"] = function anonymous(locals) {
+var buf = [];
+jade.indent = [];
+buf.push("\n<div id=\"settingsUser\" class=\"settings-button\"><img src=\"images/icon-cog-shadow.png\"/></div>\n<div id=\"user-toolbar-options\" class=\"toolbar-icons\"><a href=\"#\"><i class=\"icon-user\"></i></a><a href=\"#\"><i class=\"icon-star\"></i></a><a href=\"#\"><i class=\"icon-edit\"></i></a><a href=\"#\"><i class=\"icon-delete\"></i></a><a href=\"#\"><i class=\"icon-ban\"></i></a></div>");;return buf.join("");
 };
 
 return this["JST"];
@@ -13411,7 +13417,7 @@ define('Views/Widgets/State',['backbone', 'JST'], function(Backbone, template) {
 
   var StateWidget = Backbone.View.extend({
 
-    el: '#StateWidget',
+    el: '#stateWidget',
     template: template['app/Templates/stateWidget'],
     className: 'widget',
 
@@ -13507,6 +13513,281 @@ define('Views/Widgets/SignalStrength',['require', 'backbone', 'JST'], function(r
 
 });
 
+/**
+ * Toolbar.js
+ *
+ * @fileoverview  jQuery plugin that creates tooltip style toolbars.
+ * @link          http://paulkinzett.github.com/toolbar/
+ * @author        Paul Kinzett (http://kinzett.co.nz/)
+ * @version       1.0.4
+ * @requires      jQuery 1.7+
+ *
+ * @license jQuery Toolbar Plugin v1.0.4
+ * http://paulkinzett.github.com/toolbar/
+ * Copyright 2013 Paul Kinzett (http://kinzett.co.nz/)
+ * Released under the MIT license.
+ * <https://raw.github.com/paulkinzett/toolbar/master/LICENSE.txt>
+ */
+
+if ( typeof Object.create !== 'function' ) {
+    Object.create = function( obj ) {
+        function F() {}
+        F.prototype = obj;
+        return new F();
+    };
+}
+
+(function( $, window, document, undefined ) {
+
+    var ToolBar = {
+        init: function( options, elem ) {
+            var self = this;
+            self.elem = elem;
+            self.$elem = $( elem );
+            self.options = $.extend( {}, $.fn.toolbar.options, options );
+            self.toolbar = $('<div class="tool-container gradient" />')
+                .addClass('tool-'+self.options.position)
+                .addClass('tool-rounded')
+                .append('<div class="tool-items" />')
+                .append('<div class="arrow" />')
+                .appendTo('body')
+                .css('opacity', 0)
+                .hide();
+            self.toolbar_arrow = self.toolbar.find('.arrow');
+            self.initializeToolbar();
+        },
+
+        initializeToolbar: function() {
+            var self = this;
+            self.populateContent();
+            self.setTrigger();
+            self.toolbarWidth = self.toolbar.width();
+        },
+
+        setTrigger: function() {
+            var self = this;
+
+            self.$elem.on('click', function(event) {
+                event.preventDefault();
+                if(self.$elem.hasClass('pressed')) {
+                    self.hide();
+                } else {
+                    self.show();
+                }
+            });
+
+            if (self.options.hideOnClick) {
+                $('html').on("click.toolbar", function ( event ) {
+                    if (event.target != self.elem &&
+                        self.$elem.has(event.target).length === 0 &&
+                        self.toolbar.has(event.target).length === 0 &&
+                        self.toolbar.is(":visible")) {
+                        self.hide();
+                    }
+                });
+            }
+
+            $(window).resize(function( event ) {
+                event.stopPropagation();
+                if ( self.toolbar.is(":visible") ) {
+                    self.toolbarCss = self.getCoordinates(self.options.position, 20);
+                    self.collisionDetection();
+                    self.toolbar.css( self.toolbarCss );
+                    self.toolbar_arrow.css( self.arrowCss );
+                }
+            });
+        },
+
+        populateContent: function() {
+            var self = this;
+            var location = self.toolbar.find('.tool-items');
+            var content = $(self.options.content).clone( true ).find('a').addClass('tool-item gradient');
+            location.html(content);
+            location.find('.tool-item').on('click', function(event) {
+                event.preventDefault();
+                self.$elem.trigger('toolbarItemClick', this);
+            });
+        },
+
+        calculatePosition: function() {
+            var self = this;
+                self.arrowCss = {};
+                self.toolbarCss = self.getCoordinates(self.options.position, 0);
+                self.toolbarCss.position = 'absolute';
+                self.toolbarCss.zIndex = self.options.zIndex;
+                self.collisionDetection();
+                self.toolbar.css(self.toolbarCss);
+                self.toolbar_arrow.css(self.arrowCss);
+        },
+
+        getCoordinates: function( position, adjustment ) {
+            var self = this;
+            self.coordinates = self.$elem.offset();
+
+            if (self.options.adjustment && self.options.adjustment[self.options.position]) {
+                adjustment = self.options.adjustment[self.options.position];
+            }
+
+            switch(self.options.position) {
+                case 'top':
+                    return {
+                        left: self.coordinates.left-(self.toolbar.width()/2)+(self.$elem.outerWidth()/2),
+                        top: self.coordinates.top-self.$elem.height()-adjustment,
+                        right: 'auto'
+                    };
+                case 'left':
+                    return {
+                        left: self.coordinates.left-(self.toolbar.width()/2)-(self.$elem.width()/2)-adjustment,
+                        top: self.coordinates.top-(self.toolbar.height()/2)+(self.$elem.outerHeight()/2),
+                        right: 'auto'
+                    };
+                case 'right':
+                    return {
+                        left: self.coordinates.left+(self.toolbar.width()/2)+(self.$elem.width()/3)+adjustment,
+                        top: self.coordinates.top-(self.toolbar.height()/2)+(self.$elem.outerHeight()/2),
+                        right: 'auto'
+                    };
+                case 'bottom':
+                    return {
+                        left: self.coordinates.left-(self.toolbar.width()/2)+(self.$elem.outerWidth()/2),
+                        top: self.coordinates.top+self.$elem.height()+adjustment,
+                        right: 'auto'
+                    };
+            }
+        },
+
+        collisionDetection: function() {
+            var self = this;
+            var edgeOffset = 20;
+            if(self.options.position == 'top' || self.options.position == 'bottom') {
+                self.arrowCss = {left: '50%', right: '50%'};
+                if( self.toolbarCss.left < edgeOffset ) {
+                    self.toolbarCss.left = edgeOffset;
+                    self.arrowCss.left = self.$elem.offset().left + self.$elem.width()/2-(edgeOffset);
+                }
+                else if(($(window).width() - (self.toolbarCss.left + self.toolbarWidth)) < edgeOffset) {
+                    self.toolbarCss.right = edgeOffset;
+                    self.toolbarCss.left = 'auto';
+                    self.arrowCss.left = 'auto';
+                    self.arrowCss.right = ($(window).width()-self.$elem.offset().left)-(self.$elem.width()/2)-(edgeOffset)-5;
+                }
+            }
+        },
+
+        show: function() {
+            var self = this;
+            var animation = {'opacity': 1};
+
+            self.$elem.addClass('pressed');
+            self.calculatePosition();
+
+            switch(self.options.position) {
+                case 'top':
+                    animation.top = '-=20';
+                    break;
+                case 'left':
+                    animation.left = '-=20';
+                    break;
+                case 'right':
+                    animation.left = '+=20';
+                    break;
+                case 'bottom':
+                    animation.top = '+=20';
+                    break;
+            }
+
+            self.toolbar.show().animate(animation, 200 );
+            self.$elem.trigger('toolbarShown');
+        },
+
+        hide: function() {
+            var self = this;
+            var animation = {'opacity': 0};
+
+            self.$elem.removeClass('pressed');
+
+            switch(self.options.position) {
+                case 'top':
+                    animation.top = '+=20';
+                    break;
+                case 'left':
+                    animation.left = '+=20';
+                    break;
+                case 'right':
+                    animation.left = '-=20';
+                    break;
+                case 'bottom':
+                    animation.top = '-=20';
+                    break;
+            }
+
+            self.toolbar.animate(animation, 200, function() {
+                self.toolbar.hide();
+            });
+
+            self.$elem.trigger('toolbarHidden');
+        },
+
+        getToolbarElement: function () {
+            return this.toolbar.find('.tool-items');
+        }
+    };
+
+    $.fn.toolbar = function( options ) {
+        if ($.isPlainObject( options )) {
+            return this.each(function() {
+                var toolbarObj = Object.create( ToolBar );
+                toolbarObj.init( options, this );
+                $(this).data('toolbarObj', toolbarObj);
+            });
+        } else if ( typeof options === 'string' && options.indexOf('_') !== 0 ) {
+            var toolbarObj = $(this).data('toolbarObj');
+            var method = toolbarObj[options];
+            return method.apply(toolbarObj, $.makeArray(arguments).slice(1));
+        }
+    };
+
+    $.fn.toolbar.options = {
+        content: '#myContent',
+        position: 'top',
+        hideOnClick: false,
+        zIndex: 120
+    };
+
+}) ( jQuery, window, document );
+
+define("jqueryToolbar", function(){});
+
+define('Views/Widgets/Toolbar',['backbone', 'JST', 'jqueryToolbar'], function(Backbone, template, toolbar) {
+
+  var ToolbarWidget = Backbone.View.extend({
+
+    el: '#toolbarWidget',
+    template: template['app/Templates/toolbarWidget'],
+
+    initialize: function() {
+      _.bindAll(this);
+    },
+
+    render: function() {
+        this.$el.html(this.template());
+
+        $('.toolbar-icons a').on('click', function( event ) {
+            event.preventDefault();
+        });
+
+        $('#settingsUser').toolbar({
+            content: '#user-toolbar-options',
+            position: 'right'
+        });
+
+
+    }
+
+  });
+  return ToolbarWidget;
+
+});
 define('Views/Mission',['backbone', 'JST',
 
   // Models
@@ -13521,7 +13802,8 @@ define('Views/Mission',['backbone', 'JST',
   'Views/Widgets/Health',
   'Views/Widgets/State',
   'Views/Widgets/Battery',
-  'Views/Widgets/SignalStrength'
+  'Views/Widgets/SignalStrength',
+  'Views/Widgets/Toolbar',
 
   ], function(Backbone, template,
     // Models
@@ -13536,7 +13818,8 @@ define('Views/Mission',['backbone', 'JST',
     HealthWidget,
     StateWidget,
     BatteryWidget,
-    SignalStrengthWidget
+    SignalStrengthWidget,
+    ToolbarWidget
   ) {
 
   var MissionView = Backbone.View.extend({
@@ -13564,21 +13847,27 @@ define('Views/Mission',['backbone', 'JST',
 
       // Instantiate subviews, now that their elements are present on the page
       this.speedWidget = new SpeedWidget({model: this.model.get('platform')});
+      this.commsWidget = new CommsWidget({model: this.model.get('platform')});
       this.mapWidget = new MapWidget({model: this.model.get('platform')});
       this.altitudeWidget = new AltitudeWidget({model: this.model.get('platform')});
       this.batteryWidget = new BatteryWidget({model: this.model.get('platform')});
       this.healthWidget = new HealthWidget({model: this.model.get('platform')});
       this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
       this.signalStrengthWidget = new SignalStrengthWidget({model: this.model.get('platform')});
+      this.stateWidget = new StateWidget({model: this.model.get('platform')});
+      this.toolbarWidget = new ToolbarWidget({model: this.model.get('platform')});
 
       // Render party
       this.speedWidget.render();
+      this.commsWidget.render();
       this.mapWidget.render();
       this.altitudeWidget.render();
       this.batteryWidget.render();
       this.healthWidget.render();
       this.gpsWidget.render();
       this.signalStrengthWidget.render();
+      this.stateWidget.render();
+      this.toolbarWidget.render();
 
     }
 
