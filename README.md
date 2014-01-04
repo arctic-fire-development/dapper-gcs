@@ -165,3 +165,7 @@ mocha --reporter xunit test/mocha
 ```
 
 To run client-side Jasmine tests, open a web browser and open the ```test/jasmine/index.html``` HTML page.
+
+
+#### References for library components manually installed
+- [jQuery Toolbar](https://github.com/paulkinzett/toolbar)
