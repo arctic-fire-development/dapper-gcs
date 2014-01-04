@@ -25,7 +25,7 @@ describe('MAVLink parameter manager', function() {
 
     // Doozy of a setup function, but here's what it's doing:
     // -- set up a TCP server to act in place of the APM
-    // -- Initialize the MAVLink parser 
+    // -- Initialize the MAVLink parser
     // -- Initialize a "real" UavConnection so we can read/write from the TCP stream
     beforeEach(function(done) {
 
@@ -98,7 +98,7 @@ describe('MAVLink parameter manager', function() {
             }));
             this.mavParam.get('MAG_ENABLE');
 
-        } );
+        });
 
         describe('reading all params from the UAV', function() {
             it('commands the UAV to start sending all params', function(done) {
@@ -117,7 +117,7 @@ describe('MAVLink parameter manager', function() {
             it('receives all parameters until the total expected # is read, then emits a params:loaded event', function() {
 
             });
-        } );
+        });
     });
 
 

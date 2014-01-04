@@ -1,89 +1,92 @@
 define(['backbone', 'leaflet'], function(Backbone, L) {
 
-  var MapWidget = Backbone.View.extend({
+    var MapWidget = Backbone.View.extend({
 
-    el: '#mapWidget',
-    className: 'widget',
-    hasRendered: false,
-    map: undefined, // will be Leaflet map object
+        el: '#mapWidget',
+        className: 'widget',
+        hasRendered: false,
+        map: undefined, // will be Leaflet map object
 
-    initialize: function() {
+        initialize: function() {
 
-      _.bindAll(this);
-      this.model.on('change:lat change:lon', this.render);
-      this.breadcrumb = [];
-    },
+            _.bindAll(this);
+            this.model.on('change:lat change:lon', this.render);
+            this.breadcrumb = [];
+        },
 
-    render: function() {
-      lat = this.model.get('lat') || 64.88317;
-      lon = this.model.get('lon') || -147.6137;
+        render: function() {
+            lat = this.model.get('lat') || 64.88317;
+            lon = this.model.get('lon') || -147.6137;
 
-      if( false === this.hasRendered ) {
-        // Do initial map setup
-        this.renderLayout();
-        this.hasRendered = true;
+            if (false === this.hasRendered) {
+                // Do initial map setup
+                this.renderLayout();
+                this.hasRendered = true;
 
-      }
+            }
 
-      var LatLng = new L.LatLng(lat, lon);
+            var LatLng = new L.LatLng(lat, lon);
 
-      var m = new L.CircleMarker(LatLng).setRadius(10);
-      this.breadcrumb.unshift(m);
+            var m = new L.CircleMarker(LatLng).setRadius(10);
+            this.breadcrumb.unshift(m);
 
-      if(this.breadcrumb.length>50){
-        this.breadcrumb[1].addTo(this.map);
-        this.map.removeLayer(this.breadcrumb.pop());
-        _.each(this.breadcrumb, function(e, i, l) {
-          e.setStyle({
-            fillOpacity: 1/ (i + 1),
-            opacity: 2 * (1/ (1 + i))
-          });
-        }, this);
-      }
+            if (this.breadcrumb.length > 50) {
+                this.breadcrumb[1].addTo(this.map);
+                this.map.removeLayer(this.breadcrumb.pop());
+                _.each(this.breadcrumb, function(e, i, l) {
+                    e.setStyle({
+                        fillOpacity: 1 / (i + 1),
+                        opacity: 2 * (1 / (1 + i))
+                    });
+                }, this);
+            }
 
-      this.map.panTo( LatLng );
+            this.map.panTo(LatLng);
 
-      this.marker.setLatLng( LatLng );
-      this.marker.setIconAngle( this.model.get('heading'));
+            this.marker.setLatLng(LatLng);
+            this.marker.setIconAngle(this.model.get('heading'));
 
-    },
+        },
 
-    renderLayout: function() {
+        renderLayout: function() {
 
-      // create a map in the "map" div, set the view to a given place and zoom
-      this.map = L.map('mapWidget', {
-        minZoom: 1,
-        maxZoom: 24
-      }).setView([64.9, -147.1], 16);
+            // create a map in the "map" div, set the view to a given place and zoom
+            this.map = L.map('mapWidget', {
+                minZoom: 1,
+                maxZoom: 24
+            }).setView([64.9, -147.1], 16);
 
-      this.myIcon = L.icon({
-          iconUrl: 'images/jet.svg',
-          iconSize: [25, 50],
-          iconAnchor: [12, 25],
-          popupAnchor: [-3, -76]
-      });
+            this.myIcon = L.icon({
+                iconUrl: 'images/jet.svg',
+                iconSize: [25, 50],
+                iconAnchor: [12, 25],
+                popupAnchor: [-3, -76]
+            });
 
-      this.marker = L.marker([64.9, -147.1], {icon: this.myIcon, iconAngle: 0}).addTo(this.map);
+            this.marker = L.marker([64.9, -147.1], {
+                icon: this.myIcon,
+                iconAngle: 0
+            }).addTo(this.map);
 
-      var bing = new L.BingLayer("ArSmVTJNY8ZXaAjsxCHf989sG9OqZW3Qf0t1SAdM43Rn9pZpFyWU1jfYv_FFQlLO", {
-        zIndex: 0
-      });
-      this.map.addLayer(bing);
-      this.map.on('click', function(e) {
-        alert(e.latlng);
-      });
+            var bing = new L.BingLayer("ArSmVTJNY8ZXaAjsxCHf989sG9OqZW3Qf0t1SAdM43Rn9pZpFyWU1jfYv_FFQlLO", {
+                zIndex: 0
+            });
+            this.map.addLayer(bing);
+            this.map.on('click', function(e) {
+                alert(e.latlng);
+            });
 
-      // Resize to fill the screen; respond to screen size change events.
-      $('#mapWidget').height($(window).height());
-      $('#mapWidget').width($(window).width());
-      this.map.invalidateSize(false); // force Leaflet resize, do not animate
-      $(window).resize(_.debounce(_.bind(function() {
-        $('#mapWidget').width($(window).width()).height($(window).height());
-        this.map.invalidateSize();
-      }, this), 250));
+            // Resize to fill the screen; respond to screen size change events.
+            $('#mapWidget').height($(window).height());
+            $('#mapWidget').width($(window).width());
+            this.map.invalidateSize(false); // force Leaflet resize, do not animate
+            $(window).resize(_.debounce(_.bind(function() {
+                $('#mapWidget').width($(window).width()).height($(window).height());
+                this.map.invalidateSize();
+            }, this), 250));
 
-    }
-  });
-  return MapWidget;
+        }
+    });
+    return MapWidget;
 
 });
