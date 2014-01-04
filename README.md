@@ -6,11 +6,7 @@ UAV ground station software emphasizing data collection and mission operations.
 
 #### ArduPilot SITL
 
-Follow the instructions from [here](http://dev.ardupilot.com/wiki/setting-up-sitl-on-linux/)
-
-When building jsbsim, you may have to install these additional packages
-
-```apt-get install expat libexpat1-dev gnome-terminal```
+follow instructions at [README-SITL](./README-SITL.md)
 
 #### Prerequisites
 
