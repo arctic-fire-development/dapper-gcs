@@ -11940,23 +11940,21 @@ define("backbone", ["underscore","jquery"], (function (global) {
 }(this)));
 
 define('app',[
-  // Libraries.
-  "jquery",
-  "underscore",
-  "backbone"
-],
+    // Libraries.
+    "jquery",
+    "underscore",
+    "backbone"
+], function($, _, Backbone) {
 
-function($, _, Backbone) {
+    // Provide a global location to place configuration settings and module
+    // creation.
+    var app = {
+        // The root path to run the application.
+        root: "/"
+    };
 
-  // Provide a global location to place configuration settings and module
-  // creation.
-  var app = {
-    // The root path to run the application.
-    root: "/"
-  };
-
-  // Mix Backbone.Events, modules, and layout management into the app object.
-  return app;
+    // Mix Backbone.Events, modules, and layout management into the app object.
+    return app;
 
 });
 define('now',[], function() {
@@ -12573,92 +12571,92 @@ define('now',[], function() {
   return window.nowInitialize();
 });
 define('Models/Mission',['backbone'], function(Backbone) {
-  
-  var Mission = Backbone.Model.extend({
 
-  });
-  return Mission;
-  
+    var Mission = Backbone.Model.extend({
+
+    });
+    return Mission;
+
 });
 define('Models/Platform',['backbone'], function(Backbone) {
 
-  var Platform = Backbone.Model.extend({
+    var Platform = Backbone.Model.extend({
 
-    defaults: {
-      
-      speed: undefined, // kph.  Who the hell sets this?? TODO =P
-      // this can likely be removed since we are most likely interested in ground speed
+        defaults: {
 
-      // Set by mavlink.global_position_int packets
-      lat: undefined,
-      lon: undefined,
-      alt: undefined,
-      relative_alt: undefined,
-      vx: undefined,
-      vy: undefined,
-      vz: undefined,
-      hdg: undefined,
+            speed: undefined, // kph.  Who the hell sets this?? TODO =P
+            // this can likely be removed since we are most likely interested in ground speed
 
-      // Set by mavlink.gps_raw_int packets
-      fix_type: undefined,
-      satellites_visible: undefined,
+            // Set by mavlink.global_position_int packets
+            lat: undefined,
+            lon: undefined,
+            alt: undefined,
+            relative_alt: undefined,
+            vx: undefined,
+            vy: undefined,
+            vz: undefined,
+            hdg: undefined,
 
-      // set by mavlink.attitude packets
-      pitch: undefined,
-      roll: undefined,
-      yaw: undefined,
-      pitchspeed: undefined, // acceleration
-      rollspeed: undefined, // acceleration
-      yawspeed: undefined, // acceleration
+            // Set by mavlink.gps_raw_int packets
+            fix_type: undefined,
+            satellites_visible: undefined,
 
-      // Set by mavFlightMode interpreting a variety of packets
-      stateMode: undefined,
-      stateAuto: undefined,
-      stateGuided: undefined,
-      stateStabilize: undefined,
-      stateManual: undefined,
-      stateArmed: undefined,
+            // set by mavlink.attitude packets
+            pitch: undefined,
+            roll: undefined,
+            yaw: undefined,
+            pitchspeed: undefined, // acceleration
+            rollspeed: undefined, // acceleration
+            yawspeed: undefined, // acceleration
 
-      // Set by mavlink.SYS_STATUS packets
-      voltage_battery: undefined,
-      current_battery: undefined,
-      battery_remaining: undefined,
-      drop_rate_comm: undefined,
-      errors_comm: undefined,
+            // Set by mavFlightMode interpreting a variety of packets
+            stateMode: undefined,
+            stateAuto: undefined,
+            stateGuided: undefined,
+            stateStabilize: undefined,
+            stateManual: undefined,
+            stateArmed: undefined,
 
-      // Set by mavlink.vfr_hud packets
-      airspeed: undefined,
-      groundspeed: 0,
-      heading: undefined,
-      throttle: undefined,
-      climb: undefined
+            // Set by mavlink.SYS_STATUS packets
+            voltage_battery: undefined,
+            current_battery: undefined,
+            battery_remaining: undefined,
+            drop_rate_comm: undefined,
+            errors_comm: undefined,
 
-    },
+            // Set by mavlink.vfr_hud packets
+            airspeed: undefined,
+            groundspeed: 0,
+            heading: undefined,
+            throttle: undefined,
+            climb: undefined
 
-    validate: function(attrs) {
-      attrs.lat /= 1e07;
-      attrs.lon /= 1e07;
-      attrs.alt /= 100;
-    }
+        },
 
-  });
+        validate: function(attrs) {
+            attrs.lat /= 1e07;
+            attrs.lon /= 1e07;
+            attrs.alt /= 100;
+        }
 
-  return Platform;
-  
+    });
+
+    return Platform;
+
 });
 define('Models/Connection',['backbone'], function(Backbone) {
 
-  var Connection = Backbone.Model.extend({
+    var Connection = Backbone.Model.extend({
 
-    defaults: {
-      status: 'disconnected',
-      time_since_last_heartbeat: 0
-    }
+        defaults: {
+            status: 'disconnected',
+            time_since_last_heartbeat: 0
+        }
 
-  });
+    });
 
-  return Connection;
-  
+    return Connection;
+
 });
 (function(e){if("function"==typeof bootstrap)bootstrap("jade",e);else if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define('jade',e);else if("undefined"!=typeof ses){if(!ses.ok())return;ses.makeJade=e}else"undefined"!=typeof window?window.jade=e():global.jade=e()})(function(){var define,ses,bootstrap,module,exports;
 return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
@@ -12937,25 +12935,27 @@ return this["JST"];
 });
 define('Views/Widgets/Speed',['backbone', 'JST'], function(Backbone, template) {
 
-  var SpeedWidget = Backbone.View.extend({
+    var SpeedWidget = Backbone.View.extend({
 
-    el: '#speedWidget',
-    template: template['app/Templates/speedWidget'],
-    className: 'widget',
+        el: '#speedWidget',
+        template: template['app/Templates/speedWidget'],
+        className: 'widget',
 
-    initialize: function() {
-      _.bindAll(this);
-      this.model.on('change:groundspeed', this.render);
-    },
+        initialize: function() {
+            _.bindAll(this);
+            this.model.on('change:groundspeed', this.render);
+        },
 
-    render: function() {
-      var data = { groundspeed: Number(this.model.get('groundspeed')).toFixed(0) };
+        render: function() {
+            var data = {
+                groundspeed: Number(this.model.get('groundspeed')).toFixed(0)
+            };
 
-      this.$el.html( this.template(data) );
-    }
+            this.$el.html(this.template(data));
+        }
 
-  });
-  return SpeedWidget;
+    });
+    return SpeedWidget;
 
 });
 /*
@@ -13135,237 +13135,237 @@ define("leaflet", (function (global) {
 
 define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
 
-  var MapWidget = Backbone.View.extend({
+    var MapWidget = Backbone.View.extend({
 
-    el: '#mapWidget',
-    className: 'widget',
-    hasRendered: false,
-    map: undefined, // will be Leaflet map object
+        el: '#mapWidget',
+        className: 'widget',
+        hasRendered: false,
+        map: undefined, // will be Leaflet map object
 
-    initialize: function() {
+        initialize: function() {
 
-      _.bindAll(this);
-      this.model.on('change:lat change:lon', this.render);
-      this.breadcrumb = [];
-    },
+            _.bindAll(this);
+            this.model.on('change:lat change:lon', this.render);
+            this.breadcrumb = [];
+        },
 
-    render: function() {
-      lat = this.model.get('lat') || 64.88317;
-      lon = this.model.get('lon') || -147.6137;
+        render: function() {
+            lat = this.model.get('lat') || 64.88317;
+            lon = this.model.get('lon') || -147.6137;
 
-      if( false === this.hasRendered ) {
-        // Do initial map setup
-        this.renderLayout();
-        this.hasRendered = true;
+            if (false === this.hasRendered) {
+                // Do initial map setup
+                this.renderLayout();
+                this.hasRendered = true;
 
-      }
+            }
 
-      var LatLng = new L.LatLng(lat, lon);
+            var LatLng = new L.LatLng(lat, lon);
 
-      var m = new L.CircleMarker(LatLng).setRadius(10);
-      this.breadcrumb.unshift(m);
+            var m = new L.CircleMarker(LatLng).setRadius(10);
+            this.breadcrumb.unshift(m);
 
-      if(this.breadcrumb.length>50){
-        this.breadcrumb[1].addTo(this.map);
-        this.map.removeLayer(this.breadcrumb.pop());
-        _.each(this.breadcrumb, function(e, i, l) {
-          e.setStyle({
-            fillOpacity: 1/ (i + 1),
-            opacity: 2 * (1/ (1 + i))
-          });
-        }, this);
-      }
+            if (this.breadcrumb.length > 50) {
+                this.breadcrumb[1].addTo(this.map);
+                this.map.removeLayer(this.breadcrumb.pop());
+                _.each(this.breadcrumb, function(e, i, l) {
+                    e.setStyle({
+                        fillOpacity: 1 / (i + 1),
+                        opacity: 2 * (1 / (1 + i))
+                    });
+                }, this);
+            }
 
-      this.map.panTo( LatLng );
+            this.map.panTo(LatLng);
 
-      this.marker.setLatLng( LatLng );
-      this.marker.setIconAngle( this.model.get('heading'));
+            this.marker.setLatLng(LatLng);
+            this.marker.setIconAngle(this.model.get('heading'));
 
-    },
+        },
 
-    renderLayout: function() {
+        renderLayout: function() {
 
-      // create a map in the "map" div, set the view to a given place and zoom
-      this.map = L.map('mapWidget', {
-        minZoom: 1,
-        maxZoom: 24
-      }).setView([64.9, -147.1], 16);
+            // create a map in the "map" div, set the view to a given place and zoom
+            this.map = L.map('mapWidget', {
+                minZoom: 1,
+                maxZoom: 24
+            }).setView([64.9, -147.1], 16);
 
-      this.myIcon = L.icon({
-          iconUrl: 'images/jet.svg',
-          iconSize: [25, 50],
-          iconAnchor: [12, 25],
-          popupAnchor: [-3, -76]
-      });
+            this.myIcon = L.icon({
+                iconUrl: 'images/jet.svg',
+                iconSize: [25, 50],
+                iconAnchor: [12, 25],
+                popupAnchor: [-3, -76]
+            });
 
-      this.marker = L.marker([64.9, -147.1], {icon: this.myIcon, iconAngle: 0}).addTo(this.map);
+            this.marker = L.marker([64.9, -147.1], {
+                icon: this.myIcon,
+                iconAngle: 0
+            }).addTo(this.map);
 
-      var bing = new L.BingLayer("ArSmVTJNY8ZXaAjsxCHf989sG9OqZW3Qf0t1SAdM43Rn9pZpFyWU1jfYv_FFQlLO", {
-        zIndex: 0
-      });
-      this.map.addLayer(bing);
-      this.map.on('click', function(e) {
-        alert(e.latlng);
-      });
+            var bing = new L.BingLayer("ArSmVTJNY8ZXaAjsxCHf989sG9OqZW3Qf0t1SAdM43Rn9pZpFyWU1jfYv_FFQlLO", {
+                zIndex: 0
+            });
+            this.map.addLayer(bing);
+            this.map.on('click', function(e) {
+                alert(e.latlng);
+            });
 
-      // Resize to fill the screen; respond to screen size change events.
-      $('#mapWidget').height($(window).height());
-      $('#mapWidget').width($(window).width());
-      this.map.invalidateSize(false); // force Leaflet resize, do not animate
-      $(window).resize(_.debounce(_.bind(function() {
-        $('#mapWidget').width($(window).width()).height($(window).height());
-        this.map.invalidateSize();
-      }, this), 250));
+            // Resize to fill the screen; respond to screen size change events.
+            $('#mapWidget').height($(window).height());
+            $('#mapWidget').width($(window).width());
+            this.map.invalidateSize(false); // force Leaflet resize, do not animate
+            $(window).resize(_.debounce(_.bind(function() {
+                $('#mapWidget').width($(window).width()).height($(window).height());
+                this.map.invalidateSize();
+            }, this), 250));
 
-    }
-  });
-  return MapWidget;
+        }
+    });
+    return MapWidget;
 
 });
-define('Views/Widgets/Comms',['backbone', 'JST','now'], function(Backbone, template, now) {
+define('Views/Widgets/Comms',['backbone', 'JST', 'now'], function(Backbone, template, now) {
 
-  var CommsWidget = Backbone.View.extend({
+    var CommsWidget = Backbone.View.extend({
 
-    el: '#commsWidget',
-    template: template['app/Templates/commsWidget'],
-    className: 'widget',
-    events: {
-      'click #loadParams': 'loadParameters',
-      'click #loadMission': 'loadMission',
-      'click #startMission': 'startMission'
-    },
+        el: '#commsWidget',
+        template: template['app/Templates/commsWidget'],
+        className: 'widget',
+        events: {
+            'click #loadParams': 'loadParameters',
+            'click #loadMission': 'loadMission',
+            'click #startMission': 'startMission'
+        },
 
-    initialize: function() {
-      _.bindAll(this);
-      this.model.on('change:status', this.render);
-      this.model.on('change:time_since_last_heartbeat', this.render);
-    },
+        initialize: function() {
+            _.bindAll(this);
+            this.model.on('change:status', this.render);
+            this.model.on('change:time_since_last_heartbeat', this.render);
+        },
 
-    loadParameters: function() {
-      now.ready(function() {
-        now.loadParams('Loading params...');
-      });
-    },
+        loadParameters: function() {
+            now.ready(function() {
+                now.loadParams('Loading params...');
+            });
+        },
 
-    loadMission: function() {
-      now.ready(function() {
-        now.loadMission('Loading mission...');
-      });
-    },
+        loadMission: function() {
+            now.ready(function() {
+                now.loadMission('Loading mission...');
+            });
+        },
 
-    startMission: function() {
-      now.ready(function() {
-        now.startMission('Starting mission...');
-      });
-    },
+        startMission: function() {
+            now.ready(function() {
+                now.startMission('Starting mission...');
+            });
+        },
 
-    render: function() {
-      var hasRendered;
+        render: function() {
+            var hasRendered;
 
-      // Only draw this on initial page render.
-      if(true !== hasRendered) {
+            // Only draw this on initial page render.
+            if (true !== hasRendered) {
 
-        var heartbeatMessage = '';
-        if( this.model.get('time_since_last_heartbeat') > 5000 ) {
-          heartbeatMessage = ', disconnected for ' + this.model.get('time_since_last_heartbeat') + ' s';
+                var heartbeatMessage = '';
+                if (this.model.get('time_since_last_heartbeat') > 5000) {
+                    heartbeatMessage = ', disconnected for ' + this.model.get('time_since_last_heartbeat') + ' s';
+                }
+
+                this.$el.html(this.template({
+                    time_since_last_heartbeat: heartbeatMessage,
+                    drop_rate_comm: this.model.get('drop_rate_comm'),
+                    errors_comm: this.model.get('errors_comm')
+                }));
+
+                $('#connected').hide();
+                $('#connecting').hide();
+
+                hasRendered = true;
+            }
+
+            // Rerender upon events.
+            switch (this.model.get('status')) {
+                case 'disconnected':
+                    $('#comms .connected').hide();
+                    $('#comms .connecting').hide();
+                    $('#comms .disconnected').show();
+                    break;
+
+                case 'connecting':
+                    $('#comms .connected').hide();
+                    $('#comms .connecting').show();
+                    $('#comms .disconnected').hide();
+                    break;
+
+                case 'connected':
+                    $('#comms .connected').show();
+                    $('#comms .connecting').hide();
+                    $('#comms .disconnected').hide();
+                    break;
+            }
+
         }
 
-        this.$el.html(this.template(
-          {
-              time_since_last_heartbeat: heartbeatMessage,
-              drop_rate_comm: this.model.get('drop_rate_comm'),
-              errors_comm: this.model.get('errors_comm')
-          }
-        ));
+    });
 
-        $('#connected').hide();
-        $('#connecting').hide();
-
-        hasRendered = true;
-      }
-
-      // Rerender upon events.
-      switch(this.model.get('status')) {
-        case 'disconnected':
-          $('#comms .connected').hide();
-          $('#comms .connecting').hide();
-          $('#comms .disconnected').show();
-          break;
-
-        case 'connecting':
-          $('#comms .connected').hide();
-          $('#comms .connecting').show();
-          $('#comms .disconnected').hide();
-          break;
-
-        case 'connected':
-          $('#comms .connected').show();
-          $('#comms .connecting').hide();
-          $('#comms .disconnected').hide();
-        break;
-      }
-
-    }
-
-  });
-
-  return CommsWidget;
+    return CommsWidget;
 
 });
 define('Views/Widgets/Altitude',['backbone', 'JST'], function(Backbone, template) {
 
-  var AltitudeWidget = Backbone.View.extend({
+    var AltitudeWidget = Backbone.View.extend({
 
-    el: '#altitudeWidget',
-    template: template['app/Templates/altitudeWidget'],
-    className: 'widget',
+        el: '#altitudeWidget',
+        template: template['app/Templates/altitudeWidget'],
+        className: 'widget',
 
-    initialize: function(){
-      _.bindAll(this);
-      this.model.on("change:alt", this.render, this);
-    },
-    render: function() {
-      this.$el.html(this.template(
-        {alt: Number(this.model.get('alt')).toFixed(1)}));
-    }
+        initialize: function() {
+            _.bindAll(this);
+            this.model.on("change:alt", this.render, this);
+        },
+        render: function() {
+            this.$el.html(this.template({
+                alt: Number(this.model.get('alt')).toFixed(1)
+            }));
+        }
 
-  });
-  return AltitudeWidget;
+    });
+    return AltitudeWidget;
 
 });
 define('Views/Widgets/Gps',['backbone', 'JST'], function(Backbone, template) {
 
-  var GpsWidget = Backbone.View.extend({
+    var GpsWidget = Backbone.View.extend({
 
-    el: '#gpsWidget',
-    template: template['app/Templates/gpsWidget'],
-    className: 'widget',
+        el: '#gpsWidget',
+        template: template['app/Templates/gpsWidget'],
+        className: 'widget',
 
-    initialize: function() {
+        initialize: function() {
 
-      _.bindAll(this);
-      this.model.on('change:lat', this.render);
-      this.model.on('change:lon', this.render);
-      this.model.on('change:fix_type', this.render);
-      this.model.on('change:satellites_visible', this.render);
+            _.bindAll(this);
+            this.model.on('change:lat', this.render);
+            this.model.on('change:lon', this.render);
+            this.model.on('change:fix_type', this.render);
+            this.model.on('change:satellites_visible', this.render);
 
-    },
+        },
 
-    render: function() {
+        render: function() {
 
-        this.$el.html(this.template(
-        {
-            lat: this.model.get('lat'),
-            lon: this.model.get('lon'),
-            fix_type: this.model.get('fix_type'),
-            satellites_visible: this.model.get('satellites_visible')
+            this.$el.html(this.template({
+                lat: this.model.get('lat'),
+                lon: this.model.get('lon'),
+                fix_type: this.model.get('fix_type'),
+                satellites_visible: this.model.get('satellites_visible')
+            }));
+
         }
-        ));
 
-    }
-
-  });
-  return GpsWidget;
+    });
+    return GpsWidget;
 
 });
 
@@ -13374,61 +13374,58 @@ define('Views/Widgets/Gps',['backbone', 'JST'], function(Backbone, template) {
 // satellites_visible: undefined,;
 define('Views/Widgets/Health',['backbone', 'JST'], function(Backbone, template) {
 
-  var HealthWidget = Backbone.View.extend({
+    var HealthWidget = Backbone.View.extend({
 
-    el: '#healthWidget',
-    template: template['app/Templates/healthWidget'],
-    className: 'widget',
+        el: '#healthWidget',
+        template: template['app/Templates/healthWidget'],
+        className: 'widget',
 
-    initialize: function() {
+        initialize: function() {
 
-      _.bindAll(this);
-      this.model.on('change:mode', this.render);
-      this.model.on('change:armed', this.render);
-      this.model.on('change:manual', this.render);
-      this.model.on('change:stabilize', this.render);
-      this.model.on('change:auto', this.render);
-      this.model.on('change:guided', this.render);
-    },
+            _.bindAll(this);
+            this.model.on('change:mode', this.render);
+            this.model.on('change:armed', this.render);
+            this.model.on('change:manual', this.render);
+            this.model.on('change:stabilize', this.render);
+            this.model.on('change:auto', this.render);
+            this.model.on('change:guided', this.render);
+        },
 
-    render: function() {
+        render: function() {
 
-        this.$el.html(this.template(
-            {
+            this.$el.html(this.template({
                 stateMode: this.model.get('mode')
+            }));
+
+            if (true === this.model.get('armed')) {
+                this.$el.find('.flightModeArmed').show();
+                this.$el.find('.flightModeDisarmed').hide();
+            } else {
+                this.$el.find('.flightModeArmed').hide();
+                this.$el.find('.flightModeDisarmed').show();
             }
-        ));
-
-        if( true === this.model.get('armed')) {
-          this.$el.find('.flightModeArmed').show();
-          this.$el.find('.flightModeDisarmed').hide();
-        } else {
-           this.$el.find('.flightModeArmed').hide();
-           this.$el.find('.flightModeDisarmed').show();
         }
-    }
 
-  });
-  return HealthWidget;
+    });
+    return HealthWidget;
 
 });
-
 define('Views/Widgets/State',['backbone', 'JST'], function(Backbone, template) {
 
-  var StateWidget = Backbone.View.extend({
+    var StateWidget = Backbone.View.extend({
 
-    el: '#stateWidget',
-    template: template['app/Templates/stateWidget'],
-    className: 'widget',
+        el: '#stateWidget',
+        template: template['app/Templates/stateWidget'],
+        className: 'widget',
 
-    render: function() {
+        render: function() {
 
-      this.$el.html(this.template());
+            this.$el.html(this.template());
 
-    }
+        }
 
-  });
-  return StateWidget;
+    });
+    return StateWidget;
 
 });
 define('Views/Widgets/Battery',['backbone', 'JST'], function(Backbone, template) {
@@ -13478,53 +13475,50 @@ define('Views/Widgets/Battery',['backbone', 'JST'], function(Backbone, template)
 });
 // Widget to display the radio signal strength
 define('Views/Widgets/SignalStrength',['require', 'backbone', 'JST'], function(require, Backbone, template) {
-  var SignalStrengthWidget = Backbone.View.extend({
 
-    el: '#signalStrengthWidget',
-    template: template['app/Templates/signalStrengthWidget'],
-    className: 'widget',
+    var SignalStrengthWidget = Backbone.View.extend({
 
-    initialize: function() {
-      _.bindAll(this);
-      this.model.on("change:strength change:connected", this.render, this);
-    },
+        el: '#signalStrengthWidget',
+        template: template['app/Templates/signalStrengthWidget'],
+        className: 'widget',
 
-    render: function() {
-      this.$el.html(this.template(
-        {icon: this.getIcon()}));
-    },
+        initialize: function() {
+            _.bindAll(this);
+            this.model.on("change:strength change:connected", this.render, this);
+        },
 
-    getIcon: function() {
-        // This generates a path to the images relative to the directory containing
-        // the html, so the correct path should be automatically generated.
-        var imagesDir = require.toUrl("../../../../images/");
+        render: function() {
+            this.$el.html(this.template({
+                icon: this.getIcon()
+            }));
+        },
 
-        if(!this.model.get('connected')) {
-            return imagesDir + "no-signal.svg";
+        getIcon: function() {
+            // This generates a path to the images relative to the directory containing
+            // the html, so the correct path should be automatically generated.
+            var imagesDir = require.toUrl("../../../../images/");
+
+            if (!this.model.get('connected')) {
+                return imagesDir + "no-signal.svg";
+            } else {
+                var signalStrength = this.model.get('strength');
+                if (signalStrength >= 90) {
+                    return imagesDir + "4-bars.svg";
+                } else if (signalStrength >= 60) {
+                    return imagesDir + "3-bars.svg";
+                } else if (signalStrength >= 30) {
+                    return imagesDir + "2-bars.svg";
+                } else {
+                    return imagesDir + "1-bar.svg";
+                }
+            }
         }
-        else {
-            var signalStrength = this.model.get('strength');
-            if(signalStrength >= 90) {
-                return imagesDir + "4-bars.svg";
-            }
-            else if(signalStrength >= 60) {
-                return imagesDir + "3-bars.svg";
-            }
-            else if(signalStrength >= 30) {
-                return imagesDir + "2-bars.svg";
-            }
-            else {
-                return imagesDir + "1-bar.svg";
-            }
-        }
-    }
 
-  });
+    });
 
-  return SignalStrengthWidget;
+    return SignalStrengthWidget;
 
 });
-
 /**
  * Toolbar.js
  *
@@ -13772,52 +13766,52 @@ define("jqueryToolbar", function(){});
 
 define('Views/Widgets/Toolbar',['backbone', 'JST', 'jqueryToolbar'], function(Backbone, template, toolbar) {
 
-  var ToolbarWidget = Backbone.View.extend({
+    var ToolbarWidget = Backbone.View.extend({
 
-    el: '#toolbarWidget',
-    template: template['app/Templates/toolbarWidget'],
+        el: '#toolbarWidget',
+        template: template['app/Templates/toolbarWidget'],
 
-    initialize: function() {
-      _.bindAll(this);
-    },
+        initialize: function() {
+            _.bindAll(this);
+        },
 
-    render: function() {
-        this.$el.html(this.template());
+        render: function() {
+            this.$el.html(this.template());
 
-        $('.toolbar-icons a').on('click', function( event ) {
-            event.preventDefault();
-        });
+            $('.toolbar-icons a').on('click', function(event) {
+                event.preventDefault();
+            });
 
-        $('#settingsUser').toolbar({
-            content: '#user-toolbar-options',
-            position: 'right'
-        });
+            $('#settingsUser').toolbar({
+                content: '#user-toolbar-options',
+                position: 'right'
+            });
 
 
-    }
+        }
 
-  });
-  return ToolbarWidget;
+    });
+    return ToolbarWidget;
 
 });
 define('Views/Mission',['backbone', 'JST',
 
-  // Models
-  'Models/Mission',
+    // Models
+    'Models/Mission',
 
-  // Widgets (subviews)
-  'Views/Widgets/Speed',
-  'Views/Widgets/Map',
-  'Views/Widgets/Comms',
-  'Views/Widgets/Altitude',
-  'Views/Widgets/Gps',
-  'Views/Widgets/Health',
-  'Views/Widgets/State',
-  'Views/Widgets/Battery',
-  'Views/Widgets/SignalStrength',
-  'Views/Widgets/Toolbar',
+    // Widgets (subviews)
+    'Views/Widgets/Speed',
+    'Views/Widgets/Map',
+    'Views/Widgets/Comms',
+    'Views/Widgets/Altitude',
+    'Views/Widgets/Gps',
+    'Views/Widgets/Health',
+    'Views/Widgets/State',
+    'Views/Widgets/Battery',
+    'Views/Widgets/SignalStrength',
+    'Views/Widgets/Toolbar',
 
-  ], function(Backbone, template,
+], function(Backbone, template,
     // Models
     Mission,
 
@@ -13832,171 +13826,194 @@ define('Views/Mission',['backbone', 'JST',
     BatteryWidget,
     SignalStrengthWidget,
     ToolbarWidget
-  ) {
+) {
 
-  var MissionView = Backbone.View.extend({
+    var MissionView = Backbone.View.extend({
 
-    model: Mission,
-    el: '#missionView',
-    template: template['app/Templates/missionLayout'],
-    hasRendered: false,
+        model: Mission,
+        el: '#missionView',
+        template: template['app/Templates/missionLayout'],
+        hasRendered: false,
 
-    initialize: function() {
-      _.bindAll(this);
-    },
+        initialize: function() {
+            _.bindAll(this);
+        },
 
-    render: function() {
+        render: function() {
 
-      if(false === this.hasRendered) { this.renderLayout(); }
+            if (false === this.hasRendered) {
+                this.renderLayout();
+            }
 
-    },
+        },
 
-    // Meant to be run only once; renders scaffolding and subviews.
-    renderLayout: function() {
+        // Meant to be run only once; renders scaffolding and subviews.
+        renderLayout: function() {
 
-      // Render scaffolding
-      this.$el.html(this.template);
+            // Render scaffolding
+            this.$el.html(this.template);
 
-      // Instantiate subviews, now that their elements are present on the page
-      this.speedWidget = new SpeedWidget({model: this.model.get('platform')});
-      this.commsWidget = new CommsWidget({model: this.model.get('platform')});
-      this.mapWidget = new MapWidget({model: this.model.get('platform')});
-      this.altitudeWidget = new AltitudeWidget({model: this.model.get('platform')});
-      this.batteryWidget = new BatteryWidget({model: this.model.get('platform')});
-      this.healthWidget = new HealthWidget({model: this.model.get('platform')});
-      this.gpsWidget = new GpsWidget({model: this.model.get('platform')});
-      this.signalStrengthWidget = new SignalStrengthWidget({model: this.model.get('platform')});
-      this.stateWidget = new StateWidget({model: this.model.get('platform')});
-      this.toolbarWidget = new ToolbarWidget({model: this.model.get('platform')});
+            // Instantiate subviews, now that their elements are present on the page
+            this.speedWidget = new SpeedWidget({
+                model: this.model.get('platform')
+            });
+            this.commsWidget = new CommsWidget({
+                model: this.model.get('platform')
+            });
+            this.mapWidget = new MapWidget({
+                model: this.model.get('platform')
+            });
+            this.altitudeWidget = new AltitudeWidget({
+                model: this.model.get('platform')
+            });
+            this.batteryWidget = new BatteryWidget({
+                model: this.model.get('platform')
+            });
+            this.healthWidget = new HealthWidget({
+                model: this.model.get('platform')
+            });
+            this.gpsWidget = new GpsWidget({
+                model: this.model.get('platform')
+            });
+            this.signalStrengthWidget = new SignalStrengthWidget({
+                model: this.model.get('platform')
+            });
+            this.stateWidget = new StateWidget({
+                model: this.model.get('platform')
+            });
+            this.toolbarWidget = new ToolbarWidget({
+                model: this.model.get('platform')
+            });
 
-      // Render party
-      this.speedWidget.render();
-      this.commsWidget.render();
-      this.mapWidget.render();
-      this.altitudeWidget.render();
-      this.batteryWidget.render();
-      this.healthWidget.render();
-      this.gpsWidget.render();
-      this.signalStrengthWidget.render();
-      this.stateWidget.render();
-      this.toolbarWidget.render();
+            // Render party
+            this.speedWidget.render();
+            this.commsWidget.render();
+            this.mapWidget.render();
+            this.altitudeWidget.render();
+            this.batteryWidget.render();
+            this.healthWidget.render();
+            this.gpsWidget.render();
+            this.signalStrengthWidget.render();
+            this.stateWidget.render();
+            this.toolbarWidget.render();
 
-    }
+        }
 
-  });
+    });
 
-  return MissionView;
+    return MissionView;
 
 });
 define('router',[
 
-  // Application + dependencies
-  "app",
-  "now",
+    // Application + dependencies
+    "app",
+    "now",
 
-  // Models
-  "Models/Mission",
-  "Models/Platform",
-  "Models/Connection",
+    // Models
+    "Models/Mission",
+    "Models/Platform",
+    "Models/Connection",
 
-  // Dependent views
-  "Views/Mission"
-],
+    // Dependent views
+    "Views/Mission"
+], function(app, now,
+    Mission,
+    Platform,
+    Connection,
+    MissionView) {
 
-function(app, now,
-  Mission,
-  Platform,
-  Connection,
-  MissionView) {
+    // Defining the application router, you can attach sub routers here.
+    var Router = Backbone.Router.extend({
 
-  // Defining the application router, you can attach sub routers here.
-  var Router = Backbone.Router.extend({
+        routes: {
+            "": "mission",
+            "mission": "mission"
+        },
 
-    routes: {
-      "": "mission",
-      "mission": "mission"
-    },
-    
-    mission: function() {
+        mission: function() {
 
-      var platform = this.platform = new Platform();
-      var connection = this.connection = new Connection();
+            var platform = this.platform = new Platform();
+            var connection = this.connection = new Connection();
 
-      this.mission = new Mission({
-        platform: this.platform,
-        connection: this.connection
-      });
+            this.mission = new Mission({
+                platform: this.platform,
+                connection: this.connection
+            });
 
-      this.missionView = new MissionView({
-        model: this.mission
-      });
+            this.missionView = new MissionView({
+                model: this.mission
+            });
 
-      // Assign locally for calling once the Now connection is ready
-      var missionView = this.missionView;
-      
-      // Handle message events as they are provided from the server
-      // This won't scale =P
-      now.ready(function(){
+            // Assign locally for calling once the Now connection is ready
+            var missionView = this.missionView;
 
-        missionView.render();
+            // Handle message events as they are provided from the server
+            // This won't scale =P
+            now.ready(function() {
 
-        now.updatePlatform = function(platformJson) {
-          platform.set(platformJson);
-        };
+                missionView.render();
 
-        now.updateConnection = function(connectionJson) {
-          connection.set(connectionJson);
+                now.updatePlatform = function(platformJson) {
+                    platform.set(platformJson);
+                };
+
+                now.updateConnection = function(connectionJson) {
+                    connection.set(connectionJson);
+                };
+
+            });
+
         }
 
-      });
+    });
 
-    }
-
-  });
-
-  return Router;
+    return Router;
 
 });
 require([
-  // Application.
-  "app",
+    // Application.
+    "app",
 
-  // Main Router.
-  "router"
-],
+    // Main Router.
+    "router"
+], function(app, Router) {
 
-function(app, Router) {
+    // Define your master router on the application namespace and trigger all
+    // navigation from this instance.
+    app.router = new Router();
 
-  // Define your master router on the application namespace and trigger all
-  // navigation from this instance.
-  app.router = new Router();
+    // Trigger the initial route and enable HTML5 History API support, set the
+    // root folder to '/' by default.  Change in app.js.
+    Backbone.history.start({
+        pushState: true,
+        root: app.root
+    });
 
-  // Trigger the initial route and enable HTML5 History API support, set the
-  // root folder to '/' by default.  Change in app.js.
-  Backbone.history.start({ pushState: true, root: app.root });
+    // All navigation that is relative should be passed through the navigate
+    // method, to be processed by the router. If the link has a `data-bypass`
+    // attribute, bypass the delegation completely.
+    $(document).on("click", "a[href]:not([data-bypass])", function(evt) {
+        // Get the absolute anchor href.
+        var href = {
+            prop: $(this).prop("href"),
+            attr: $(this).attr("href")
+        };
+        // Get the absolute root.
+        var root = location.protocol + "//" + location.host + app.root;
 
-  // All navigation that is relative should be passed through the navigate
-  // method, to be processed by the router. If the link has a `data-bypass`
-  // attribute, bypass the delegation completely.
-  $(document).on("click", "a[href]:not([data-bypass])", function(evt) {
-    // Get the absolute anchor href.
-    var href = { prop: $(this).prop("href"), attr: $(this).attr("href") };
-    // Get the absolute root.
-    var root = location.protocol + "//" + location.host + app.root;
+        // Ensure the root is part of the anchor href, meaning it's relative.
+        if (href.prop.slice(0, root.length) === root) {
+            // Stop the default event to ensure the link will not cause a page
+            // refresh.
+            evt.preventDefault();
 
-    // Ensure the root is part of the anchor href, meaning it's relative.
-    if (href.prop.slice(0, root.length) === root) {
-      // Stop the default event to ensure the link will not cause a page
-      // refresh.
-      evt.preventDefault();
-
-      // `Backbone.history.navigate` is sufficient for all Routers and will
-      // trigger the correct events. The Router's internal `navigate` method
-      // calls this anyways.  The fragment is sliced from the root.
-      Backbone.history.navigate(href.attr, true);
-    }
-  });
+            // `Backbone.history.navigate` is sufficient for all Routers and will
+            // trigger the correct events. The Router's internal `navigate` method
+            // calls this anyways.  The fragment is sliced from the root.
+            Backbone.history.navigate(href.attr, true);
+        }
+    });
 
 });
-
 define("main", function(){});
