@@ -59,27 +59,27 @@ UavConnection.prototype.changeState = function(newState) {
     this.emit(this.state);
     log.info('[UavConnection] Changing state to [' + this.state + ']');
     this.invokeState(this.state);
-}
+};
 
 // The heartbeat function is invoked once per second and is kicked off by the start() function.
 // The point is to update some timing information and re-invoke whatever current state
 // the system is in to see if we need to change state/status.
 UavConnection.prototype.heartbeat = function() {
-  this.timeSinceLastHeartbeat = Date.now() - this.lastHeartbeat;
-  this.emit(this.state);
-  this.emit('heartbeat');
-  this.invokeState(this.state);
-}
+    this.timeSinceLastHeartbeat = Date.now() - this.lastHeartbeat;
+    this.emit(this.state);
+    this.emit('heartbeat');
+    this.invokeState(this.state);
+};
 
 // Convenience function to make the meaning of the awkward syntax more clear.
 UavConnection.prototype.invokeState = function(state) {
-  this[this.state]();
+    this[this.state]();
 };
 
 UavConnection.prototype.start = function() {
     setInterval(_.bind(this.heartbeat, this), 1000);
     this.changeState('disconnected');
-}
+};
 
 // Accessor for private variable (stateName)
 UavConnection.prototype.getState = function() {
@@ -88,8 +88,8 @@ UavConnection.prototype.getState = function() {
 
 // Update the remote heartbeat's last timestamp
 UavConnection.prototype.updateHeartbeat = function() {
-  this.emit('heartbeat:packet');
-  this.lastHeartbeat = Date.now();
+    this.emit('heartbeat:packet');
+    this.lastHeartbeat = Date.now();
 };
 
 UavConnection.prototype.disconnected = function() {
@@ -109,8 +109,8 @@ UavConnection.prototype.disconnected = function() {
                 this.dataEventName = 'data';
                 this.connection = new SerialPort(
                     this.config.get('serial:device'), {
-                    baudrate: this.config.get('serial:baudrate')
-                });
+                        baudrate: this.config.get('serial:baudrate')
+                    });
 
                 // Once the connection is opened, move to a connecting state
                 this.connection.on('open', _.bind(this.changeState, this, 'connecting'));
@@ -143,7 +143,7 @@ UavConnection.prototype.disconnected = function() {
                 // throw an exception, which may not be what is expected in the surrounding code.
                 this.connection.on('error', function(e) {
                     log.info("[UavConnection] TCP connection error message: " + e);
-                })
+                });
                 break;
 
             default:
@@ -152,7 +152,7 @@ UavConnection.prototype.disconnected = function() {
     } catch (e) {
         log.error(e);
     }
-}
+};
 
 UavConnection.prototype.connecting = function() {
     try {
@@ -172,7 +172,7 @@ UavConnection.prototype.connecting = function() {
         }
 
         this.protocol.once('HEARTBEAT', _.bind(this.changeState, this, 'connected'));
-    
+
         this.attachDataEventListener = false;
 
     } catch (e) {
@@ -194,11 +194,12 @@ UavConnection.prototype.write = function(data) {
         case 'tcp': // fallthrough
         case 'serial':
             this.connection.write(data);
+            break;
         case 'udp':
             // special case, don't do anything.
             break;
     }
-}
+};
 
 exports.UavConnection = UavConnection;
 
@@ -245,7 +246,7 @@ seq: 1
 
 protocol.on('message', function(message) {
 log.info(message.name);
-}); 
+});
 
 p = new Buffer(request.pack());
 

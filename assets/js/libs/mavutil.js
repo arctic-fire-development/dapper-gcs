@@ -1,11 +1,11 @@
 var _ = require("underscore");
 
 // Add a convenience method to Buffer
-Buffer.prototype.toByteArray = function () {
-  return Array.prototype.slice.call(this, 0)
-}
+Buffer.prototype.toByteArray = function() {
+    return Array.prototype.slice.call(this, 0);
+};
 
-function mavutil() { };
+function mavutil() {};
 
 mavutil.x25Crc = function(buffer, crc) {
 
@@ -18,6 +18,6 @@ mavutil.x25Crc = function(buffer, crc) {
         crc = crc & 0xffff;
     });
     return crc;
-}
+};
 
 module.exports = mavutil;

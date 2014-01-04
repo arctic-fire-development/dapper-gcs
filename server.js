@@ -83,23 +83,23 @@ var mavParams = new MavParams(logger);
 // User clicked 'load params'!
 everyone.now.loadParams = function(msg) {
     console.log('LOADING PARAMS');
-}
+};
 
 everyone.now.loadMission = function(msg) {
-    console.log('LOADING MISSION')
-    var mm= new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+    console.log('LOADING MISSION');
+    var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
     mm.loadMission();
-}
+};
 
 everyone.now.startMission = function(msg) {
     console.log('taking off');
     quad.takeoff();
-}
+};
 
 // Client integration code, TODO refactor away to elsewhere
-requirejs(["Models/Platform","now"], function(Platform, now) {
+requirejs(["Models/Platform", "now"], function(Platform, now) {
 
-// eat error for the moment, remove this soon!
+    // eat error for the moment, remove this soon!
     var connection = {};
 
     uavConnectionManager.on('disconnected', function() {
@@ -108,7 +108,7 @@ requirejs(["Models/Platform","now"], function(Platform, now) {
             time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
         });
         everyone.now.updateConnection(connection);
-    })
+    });
 
     uavConnectionManager.on('connecting', function() {
         connection = _.extend(connection, {
@@ -116,7 +116,7 @@ requirejs(["Models/Platform","now"], function(Platform, now) {
             time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
         });
         everyone.now.updateConnection(connection);
-    })
+    });
 
     uavConnectionManager.on('connected', function() {
         connection = _.extend(connection, {
@@ -124,7 +124,7 @@ requirejs(["Models/Platform","now"], function(Platform, now) {
             time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
         });
         everyone.now.updateConnection(connection);
-    })
+    });
 
     var platform = {};
 

@@ -35,14 +35,14 @@ function paramHandler(msg) {
     // There's some risk that this could get tangled if unrelated code
     // is asking for + setting the same param around the same time, but it
     // seems unlikely.
-    if(pendingAcks[msg.param_id]) {
+    if (pendingAcks[msg.param_id]) {
         delete pendingAcks[msg.param_id];
     }
 }
 
 // Log object is assumed to be a winston object.
 function MavParam(mavlinkParserObject, logger) {
-    
+
     log = logger;
     mavlinkParser = mavlinkParserObject;
     mavlinkParser.on('PARAM_VALUE', paramHandler);
@@ -52,28 +52,28 @@ function MavParam(mavlinkParserObject, logger) {
 // name = param_name
 // value = value to send it
 MavParam.prototype.set = function(name, value, retries) {
-    
+
     // Set default value of 3 seconds -- TODO figure out if this is ever used in practice in the Python MAVProxy code?
     retries = typeof retries !== 'undefined' ? retries : 3000;
 
-    // Build PARAM_SET message to send 
+    // Build PARAM_SET message to send
     var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
 
     // Establish a handler to try and send the required packet every second until cancelled
-    senderHandler[name] = setInterval( function() {
-        log.info('Requesting parameter ['+name+'] be set to ['+value+']...');
+    senderHandler[name] = setInterval(function() {
+        log.info('Requesting parameter [' + name + '] be set to [' + value + ']...');
         mavlinkParser.send(param_set);
     }, 1000);
 
     timeoutWatcher[name] = setTimeout(function() {
         clearInterval(senderHandler[name]);
-        if(pendingAcks[name]) {
+        if (pendingAcks[name]) {
             delete pendingAcks[msg.name];
-            throw 'No ack returned when requesting to set param ['+name+'] to ['+value+']';
+            throw 'No ack returned when requesting to set param [' + name + '] to [' + value + ']';
         }
-        
+
     }, retries);
-}
+};
 
 MavParam.prototype.get = function(name) {
     var index = -1; // this will use the name as the lookup method
@@ -88,7 +88,7 @@ MavParam.prototype.getAll = function() {
 
 
 /*
- 
+
     def show(self, wildcard='*'):
         '''show parameters'''
         k = sorted(self.keys())
