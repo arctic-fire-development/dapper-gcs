@@ -31,7 +31,7 @@ describe('UAV Connection', function() {
             c.pipe(c); // echo data between clients
         });
 
-        this.heartbeatMessage = new Buffer([0xfe, 0x09, 0x03, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x08, 0x00, 0x00, 0x03, 0x9f, 0x5c])
+        this.heartbeatMessage = new Buffer([0xfe, 0x09, 0x03, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x08, 0x00, 0x00, 0x03, 0x9f, 0x5c]);
         this.server.listen(nconf.get('tcp:port'));
 
     });
@@ -46,8 +46,8 @@ describe('UAV Connection', function() {
             connection.on('data', function(data) {
                 data.toString().should.equal(heartbeat.toString());
                 done();
-            })
-        })
+            });
+        });
         var c = this.c; // assign to juggle scope below
         // Only try to write once the connection is actually present, i.e. in the 'connecting' state
         this.c.on('connecting', function() {
@@ -92,7 +92,7 @@ describe('UAV Connection', function() {
 
             // Fake the arrival of a previous heartbeat
             c.updateHeartbeat();
-            
+
             c.on('heartbeat', function() {
                 c.timeSinceLastHeartbeat.should.equal(2000);
                 done();
@@ -127,7 +127,7 @@ describe('UAV Connection', function() {
             });
             var c = this.c;
             c.on('heartbeat:packet', function() {
-                //c.lastHeartbeat.should.equal(4);             
+                //c.lastHeartbeat.should.equal(4);
                 should.ok;
                 done();
             });
@@ -188,7 +188,7 @@ describe('UAV Connection', function() {
                     c.protocol.listeners('HEARTBEAT')[0]();
                     spy.called.should.equal(true);
                     done();
-                })
+                });
                 this.c.start();
             });
 
@@ -303,14 +303,14 @@ console.log(data);
       unpacked.base_mode.should.equal(mavlink.MAV_MODE_FLAG_SAFETY_ARMED);
       unpacked.custom_mode.should.equal(0);
       unpacked.system_status.should.equal(mavlink.MAV_STATE_STANDBY);
-      
+
       done(); // tell Mocha to wait until this happens to complete the test (async)
 
-    });    
+    });
 console.log(this.heartbeat.pack());
     // Write the packet
     this.serial.write(new Buffer(this.heartbeat.pack()));
-    
+
   });
 
   // Point being the client can provision the connection, so various
