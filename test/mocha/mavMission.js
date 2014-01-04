@@ -38,7 +38,7 @@ describe('MAVLink mission item management', function() {
 
     // Doozy of a setup function, but here's what it's doing:
     // -- set up a TCP server to act in place of the APM
-    // -- Initialize the MAVLink parser 
+    // -- Initialize the MAVLink parser
     // -- Initialize a "real" UavConnection so we can read/write from the TCP stream
     beforeEach(function(done) {
 
@@ -85,17 +85,17 @@ describe('MAVLink mission item management', function() {
                 this.mavlinkParser.srcSystem,
                 this.mavlinkParser.srcComponent,
                 e[0], // seq
-            e[2], // frame
-            e[3], // command
-            e[1], // current
-            e[11], // autocontinue
-            e[4], // param1,
-            e[5], // param2,
-            e[6], // param3
-            e[7], // param4
-            e[8], // x (latitude
-            e[9], // y (longitude
-            e[10] // z (altitude
+                e[2], // frame
+                e[3], // command
+                e[1], // current
+                e[11], // autocontinue
+                e[4], // param1,
+                e[5], // param2,
+                e[6], // param3
+                e[7], // param4
+                e[8], // x (latitude
+                e[9], // y (longitude
+                e[10] // z (altitude
             );
             this.missionItems.push(mi);
         }, this);
@@ -119,7 +119,7 @@ describe('MAVLink mission item management', function() {
         });
 
         // This code was written on a plane while the child next to me coughed continuously,
-        // the woman in front of me was having a medical-emergency level of vomiting and was being 
+        // the woman in front of me was having a medical-emergency level of vomiting and was being
         // given an in-flight injection by a doctor who happened to be on board,
         // and the woman in front of that started to pick a fight with the flight attendants who "kept bumping her seat."
         // Continuous turblence on the flight is a given!  And the man whose child is sick next to me kept moaning

@@ -1,18 +1,18 @@
 define(['backbone', 'JST'], function(Backbone, template) {
 
-  var StateWidget = Backbone.View.extend({
+    var StateWidget = Backbone.View.extend({
 
-    el: '#stateWidget',
-    template: template['app/Templates/stateWidget'],
-    className: 'widget',
+        el: '#stateWidget',
+        template: template['app/Templates/stateWidget'],
+        className: 'widget',
 
-    render: function() {
+        render: function() {
 
-      this.$el.html(this.template());
+            this.$el.html(this.template());
 
-    }
+        }
 
-  });
-  return StateWidget;
+    });
+    return StateWidget;
 
 });

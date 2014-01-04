@@ -6,7 +6,7 @@ Implementations are in the udlImplementations/ directory.
 function udlInterface() {};
 
 udlInterface.prototype.setProtocol = function(protocol) {
-	this.protocol = protocol;
+    this.protocol = protocol;
 };
 
 udlInterface.prototype.takeoff = function() {};

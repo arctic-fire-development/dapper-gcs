@@ -1,48 +1,46 @@
 // Widget to display the radio signal strength
 define(['require', 'backbone', 'JST'], function(require, Backbone, template) {
-  var SignalStrengthWidget = Backbone.View.extend({
 
-    el: '#signalStrengthWidget',
-    template: template['app/Templates/signalStrengthWidget'],
-    className: 'widget',
+    var SignalStrengthWidget = Backbone.View.extend({
 
-    initialize: function() {
-      _.bindAll(this);
-      this.model.on("change:strength change:connected", this.render, this);
-    },
+        el: '#signalStrengthWidget',
+        template: template['app/Templates/signalStrengthWidget'],
+        className: 'widget',
 
-    render: function() {
-      this.$el.html(this.template(
-        {icon: this.getIcon()}));
-    },
+        initialize: function() {
+            _.bindAll(this);
+            this.model.on("change:strength change:connected", this.render, this);
+        },
 
-    getIcon: function() {
-        // This generates a path to the images relative to the directory containing
-        // the html, so the correct path should be automatically generated.
-        var imagesDir = require.toUrl("../../../../images/");
+        render: function() {
+            this.$el.html(this.template({
+                icon: this.getIcon()
+            }));
+        },
 
-        if(!this.model.get('connected')) {
-            return imagesDir + "no-signal.svg";
+        getIcon: function() {
+            // This generates a path to the images relative to the directory containing
+            // the html, so the correct path should be automatically generated.
+            var imagesDir = require.toUrl("../../../../images/");
+
+            if (!this.model.get('connected')) {
+                return imagesDir + "no-signal.svg";
+            } else {
+                var signalStrength = this.model.get('strength');
+                if (signalStrength >= 90) {
+                    return imagesDir + "4-bars.svg";
+                } else if (signalStrength >= 60) {
+                    return imagesDir + "3-bars.svg";
+                } else if (signalStrength >= 30) {
+                    return imagesDir + "2-bars.svg";
+                } else {
+                    return imagesDir + "1-bar.svg";
+                }
+            }
         }
-        else {
-            var signalStrength = this.model.get('strength');
-            if(signalStrength >= 90) {
-                return imagesDir + "4-bars.svg";
-            }
-            else if(signalStrength >= 60) {
-                return imagesDir + "3-bars.svg";
-            }
-            else if(signalStrength >= 30) {
-                return imagesDir + "2-bars.svg";
-            }
-            else {
-                return imagesDir + "1-bar.svg";
-            }
-        }
-    }
 
-  });
+    });
 
-  return SignalStrengthWidget;
+    return SignalStrengthWidget;
 
 });
