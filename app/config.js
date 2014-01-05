@@ -35,10 +35,24 @@ require.config({
 
     shim: {
 
-        // Backbone library depends on lodash and jQuery.
+        underscore: {
+            deps: [],
+            exports: '_',
+            // remove the global reference to _
+            // and make it internal to RequireJS
+            init: function () {
+                return this._.noConflict();
+            },
+        },
+
         backbone: {
-            deps: ["underscore", "jquery"],
-            exports: "Backbone"
+            deps: ['jquery', 'underscore'],
+            exports: 'Backbone',
+            // remove the global reference to Backbone
+            // and make it internal to RequireJS
+            init: function (jquery, underscore) {
+                return this.Backbone.noConflict();
+            },
         },
 
         leaflet: {
