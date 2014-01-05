@@ -12,9 +12,8 @@ define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
         },
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:status', this.render);
-            this.model.on('change:time_since_last_heartbeat', this.render);
+            this.listenTo(this.model, 'change:status', this.render);
+            this.listenTo(this.model, 'change:time_since_last_heartbeat', this.render);
         },
 
         loadParameters: function() {

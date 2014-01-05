@@ -8,8 +8,8 @@ define(['require', 'backbone', 'JST'], function(require, Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on("change:strength change:connected", this.render, this);
+            this.listenTo(this.model, 'change:strength', this.render);
+            this.listenTo(this.model, 'change:connected', this.render);
         },
 
         render: function() {

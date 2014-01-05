@@ -7,8 +7,7 @@ define(['backbone', 'JST'], function(Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:groundspeed', this.render);
+            this.listenTo(this.model, 'change:groundspeed', this.render);
         },
 
         render: function() {

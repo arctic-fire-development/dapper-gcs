@@ -8,9 +8,8 @@ define(['backbone', 'leaflet'], function(Backbone, L) {
         map: undefined, // will be Leaflet map object
 
         initialize: function() {
-
-            _.bindAll(this);
-            this.model.on('change:lat change:lon', this.render);
+            this.listenTo(this.model, 'change:lat', this.render);
+            this.listenTo(this.model, 'change:lon', this.render);
             this.breadcrumb = [];
         },
 

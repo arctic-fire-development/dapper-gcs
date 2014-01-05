@@ -5,10 +5,6 @@ define(['backbone', 'JST', 'jqueryToolbar'], function(Backbone, template, toolba
         el: '#toolbarWidget',
         template: template['app/Templates/toolbarWidget'],
 
-        initialize: function() {
-            _.bindAll(this);
-        },
-
         render: function() {
             this.$el.html(this.template());
 

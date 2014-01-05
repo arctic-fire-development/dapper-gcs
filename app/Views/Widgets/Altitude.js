@@ -8,7 +8,7 @@ define(['backbone', 'JST'], function(Backbone, template) {
 
         initialize: function() {
             _.bindAll(this);
-            this.model.on("change:alt", this.render, this);
+            this.listenTo(this.model, 'change:alt', this.render);
         },
         render: function() {
             this.$el.html(this.template({

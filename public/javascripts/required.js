@@ -12942,8 +12942,7 @@ define('Views/Widgets/Speed',['backbone', 'JST'], function(Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:groundspeed', this.render);
+            this.listenTo(this.model, 'change:groundspeed', this.render);
         },
 
         render: function() {
@@ -13143,9 +13142,8 @@ define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
         map: undefined, // will be Leaflet map object
 
         initialize: function() {
-
-            _.bindAll(this);
-            this.model.on('change:lat change:lon', this.render);
+            this.listenTo(this.model, 'change:lat', this.render);
+            this.listenTo(this.model, 'change:lon', this.render);
             this.breadcrumb = [];
         },
 
@@ -13239,9 +13237,8 @@ define('Views/Widgets/Comms',['backbone', 'JST', 'now'], function(Backbone, temp
         },
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:status', this.render);
-            this.model.on('change:time_since_last_heartbeat', this.render);
+            this.listenTo(this.model, 'change:status', this.render);
+            this.listenTo(this.model, 'change:time_since_last_heartbeat', this.render);
         },
 
         loadParameters: function() {
@@ -13323,7 +13320,7 @@ define('Views/Widgets/Altitude',['backbone', 'JST'], function(Backbone, template
 
         initialize: function() {
             _.bindAll(this);
-            this.model.on("change:alt", this.render, this);
+            this.listenTo(this.model, 'change:alt', this.render);
         },
         render: function() {
             this.$el.html(this.template({
@@ -13344,13 +13341,10 @@ define('Views/Widgets/Gps',['backbone', 'JST'], function(Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-
-            _.bindAll(this);
-            this.model.on('change:lat', this.render);
-            this.model.on('change:lon', this.render);
-            this.model.on('change:fix_type', this.render);
-            this.model.on('change:satellites_visible', this.render);
-
+            this.listenTo(this.model, 'change:lat', this.render);
+            this.listenTo(this.model, 'change:lon', this.render);
+            this.listenTo(this.model, 'change:fix_type', this.render);
+            this.listenTo(this.model, 'change:satellites_visible', this.render);
         },
 
         render: function() {
@@ -13369,9 +13363,6 @@ define('Views/Widgets/Gps',['backbone', 'JST'], function(Backbone, template) {
 
 });
 
-
-// fix_type: undefined,
-// satellites_visible: undefined,;
 define('Views/Widgets/Health',['backbone', 'JST'], function(Backbone, template) {
 
     var HealthWidget = Backbone.View.extend({
@@ -13437,10 +13428,9 @@ define('Views/Widgets/Battery',['backbone', 'JST'], function(Backbone, template)
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:current_battery', this.render, this);
-            this.model.on('change:voltage_battery', this.render, this);
-            this.model.on('change:battery_remaining', this.render, this);
+            this.listenTo(this.model, 'change:current_battery', this.render);
+            this.listenTo(this.model, 'change:voltge_battery', this.render);
+            this.listenTo(this.model, 'change:battery_remaining', this.render);
         },
 
         render: function() {
@@ -13483,8 +13473,8 @@ define('Views/Widgets/SignalStrength',['require', 'backbone', 'JST'], function(r
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on("change:strength change:connected", this.render, this);
+            this.listenTo(this.model, 'change:strength', this.render);
+            this.listenTo(this.model, 'change:connected', this.render);
         },
 
         render: function() {
@@ -13770,10 +13760,6 @@ define('Views/Widgets/Toolbar',['backbone', 'JST', 'jqueryToolbar'], function(Ba
 
         el: '#toolbarWidget',
         template: template['app/Templates/toolbarWidget'],
-
-        initialize: function() {
-            _.bindAll(this);
-        },
 
         render: function() {
             this.$el.html(this.template());

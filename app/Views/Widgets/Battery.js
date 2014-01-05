@@ -7,10 +7,9 @@ define(['backbone', 'JST'], function(Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:current_battery', this.render, this);
-            this.model.on('change:voltage_battery', this.render, this);
-            this.model.on('change:battery_remaining', this.render, this);
+            this.listenTo(this.model, 'change:current_battery', this.render);
+            this.listenTo(this.model, 'change:voltge_battery', this.render);
+            this.listenTo(this.model, 'change:battery_remaining', this.render);
         },
 
         render: function() {

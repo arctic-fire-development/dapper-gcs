@@ -7,13 +7,10 @@ define(['backbone', 'JST'], function(Backbone, template) {
         className: 'widget',
 
         initialize: function() {
-
-            _.bindAll(this);
-            this.model.on('change:lat', this.render);
-            this.model.on('change:lon', this.render);
-            this.model.on('change:fix_type', this.render);
-            this.model.on('change:satellites_visible', this.render);
-
+            this.listenTo(this.model, 'change:lat', this.render);
+            this.listenTo(this.model, 'change:lon', this.render);
+            this.listenTo(this.model, 'change:fix_type', this.render);
+            this.listenTo(this.model, 'change:satellites_visible', this.render);
         },
 
         render: function() {
@@ -31,7 +28,3 @@ define(['backbone', 'JST'], function(Backbone, template) {
     return GpsWidget;
 
 });
-
-
-// fix_type: undefined,
-// satellites_visible: undefined,
