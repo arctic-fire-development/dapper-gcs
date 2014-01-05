@@ -85,6 +85,20 @@ module.exports = function(grunt) {
                     "public/stylesheets/min.css": ["build/less.css", "assets/css/**/*.css"]
                 }
             }
+        },
+
+        svgmin: { // Task
+            dist: {
+                files: [{ // Dictionary of files
+                    expand: true, // Enable dynamic expansion.
+                    cwd: 'assets/images', // Src matches are relative to this path.
+                    src: ['**/*.svg'], // Actual pattern(s) to match.
+                    dest: 'public/images', // Destination path prefix.
+                    ext: '.min.svg' // Dest filepaths will have this extension.
+                    // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
+                }]
+            }
+
         }
     });
 
@@ -96,10 +110,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-svgmin');
 
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['jade', 'requirejs', 'less', 'cssmin']);
+    grunt.registerTask('default', ['jade', 'requirejs', 'less', 'cssmin', 'svgmin']);
 
 };
