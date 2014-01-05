@@ -182,23 +182,23 @@ require([
         it("should display no-signal icon when NOT connected", function() {
             this.signalStrength.model.set('connected', false);
             this.signalStrength.model.set('strength', 0);
-            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.svg');
+            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.min.svg');
             //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
             this.signalStrength.model.set('strength', 25);
-            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.svg');
+            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.min.svg');
             //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
             this.signalStrength.model.set('strength', 50);
-            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.svg');
+            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.min.svg');
             //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
             this.signalStrength.model.set('strength', 75);
-            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.svg');
+            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.min.svg');
             //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
             this.signalStrength.model.set('strength', 100);
-            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.svg');
+            expect($('#signalStrengthWidget img').attr('src')).toContain('no-signal.min.svg');
             //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
         });
 
@@ -206,56 +206,56 @@ require([
             it("should display 4-bars icon when signal strength >= 90%", function() {
                 this.signalStrength.model.set('connected', true);
                 this.signalStrength.model.set('strength', 90);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('4-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('4-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 100);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('4-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('4-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
             });
 
             it("should display 3-bars icon when 60% <= signal strength < 90%", function() {
                 this.signalStrength.model.set('connected', true);
                 this.signalStrength.model.set('strength', 89);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 75);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 60);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('3-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
             });
 
             it("should display 2-bars icon when 30% <= signal strength < 60%", function() {
                 this.signalStrength.model.set('connected', true);
                 this.signalStrength.model.set('strength', 59);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 45);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 30);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('2-bars.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
             });
 
             it("should display 1-bar icon when 0% <= signal strength < 30%", function() {
                 this.signalStrength.model.set('connected', true);
                 this.signalStrength.model.set('strength', 29);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 15);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
 
                 this.signalStrength.model.set('strength', 0);
-                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.svg');
+                expect($('#signalStrengthWidget img').attr('src')).toContain('1-bar.min.svg');
                 //expect($('#signalStrengthWidget img').prop('complete')).toBe(true);
             });
         });
@@ -284,29 +284,29 @@ require([
         });
 
         it("should display battery icon", function() {
-            expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.svg');
+            expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.min.svg');
         });
 
         describe("Icon", function() {
 
             it("should be green when charge == 100%", function() {
                 this.batteryWidget.model.set('battery_remaining', 100);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-green.svg');
+                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-green.min.svg');
                 //expect($('#battery_indicator').css("fill")).toEqual(97d7a6);
             });
 
             it("should be yellow when charge == 60%", function() {
                 this.batteryWidget.model.set('battery_remaining', 60);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-yellow.svg');
+                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-yellow.min.svg');
                 //expect($('#battery_indicator').css("fill")).toEqual(0xf8f77e);
             });
 
             it("should be red when charge <= 30%", function() {
                 this.batteryWidget.model.set('battery_remaining', 30);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-red.svg');
+                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-red.min.svg');
                 //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
                 this.batteryWidget.model.set('battery_remaining', 10);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.svg');
+                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.min.svg');
                 //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
             });
         });
