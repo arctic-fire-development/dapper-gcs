@@ -57,7 +57,7 @@ define(['backbone', 'leaflet'], function(Backbone, L) {
             }).setView([64.9, -147.1], 16);
 
             this.myIcon = L.icon({
-                iconUrl: 'images/jet.svg',
+                iconUrl: 'images/jet.min.svg',
                 iconSize: [25, 50],
                 iconAnchor: [12, 25],
                 popupAnchor: [-3, -76]

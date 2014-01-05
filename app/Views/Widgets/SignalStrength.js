@@ -24,17 +24,17 @@ define(['require', 'backbone', 'JST'], function(require, Backbone, template) {
             var imagesDir = require.toUrl("../../../../images/");
 
             if (!this.model.get('connected')) {
-                return imagesDir + "no-signal.svg";
+                return imagesDir + "no-signal.min.svg";
             } else {
                 var signalStrength = this.model.get('strength');
                 if (signalStrength >= 90) {
-                    return imagesDir + "4-bars.svg";
+                    return imagesDir + "4-bars.min.svg";
                 } else if (signalStrength >= 60) {
-                    return imagesDir + "3-bars.svg";
+                    return imagesDir + "3-bars.min.svg";
                 } else if (signalStrength >= 30) {
-                    return imagesDir + "2-bars.svg";
+                    return imagesDir + "2-bars.min.svg";
                 } else {
-                    return imagesDir + "1-bar.svg";
+                    return imagesDir + "1-bar.min.svg";
                 }
             }
         }
