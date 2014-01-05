@@ -10348,7 +10348,16 @@ return jQuery;
 
 }).call(this);
 
-define("underscore", function(){});
+define("underscore", (function (global) {
+    return function () {
+        var ret, fn;
+       fn = function () {
+                return this._.noConflict();
+            };
+        ret = fn.apply(global, arguments);
+        return ret || global._;
+    };
+}(this)));
 
 //     Backbone.js 1.1.0
 
@@ -11932,9 +11941,13 @@ define("underscore", function(){});
 
 }).call(this);
 
-define("backbone", ["underscore","jquery"], (function (global) {
+define("backbone", ["jquery","underscore"], (function (global) {
     return function () {
         var ret, fn;
+       fn = function (jquery, underscore) {
+                return this.Backbone.noConflict();
+            };
+        ret = fn.apply(global, arguments);
         return ret || global.Backbone;
     };
 }(this)));
