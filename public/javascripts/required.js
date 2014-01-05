@@ -13192,7 +13192,7 @@ define('Views/Widgets/Map',['backbone', 'leaflet'], function(Backbone, L) {
             }).setView([64.9, -147.1], 16);
 
             this.myIcon = L.icon({
-                iconUrl: 'images/jet.svg',
+                iconUrl: 'images/jet.min.svg',
                 iconSize: [25, 50],
                 iconAnchor: [12, 25],
                 popupAnchor: [-3, -76]
@@ -13454,17 +13454,17 @@ define('Views/Widgets/Battery',['backbone', 'JST'], function(Backbone, template)
 
         getIcon: function() {
             if (!this.model.get('battery_remaining')) {
-                return "images/battery-empty.svg";
+                return "images/battery-empty.min.svg";
             } else {
                 var battery_remaining = this.model.get('battery_remaining');
                 if (battery_remaining >= 90) {
-                    return "images/battery-green.svg";
+                    return "images/battery-green.min.svg";
                 } else if (battery_remaining >= 60) {
-                    return "images/battery-yellow.svg";
+                    return "images/battery-yellow.min.svg";
                 } else if (battery_remaining >= 30) {
-                    return "images/battery-red.svg";
+                    return "images/battery-red.min.svg";
                 } else {
-                    return "images/battery-empty.svg";
+                    return "images/battery-empty.min.svg";
                 }
             }
         }
@@ -13499,17 +13499,17 @@ define('Views/Widgets/SignalStrength',['require', 'backbone', 'JST'], function(r
             var imagesDir = require.toUrl("../../../../images/");
 
             if (!this.model.get('connected')) {
-                return imagesDir + "no-signal.svg";
+                return imagesDir + "no-signal.min.svg";
             } else {
                 var signalStrength = this.model.get('strength');
                 if (signalStrength >= 90) {
-                    return imagesDir + "4-bars.svg";
+                    return imagesDir + "4-bars.min.svg";
                 } else if (signalStrength >= 60) {
-                    return imagesDir + "3-bars.svg";
+                    return imagesDir + "3-bars.min.svg";
                 } else if (signalStrength >= 30) {
-                    return imagesDir + "2-bars.svg";
+                    return imagesDir + "2-bars.min.svg";
                 } else {
-                    return imagesDir + "1-bar.svg";
+                    return imagesDir + "1-bar.min.svg";
                 }
             }
         }
