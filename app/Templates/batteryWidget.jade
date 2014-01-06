@@ -1,14 +1,15 @@
 h3 Battery
 
-a
-    img#battery_image.svg(src=icon)
+div#battery_image
+    img.svg(src=icon)
 
-div
-    span.value !{battery_remaining}
-    span.units &nbsp;%
-div
-    span.value !{voltage_battery}
-    span.units &nbsp;v
-div
-    span.value !{current_battery}
-    span.units &nbsp;A
+div#battery_toolbar_display.battery_values
+    a(href='#')
+        span.value !{battery_remaining}
+        span.units &nbsp;%
+    a
+        span.value !{voltage_battery}
+        span.units &nbsp;v
+    a
+        span.value !{current_battery}
+        span.units &nbsp;A
