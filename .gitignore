@@ -6,8 +6,8 @@ config.json
 *.DS_Store
 .monitor
 public/stylesheets/*.css
+public/images/*.min.svg
 public/javascripts/required.js
-app/Templates/templates.js
 build/
 dataflash.bin
 eeprom.bin

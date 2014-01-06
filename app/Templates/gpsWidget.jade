@@ -1,14 +1,17 @@
 h3 GPS
 
-#position
-    span.units lat &nbsp;
-    span.value !{lat} &nbsp;
-    span.units lon &nbsp;
-    span.value !{lon} &nbsp;
-#gps_stats
-    #location
+div#gps_image
+    img.svg(src=icon)
+
+div#gps_toolbar_display.gps_values
+    a.latlon
+        span.units lat &nbsp;
+        span.value !{lat} &nbsp;
+        span.units lon &nbsp;
+        span.value !{lon} &nbsp;
+    a.fix_type
         span.units fix_type &nbsp;
         span.value !{fix_type} &nbsp;
-    #stats
+    a.stats
         span.units satellites_visible &nbsp;
         span.value !{satellites_visible} &nbsp;
