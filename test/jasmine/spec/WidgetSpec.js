@@ -150,14 +150,6 @@ require([
 
         describe("Tooltip", function() {
 
-            beforeEach(function() {
-                $('#battery_image img').trigger('click');
-            });
-
-            it("should be shown when icon is clicked", function() {
-                expect($('div.tool-container.gradient.tool-right.tool-rounded').css("display")).toBe('block');
-            });
-
             it("should display current charge as percent", function() {
                 this.batteryWidget.model.set('battery_remaining', 50);
                 expect($('#battery_toolbar_display a.percentage span.value')
@@ -207,6 +199,72 @@ require([
             // Render to the sandbox div
             this.gpsWidget.render();
 
+        });
+
+        describe(" GPS Icon", function() {
+            it("should display gps icon", function() {
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+            });
+
+            it("should be green when # satellites >= 6", function() {
+                this.gpsWidget.model.set('satellites_visible', 7);
+                expect($('div#gps_image img').attr('src')).toContain('gps-green.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 6);
+                expect($('div#gps_image img').attr('src')).toContain('gps-green.min.svg');
+            });
+
+            it("should be yellow when # satellites < 6 and >=4", function() {
+                this.gpsWidget.model.set('satellites_visible', 5);
+                expect($('div#gps_image img').attr('src')).toContain('gps-yellow.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 4);
+                expect($('div#gps_image img').attr('src')).toContain('gps-yellow.min.svg');
+            });
+
+            it("should be red when # satellites < 4 and >=2", function() {
+                this.gpsWidget.model.set('satellites_visible', 3);
+                expect($('div#gps_image img').attr('src')).toContain('gps-red.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 2);
+                expect($('div#gps_image img').attr('src')).toContain('gps-red.min.svg');
+            });
+
+            it("should be empty when # satellites < 2", function() {
+                this.gpsWidget.model.set('satellites_visible', 1);
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 0);
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+            });
+        });
+
+        it("should display number of connected satellites", function() {
+            this.gpsWidget.model.set('satellites_visible', 6);
+            expect($('#gps_toolbar_display a.stats span.value')
+                .text()).toContain('6');
+            expect($('#gps_toolbar_display a.stats span.units')
+                .text())
+                .toContain("satellites_visible");
+        });
+
+        it("should display the fix type", function() {
+            this.gpsWidget.model.set('fix_type', '3D');
+            expect($('#gps_toolbar_display a.fix_type span.value')
+                .text()).toContain('3D');
+            expect($('#gps_toolbar_display a.fix_type span.units')
+                .text())
+                .toContain("fix_type");
+        });
+
+        it("should display the latitude and longitude", function() {
+            this.gpsWidget.model.set('lat', 64.88317);
+            this.gpsWidget.model.set('lon', -147.6137);
+            expect($('#gps_toolbar_display a.latlon span.value')
+                .text()).toContain('64.88317');
+            expect($('#gps_toolbar_display a.latlon span.units')
+                .text())
+                .toContain("lat");
         });
     });
     // Signal strength widget shows the strength of the connection with the UAV
