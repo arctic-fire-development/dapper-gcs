@@ -267,6 +267,69 @@ require([
                 .toContain("lat");
         });
     });
+
+    describe("Health Widget", function(){
+        beforeEach(function() {
+
+            // Create a DOM element to render into
+            setFixtures(sandbox({
+                id: 'healthWidget'
+            }));
+
+            // Create a 'platform' Backbone model, which the view observes
+            this.platform = new Platform();
+
+            // Create the view we want to test
+            this.healthWidget = new healthWidget({
+                model: this.platform
+            });
+
+            // Render to the sandbox div
+            this.healthWidget.render();
+
+        });
+        describe("Flight Mode", function() {
+
+            it("displays the state mode as 'manual' when platform is in manual mode", function() {
+                this.healthWidget.model.set('stateMode', 'manual');
+                expect($('.flightMode span').text()).toContain('manual');
+            });
+
+            it("displays the state mode as 'stabilize' when platform is in stabilize mode", function() {
+                this.healthWidget.model.set('stateMode', 'stabilize');
+                expect($('.flightMode span').text()).toContain('stabilize');
+            });
+
+            it("displays the state mode as 'auto' when platform is in auto mode", function() {
+                this.healthWidget.model.set('stateMode', 'auto');
+                expect($('.flightMode span').text()).toContain('auto');
+            });
+
+            it("displays the state mode as 'guided' when platform is in guided mode", function() {
+                this.healthWidget.model.set('stateMode', 'guided');
+                expect($('.flightMode span').text()).toContain('guided');
+            });
+
+        });
+
+        describe("Armed Status", function() {
+
+            it("displays the armed status as 'Armed' when platform is armed", function() {
+                this.healthWidget.model.set('stateArmed', false);
+                expect($('div.flightModeArmed')).toBeHidden();
+                expect($('div.flightModeDisarmed')).toBeVisible();
+            });
+
+            it("displays the armed status as 'Disarmed' when platform is disarmed", function() {
+                this.healthWidget.model.set('stateArmed', true);
+                expect($('div.flightModeArmed')).toBeVisible();
+                expect($('div.flightModeDisarmed')).toBeHidden();
+            });
+
+        });
+
+    });
+
     // Signal strength widget shows the strength of the connection with the UAV
     describe("Signal Strength Widget", function() {
 
