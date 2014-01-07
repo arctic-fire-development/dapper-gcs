@@ -12,9 +12,8 @@ define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
         },
 
         initialize: function() {
-            _.bindAll(this);
-            this.model.on('change:status', this.render);
-            this.model.on('change:time_since_last_heartbeat', this.render);
+            this.model.on('change:status', this.render, this);
+            this.model.on('change:time_since_last_heartbeat', this.render, this);
         },
 
         loadParameters: function() {
@@ -52,8 +51,8 @@ define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
                     errors_comm: this.model.get('errors_comm')
                 }));
 
-                $('#connected').hide();
-                $('#connecting').hide();
+                $('.connected').hide();
+                $('.connecting').hide();
 
                 hasRendered = true;
             }

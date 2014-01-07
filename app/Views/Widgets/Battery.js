@@ -20,6 +20,16 @@ define(['backbone', 'JST'], function(Backbone, template) {
                 voltage_battery: this.model.get('voltage_battery') / 1000,
                 current_battery: this.model.get('current_battery') / -100
             }));
+
+            this.$('.battery_values a').on('click', function(event) {
+                event.preventDefault();
+            });
+
+            this.$('#battery_image').toolbar({
+                content: '#battery_toolbar_display',
+                hideOnClick: true,
+                position: 'right'
+            });
         },
 
         getIcon: function() {
