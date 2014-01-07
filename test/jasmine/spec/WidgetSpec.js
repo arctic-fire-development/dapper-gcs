@@ -34,72 +34,7 @@ require([
     stateWidget
 ) {
 
-    // Add a collection of tests
-    describe("Speed widget", function() {
-
-        // Setup function -- will execute before every test
-        beforeEach(function() {
-
-            // Create a DOM element to render into
-            setFixtures(sandbox({
-                id: 'speedWidget'
-            }));
-
-            // Create a 'platform' Backbone model, which the view observes
-            this.platform = new Platform();
-
-            // Create the view we want to test
-            this.speedWidget = new speedWidget({
-                model: this.platform
-            });
-
-            // Render to the sandbox div
-            this.speedWidget.render();
-
-        });
-
-        it("should display the speed in the span.value element", function() {
-            var renderedValue;
-
-            this.speedWidget.model.set('groundspeed', 13);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('13');
-
-            this.speedWidget.model.set('groundspeed', 10);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('10');
-        });
-
-        it("should round value to the nearest integer", function() {
-            var renderedValue;
-
-            this.speedWidget.model.set('groundspeed', 10.5);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('11');
-
-            this.speedWidget.model.set('groundspeed', 10.4);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('10');
-
-            this.speedWidget.model.set('groundspeed', 10.49);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('10');
-
-            this.speedWidget.model.set('groundspeed', 10.9);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('11');
-
-            this.speedWidget.model.set('groundspeed', 10.0);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('10');
-
-            this.speedWidget.model.set('groundspeed', 10);
-            renderedValue = $('#speedWidget span.value').text();
-            expect(renderedValue).toBe('10');
-        });
-    });
-
-    describe("Altitude widget", function() {
+    describe("Altitude Widget", function() {
 
         beforeEach(function() {
 
@@ -163,8 +98,240 @@ require([
 
     });
 
+    describe("Battery Widget", function() {
+
+        beforeEach(function() {
+
+            // Create a DOM element to render into
+            setFixtures(sandbox({
+                id: 'batteryWidget'
+            }));
+
+            // Create a 'platform' Backbone model, which the view observes
+            this.platform = new Platform();
+
+            // Create the view we want to test
+            this.batteryWidget = new batteryWidget({
+                model: this.platform
+            });
+
+            // Render to the sandbox div
+            this.batteryWidget.render();
+
+        });
+
+        it("should display battery icon", function() {
+            expect($('div#battery_image img').attr('src')).toContain('battery-empty.min.svg');
+        });
+
+        describe("Icon", function() {
+
+            it("should be green when charge == 100%", function() {
+                this.batteryWidget.model.set('battery_remaining', 100);
+                expect($('div#battery_image img').attr('src')).toContain('battery-green.min.svg');
+                //expect($('#battery_indicator').css("fill")).toEqual(97d7a6);
+            });
+
+            it("should be yellow when charge == 60%", function() {
+                this.batteryWidget.model.set('battery_remaining', 60);
+                expect($('div#battery_image img').attr('src')).toContain('battery-yellow.min.svg');
+                //expect($('#battery_indicator').css("fill")).toEqual(0xf8f77e);
+            });
+
+            it("should be red when charge <= 30%", function() {
+                this.batteryWidget.model.set('battery_remaining', 30);
+                expect($('div#battery_image img').attr('src')).toContain('battery-red.min.svg');
+                //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
+                this.batteryWidget.model.set('battery_remaining', 10);
+                expect($('div#battery_image img').attr('src')).toContain('battery-empty.min.svg');
+                //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
+            });
+        });
+
+        describe("Tooltip", function() {
+
+            it("should display current charge as percent", function() {
+                this.batteryWidget.model.set('battery_remaining', 50);
+                expect($('#battery_toolbar_display a.percentage span.value')
+                    .text()).toBe('50');
+                expect($('#battery_toolbar_display a.percentage span.units')
+                    .text())
+                    .toContain("%");
+            });
+
+            it("should display battery voltage", function() {
+                this.batteryWidget.model.set('voltage_battery', 50000); //battery supplies value in miliVolts
+                expect($('#battery_toolbar_display a.voltage span.value')
+                    .text()).toBe('50');
+                expect($('#battery_toolbar_display a.voltage span.units')
+                    .text())
+                    .toContain("V");
+            });
+
+            it("should display battery current", function() {
+                this.batteryWidget.model.set('current_battery', 5000);
+                expect($('#battery_toolbar_display a.current span.value')
+                    .text()).toBe('-50');
+                expect($('#battery_toolbar_display a.current span.units')
+                    .text())
+                    .toContain("A");
+            });
+
+        });
+    });
+
+    describe("GPS Widget", function(){
+        beforeEach(function() {
+
+            // Create a DOM element to render into
+            setFixtures(sandbox({
+                id: 'gpsWidget'
+            }));
+
+            // Create a 'platform' Backbone model, which the view observes
+            this.platform = new Platform();
+
+            // Create the view we want to test
+            this.gpsWidget = new gpsWidget({
+                model: this.platform
+            });
+
+            // Render to the sandbox div
+            this.gpsWidget.render();
+
+        });
+
+        describe(" GPS Icon", function() {
+            it("should display gps icon", function() {
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+            });
+
+            it("should be green when # satellites >= 6", function() {
+                this.gpsWidget.model.set('satellites_visible', 7);
+                expect($('div#gps_image img').attr('src')).toContain('gps-green.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 6);
+                expect($('div#gps_image img').attr('src')).toContain('gps-green.min.svg');
+            });
+
+            it("should be yellow when # satellites < 6 and >=4", function() {
+                this.gpsWidget.model.set('satellites_visible', 5);
+                expect($('div#gps_image img').attr('src')).toContain('gps-yellow.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 4);
+                expect($('div#gps_image img').attr('src')).toContain('gps-yellow.min.svg');
+            });
+
+            it("should be red when # satellites < 4 and >=2", function() {
+                this.gpsWidget.model.set('satellites_visible', 3);
+                expect($('div#gps_image img').attr('src')).toContain('gps-red.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 2);
+                expect($('div#gps_image img').attr('src')).toContain('gps-red.min.svg');
+            });
+
+            it("should be empty when # satellites < 2", function() {
+                this.gpsWidget.model.set('satellites_visible', 1);
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+
+                this.gpsWidget.model.set('satellites_visible', 0);
+                expect($('div#gps_image img').attr('src')).toContain('gps-empty.min.svg');
+            });
+        });
+
+        it("should display number of connected satellites", function() {
+            this.gpsWidget.model.set('satellites_visible', 6);
+            expect($('#gps_toolbar_display a.stats span.value')
+                .text()).toContain('6');
+            expect($('#gps_toolbar_display a.stats span.units')
+                .text())
+                .toContain("satellites_visible");
+        });
+
+        it("should display the fix type", function() {
+            this.gpsWidget.model.set('fix_type', '3D');
+            expect($('#gps_toolbar_display a.fix_type span.value')
+                .text()).toContain('3D');
+            expect($('#gps_toolbar_display a.fix_type span.units')
+                .text())
+                .toContain("fix_type");
+        });
+
+        it("should display the latitude and longitude", function() {
+            this.gpsWidget.model.set('lat', 64.88317);
+            this.gpsWidget.model.set('lon', -147.6137);
+            expect($('#gps_toolbar_display a.latlon span.value')
+                .text()).toContain('64.88317');
+            expect($('#gps_toolbar_display a.latlon span.units')
+                .text())
+                .toContain("lat");
+        });
+    });
+
+    describe("Health Widget", function(){
+        beforeEach(function() {
+
+            // Create a DOM element to render into
+            setFixtures(sandbox({
+                id: 'healthWidget'
+            }));
+
+            // Create a 'platform' Backbone model, which the view observes
+            this.platform = new Platform();
+
+            // Create the view we want to test
+            this.healthWidget = new healthWidget({
+                model: this.platform
+            });
+
+            // Render to the sandbox div
+            this.healthWidget.render();
+
+        });
+        describe("Flight Mode", function() {
+
+            it("displays the state mode as 'manual' when platform is in manual mode", function() {
+                this.healthWidget.model.set('stateMode', 'manual');
+                expect($('.flightMode span').text()).toContain('manual');
+            });
+
+            it("displays the state mode as 'stabilize' when platform is in stabilize mode", function() {
+                this.healthWidget.model.set('stateMode', 'stabilize');
+                expect($('.flightMode span').text()).toContain('stabilize');
+            });
+
+            it("displays the state mode as 'auto' when platform is in auto mode", function() {
+                this.healthWidget.model.set('stateMode', 'auto');
+                expect($('.flightMode span').text()).toContain('auto');
+            });
+
+            it("displays the state mode as 'guided' when platform is in guided mode", function() {
+                this.healthWidget.model.set('stateMode', 'guided');
+                expect($('.flightMode span').text()).toContain('guided');
+            });
+
+        });
+
+        describe("Armed Status", function() {
+
+            it("displays the armed status as 'Armed' when platform is armed", function() {
+                this.healthWidget.model.set('stateArmed', false);
+                expect($('div.flightModeArmed')).toBeHidden();
+                expect($('div.flightModeDisarmed')).toBeVisible();
+            });
+
+            it("displays the armed status as 'Disarmed' when platform is disarmed", function() {
+                this.healthWidget.model.set('stateArmed', true);
+                expect($('div.flightModeArmed')).toBeVisible();
+                expect($('div.flightModeDisarmed')).toBeHidden();
+            });
+
+        });
+
+    });
+
     // Signal strength widget shows the strength of the connection with the UAV
-    describe("Signal strength widget", function() {
+    describe("Signal Strength Widget", function() {
 
         beforeEach(function() {
             setFixtures(sandbox({
@@ -261,95 +428,67 @@ require([
         });
     });
 
-    describe("Battery widget", function() {
+    describe("Speed Widget", function() {
 
+        // Setup function -- will execute before every test
         beforeEach(function() {
 
             // Create a DOM element to render into
             setFixtures(sandbox({
-                id: 'batteryWidget'
+                id: 'speedWidget'
             }));
 
             // Create a 'platform' Backbone model, which the view observes
             this.platform = new Platform();
 
             // Create the view we want to test
-            this.batteryWidget = new batteryWidget({
+            this.speedWidget = new speedWidget({
                 model: this.platform
             });
 
             // Render to the sandbox div
-            this.batteryWidget.render();
+            this.speedWidget.render();
 
         });
 
-        it("should display battery icon", function() {
-            expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.min.svg');
+        it("should display the speed in the span.value element", function() {
+            var renderedValue;
+
+            this.speedWidget.model.set('groundspeed', 13);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('13');
+
+            this.speedWidget.model.set('groundspeed', 10);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('10');
         });
 
-        describe("Icon", function() {
+        it("should round value to the nearest integer", function() {
+            var renderedValue;
 
-            it("should be green when charge == 100%", function() {
-                this.batteryWidget.model.set('battery_remaining', 100);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-green.min.svg');
-                //expect($('#battery_indicator').css("fill")).toEqual(97d7a6);
-            });
+            this.speedWidget.model.set('groundspeed', 10.5);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('11');
 
-            it("should be yellow when charge == 60%", function() {
-                this.batteryWidget.model.set('battery_remaining', 60);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-yellow.min.svg');
-                //expect($('#battery_indicator').css("fill")).toEqual(0xf8f77e);
-            });
+            this.speedWidget.model.set('groundspeed', 10.4);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('10');
 
-            it("should be red when charge <= 30%", function() {
-                this.batteryWidget.model.set('battery_remaining', 30);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-red.min.svg');
-                //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
-                this.batteryWidget.model.set('battery_remaining', 10);
-                expect($('#batteryWidget a img#battery_image').attr('src')).toContain('battery-empty.min.svg');
-                //expect($('#battery_indicator').css("fill")).toEqual(0xd72822);
-            });
-        });
+            this.speedWidget.model.set('groundspeed', 10.49);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('10');
 
-        describe("Tooltip", function() {
+            this.speedWidget.model.set('groundspeed', 10.9);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('11');
 
-            beforeEach(function() {
-                $('#batteryWidget').trigger('click');
-            });
+            this.speedWidget.model.set('groundspeed', 10.0);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('10');
 
-            it("should be shown when icon is clicked", function() {
-                expect($('#batteryWidget #battery_image').next('div.popover').length).toBeTruthy();
-            });
-
-            it("should display battery voltage", function() {
-                this.batteryWidget.model.set('voltage_battery', 50);
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content'))
-                    .toContain('Voltage: ');
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content span.value')
-                    .text()).toBe('50');
-            });
-
-            it("should display battery current", function() {
-                this.batteryWidget.model.set('current_battery', 50);
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content'))
-                    .toContain('Current: ');
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content span.value')
-                    .text()).toBe('50');
-            });
-
-            it("should display current charge as percent", function() {
-                this.batteryWidget.model.set('battery_remaining', 50);
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content'))
-                    .toContain('Remaining: ');
-                expect($('#batteryWidget #battery_image')
-                    .next('div.popover div.popover-content span.value')
-                    .text()).toBe('50');
-            });
+            this.speedWidget.model.set('groundspeed', 10);
+            renderedValue = $('#speedWidget span.value').text();
+            expect(renderedValue).toBe('10');
         });
     });
 
