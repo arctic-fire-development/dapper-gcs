@@ -21,7 +21,7 @@ var log;
 
 function UavConnection(configObject, protocolParser, logObject) {
 
-    _.bindAll(this);
+    _.bindAll(this, 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'write');
 
     // config is an nconf instance
     this.config = configObject;
@@ -69,6 +69,7 @@ UavConnection.prototype.heartbeat = function() {
     this.emit(this.state);
     this.emit('heartbeat');
     this.invokeState(this.state);
+    log.info('time since last heartbeat: '+this.timeSinceLastHeartbeat);
 };
 
 // Convenience function to make the meaning of the awkward syntax more clear.
@@ -89,6 +90,7 @@ UavConnection.prototype.getState = function() {
 // Update the remote heartbeat's last timestamp
 UavConnection.prototype.updateHeartbeat = function() {
     this.emit('heartbeat:packet');
+    log.info('Heartbeat updated: ' + Date.now());
     this.lastHeartbeat = Date.now();
 };
 
@@ -150,7 +152,7 @@ UavConnection.prototype.disconnected = function() {
                 log.info('Connection type not understood (' + this.config.get('connection') + ')');
         }
     } catch (e) {
-        log.error(e);
+        log.log('error', e);
     }
 };
 

@@ -2,6 +2,7 @@ var mavlink = require("mavlink_ardupilotmega_v1.0"),
     UavConnection = require("./assets/js/libs/uavConnection.js"),
     MavParams = require("./assets/js/libs/mavParam.js"),
     express = require('express'),
+    csv = require('csv'),
     routes = require('./routes'),
     app = express(),
     http = require('http'),
@@ -52,7 +53,14 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
+// Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
+
+// Catchall/redirect for routes not otherwise handled, go home.
+app.use(function(req, res){
+    console.log(req);
+    res.redirect('/');
+});
 
 // We need to take care with syntax when using Express 3.x and Socket.io.
 // https://github.com/Flotype/now/issues/200
@@ -78,11 +86,23 @@ quad.setProtocol(mavlinkParser);
 
 // MavParams are for handling loading parameters
 // Just hacking/playing code for now
-var mavParams = new MavParams(logger);
+var mavParams = new MavParams(mavlinkParser, logger);
 
 // User clicked 'load params'!
 everyone.now.loadParams = function(msg) {
     console.log('LOADING PARAMS');
+    // Load parameters.
+    csv()
+      .from.path('./etc/Quad.parm', {
+          delimiter: ' ',
+          trim: true,
+          comment: '#'
+        } )
+      .to.array(function(data) {
+        _.each(data, function(e) {
+            mavParams.set(e[0], e[1]);
+        });
+      });
 };
 
 everyone.now.loadMission = function(msg) {
@@ -145,6 +165,10 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
             mavlink_version: message.mavlink_version
         });
         everyone.now.updatePlatform(platform);
+
+        // Also update the connection status, just so it stays current on page navigations.
+        everyone.now.updateConnection(connection);
+
     });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {

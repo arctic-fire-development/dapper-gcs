@@ -1,14 +1,14 @@
-define(['backbone', 'JST'], function(Backbone, template) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var GpsWidget = Backbone.View.extend({
 
         el: '#gpsWidget',
-        template: template['app/Templates/gpsWidget'],
+        template: templates['app/Templates/gpsWidget'],
         className: 'widget',
 
         initialize: function() {
 
-            _.bindAll(this);
+            _.bindAll(this, 'render');
             this.model.on('change:lat', this.render);
             this.model.on('change:lon', this.render);
             this.model.on('change:fix_type', this.render);
@@ -30,11 +30,14 @@ define(['backbone', 'JST'], function(Backbone, template) {
                 event.preventDefault();
             });
 
+            /* Commenting out instead of nuking to preserve intent;
+            replace with Bootstrap.
             this.$('#gps_image').toolbar({
                 content: '#gps_toolbar_display',
                 hideOnClick: true,
                 position: 'right'
             });
+*/
 
         },
 

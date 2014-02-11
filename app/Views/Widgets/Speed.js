@@ -1,13 +1,13 @@
-define(['backbone', 'JST'], function(Backbone, template) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var SpeedWidget = Backbone.View.extend({
 
         el: '#speedWidget',
-        template: template['app/Templates/speedWidget'],
+        template: templates['app/Templates/speedWidget'],
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render');
             this.model.on('change:groundspeed', this.render);
         },
 

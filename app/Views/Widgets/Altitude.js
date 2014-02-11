@@ -1,13 +1,13 @@
-define(['backbone', 'JST'], function(Backbone, template) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var AltitudeWidget = Backbone.View.extend({
 
         el: '#altitudeWidget',
-        template: template['app/Templates/altitudeWidget'],
+        template: templates['app/Templates/altitudeWidget'],
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render');
             this.model.on("change:alt", this.render, this);
         },
         render: function() {

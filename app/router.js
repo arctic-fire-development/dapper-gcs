@@ -3,6 +3,8 @@ define([
     // Application + dependencies
     "app",
     "now",
+    "underscore",
+    "jquery",
 
     // Models
     "Models/Mission",
@@ -10,23 +12,51 @@ define([
     "Models/Connection",
 
     // Dependent views
-    "Views/Mission"
-], function(app, now,
+    "Views/Mission",
+    "Views/Home",
+    "Views/Plan"
+], function(app, now, _, $,
     Mission,
     Platform,
     Connection,
-    MissionView) {
+    MissionView,
+    HomeView,
+    PlanView) {
 
     // Defining the application router, you can attach sub routers here.
     var Router = Backbone.Router.extend({
 
         routes: {
-            "": "mission",
-            "mission": "mission"
+            "": "home",
+            "plan" : "plan",
+            "mission" : "mission"
+        },
+
+        initialize: function() {
+            this.homeView = new HomeView();
+            this.planView = new PlanView();
+        },
+
+        // Pass the name of the div to show, others are hidden for "navigation" :)
+        showOnly: function(name) {
+            var panes = ['home', 'plan', 'mission'];
+            _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
+            $('#'+name).show();
+        },
+
+        home: function() {
+            this.showOnly('home');
+            this.homeView.render();
+        },
+
+        plan: function() {
+            this.showOnly('plan');
+            this.planView.render();
         },
 
         mission: function() {
 
+            this.showOnly('mission');
             var platform = this.platform = new Platform();
             var connection = this.connection = new Connection();
 
