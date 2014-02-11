@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet'], function(Backbone, L) {
+define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L) {
 
     var MapWidget = Backbone.View.extend({
 
@@ -9,7 +9,7 @@ define(['backbone', 'leaflet'], function(Backbone, L) {
 
         initialize: function() {
 
-            _.bindAll(this);
+            _.bindAll(this, 'render', 'renderLayout');
             this.model.on('change:lat change:lon', this.render);
             this.breadcrumb = [];
         },
@@ -44,7 +44,10 @@ define(['backbone', 'leaflet'], function(Backbone, L) {
             this.map.panTo(LatLng);
 
             this.marker.setLatLng(LatLng);
-            this.marker.setIconAngle(this.model.get('heading'));
+
+            // Commenting this out instead of nuking for the moment because the functionality
+            // can be patched/restored, but this method is out of date.
+            // this.marker.setIconAngle(this.model.get('heading'));
 
         },
 

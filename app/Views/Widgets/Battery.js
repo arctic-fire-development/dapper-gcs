@@ -1,13 +1,13 @@
-define(['backbone', 'JST'], function(Backbone, template) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var BatteryWidget = Backbone.View.extend({
 
         el: '#batteryWidget',
-        template: template['app/Templates/batteryWidget'],
+        template: templates['app/Templates/batteryWidget'],
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render', 'getIcon');
             this.model.on('change:current_battery', this.render, this);
             this.model.on('change:voltage_battery', this.render, this);
             this.model.on('change:battery_remaining', this.render, this);
@@ -25,11 +25,15 @@ define(['backbone', 'JST'], function(Backbone, template) {
                 event.preventDefault();
             });
 
-            this.$('#battery_image').toolbar({
-                content: '#battery_toolbar_display',
-                hideOnClick: true,
-                position: 'right'
-            });
+            /* Commenting out instead of nuking to keep the intent in place,
+                though it will likely be replaced by a Bootstrap method.
+
+                this.$('#battery_image').toolbar({
+                    content: '#battery_toolbar_display',
+                    hideOnClick: true,
+                    position: 'right'
+                });
+                */
         },
 
         getIcon: function() {

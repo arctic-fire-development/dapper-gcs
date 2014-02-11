@@ -1,14 +1,14 @@
-define(['backbone', 'JST'], function(Backbone, template) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var HealthWidget = Backbone.View.extend({
 
         el: '#healthWidget',
-        template: template['app/Templates/healthWidget'],
+        template: templates['app/Templates/healthWidget'],
         className: 'widget',
 
         initialize: function() {
 
-            _.bindAll(this);
+            _.bindAll(this, 'render');
             this.model.on('change:stateMode', this.render);
             this.model.on('change:stateArmed', this.render);
             this.model.on('change:stateManual', this.render);

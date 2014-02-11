@@ -1,14 +1,14 @@
 // Widget to display the radio signal strength
-define(['require', 'backbone', 'JST'], function(require, Backbone, template) {
+define(['require', 'backbone', 'JST'], function(require, Backbone, templates) {
 
     var SignalStrengthWidget = Backbone.View.extend({
 
         el: '#signalStrengthWidget',
-        template: template['app/Templates/signalStrengthWidget'],
+        template: templates['app/Templates/signalStrengthWidget'],
         className: 'widget',
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render', 'getIcon');
             this.model.on("change:strength change:connected", this.render, this);
         },
 

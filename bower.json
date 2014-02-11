@@ -1,0 +1,14 @@
+{
+  "name": "dappergcs",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~2.1",
+    "bootstrap": "~3.1",
+    "leaflet-dist": "~0.7.2",
+    "backbone": "~1.1.0",
+    "underscore": "",
+    "jade": "",
+    "leaflet-plugins": "~1.0.1",
+    "requirejs": "~2.1.10"
+  }
+}
