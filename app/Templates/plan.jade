@@ -1,15 +1,15 @@
-h1 Plan the flight
+.jumbotron
+	.row
+		.col-md-4.col-md-offset-4
+			h1 Plan the flight<span>.</span>
+			.panel.panel-default
+				.panel-heading Choose platform and mission type
+				.panel-body
+					form(role="form")
+						div.form-group
+							label(for="platformSelection") Platform
+							select#platformSelection.form-control
+								option SITL - Quadcopter
 
-.row
-	.col-md-4.col-md-offset-4
-		.panel.panel-default
-			.panel-heading Choose platform and mission type
-			.panel-body
-				form(role="form")
-					div.form-group
-						label(for="platformSelection") Platform
-						select#platformSelection.form-control
-							option SITL - Quadcopter
-
-					div.form-group
-						a.btn.btn-primary.btn-lg(href="/mission") Continue
+						div.form-group
+							a.btn.btn-primary.btn-lg(href="/mission") Continue
