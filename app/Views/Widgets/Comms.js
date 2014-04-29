@@ -1,9 +1,9 @@
-define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
+define(['backbone', 'now', 'JST'], function(Backbone, now, templates) {
 
     var CommsWidget = Backbone.View.extend({
 
         el: '#commsWidget',
-        template: template['app/Templates/commsWidget'],
+        template: templates['app/Templates/commsWidget'],
         className: 'widget',
         events: {
             'click #loadParams': 'loadParameters',
@@ -12,11 +12,13 @@ define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
         },
 
         initialize: function() {
+            _.bindAll(this, 'render');
             this.model.on('change:status', this.render, this);
             this.model.on('change:time_since_last_heartbeat', this.render, this);
         },
 
         loadParameters: function() {
+            console.log('loading parameters');
             now.ready(function() {
                 now.loadParams('Loading params...');
             });
@@ -35,6 +37,7 @@ define(['backbone', 'JST', 'now'], function(Backbone, template, now) {
         },
 
         render: function() {
+            console.log('RENDERING COMMS');
             var hasRendered;
 
             // Only draw this on initial page render.

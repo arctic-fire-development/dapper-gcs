@@ -1,52 +1,62 @@
 {
-    "name": "dapper",
-    "description": "DataMapper Ground Control Station",
-    "version": "0.0.1",
-    "homepage": "https://github.com/arctic-fire-development/unbase-gcs",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/arctic-fire-development/unbase-gcs.git"
-    },
-    "private": true,
-    "bugs": {
-        "url": "https://github.com/arctic-fire-development/unbase-gcs/issues"
-    },
-    "engines": {
-        "node": ">= 0.8.0"
-    },
-    "scripts": {
-        "test": "grunt test"
-    },
-    "dependencies": {
-        "express": "~3.4.7",
-        "serialport": "~1.2.5",
-        "now": "~0.8.1",
-        "leaflet": "~0.7.1",
-        "backbone": "~1.1.0",
-        "nconf": "~0.6.9",
-        "underscore": "~1.4.4",
-        "winston": "~0.7.2",
-        "jspack": "0.0.1",
-        "jquery": "~2.1.0-beta3",
-        "less-middleware": "*",
-        "colors": "*",
-        "requirejs": "~2.1.9",
-        "q": "*",
-        "mavlink_ardupilotmega_v1.0": "0.0.2",
-        "jade": "~1.0.2"
-    },
-    "devDependencies": {
-        "mocha": "~1.16.2",
-        "grunt-simple-mocha": "~0.4.0",
-        "should": "~2.1.1",
-        "sinon": "~1.7.3",
-        "grunt": "~0.4.2",
-        "grunt-contrib": "~0.8.0",
-        "grunt-svgmin": "~0.3.0"
-    },
-    "keywords": [
-        "drone",
-        "mavlink",
-        "geospatial"
-    ]
+  "name": "dapper",
+  "description": "DataMapper Ground Control Station",
+  "version": "0.0.1",
+  "homepage": "https://github.com/arctic-fire-development/unbase-gcs",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/arctic-fire-development/unbase-gcs.git"
+  },
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/arctic-fire-development/unbase-gcs/issues"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "express": "~3",
+    "serialport": "",
+    "now": "",
+    "csv": "",
+    "backbone": "",
+    "nconf": "",
+    "underscore": "",
+    "winston": "",
+    "jspack": "",
+    "less-middleware": "",
+    "colors": "",
+    "requirejs": "",
+    "q": "",
+    "mavlink_ardupilotmega_v1.0": "",
+    "jade": ""
+  },
+  "devDependencies": {
+    "mocha": "",
+    "grunt-simple-mocha": "",
+    "should": "",
+    "sinon": "",
+    "grunt": "",
+    "grunt-svgmin": "",
+    "grunt-bower-task": "",
+    "bower": "",
+    "grunt-bower-requirejs": "",
+    "grunt-develop": "",
+    "grunt-contrib-clean": "",
+    "grunt-contrib-watch": "",
+    "grunt-contrib-jade": "",
+    "grunt-contrib-requirejs": "",
+    "grunt-contrib-jasmine": "",
+    "grunt-contrib-less": "",
+    "grunt-contrib-cssmin": "",
+    "grunt-contrib-copy": "~0.5.0"
+  },
+  "keywords": [
+    "drone",
+    "mavlink",
+    "geospatial"
+  ]
 }

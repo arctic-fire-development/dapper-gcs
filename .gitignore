@@ -1,16 +1,26 @@
-mavlink.dev.log
+# No package managed stuff
 node_modules/*
+app/assets/bower/*
+
+# No config files!
+config.json
+
+# App or OS specific junk
 *.sublime-project
 *.sublime-workspace
-config.json
 *.DS_Store
 .monitor
-public/stylesheets/*.css
-public/images/*.min.svg
-public/javascripts/required.js
+
+# These files and/or directory contents are always rebuilt during build processes.
+public/stylesheets/
+public/images/
+public/javascripts/
 app/Templates/templates.js
 build/
+
+# Random junk that sometimes crops up in development
 dataflash.bin
 eeprom.bin
 mav.tlog
 mav.tlog.raw
+mavlink.dev.log

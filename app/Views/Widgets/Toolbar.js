@@ -1,12 +1,12 @@
-define(['backbone', 'JST', 'jqueryToolbar'], function(Backbone, template, toolbar) {
+define(['backbone', 'JST'], function(Backbone, templates, toolbar) {
 
     var ToolbarWidget = Backbone.View.extend({
 
         el: '#toolbarWidget',
-        template: template['app/Templates/toolbarWidget'],
+        template: templates['app/Templates/toolbarWidget'],
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render');
         },
 
         render: function() {
@@ -15,12 +15,6 @@ define(['backbone', 'JST', 'jqueryToolbar'], function(Backbone, template, toolba
             $('.toolbar-icons a').on('click', function(event) {
                 event.preventDefault();
             });
-
-            $('#settingsUser').toolbar({
-                content: '#user-toolbar-options',
-                position: 'right'
-            });
-
 
         }
 

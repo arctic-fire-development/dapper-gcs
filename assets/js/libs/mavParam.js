@@ -49,13 +49,9 @@ function MavParam(mavlinkParserObject, logger) {
 
 }
 
-// name = param_name
-// value = value to send it
-MavParam.prototype.set = function(name, value, retries) {
-
-    // Set default value of 3 seconds -- TODO figure out if this is ever used in practice in the Python MAVProxy code?
-    retries = typeof retries !== 'undefined' ? retries : 3000;
-
+MavParam.prototype.set = function(name, value) {
+    return;
+    
     // Build PARAM_SET message to send
     var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
 
@@ -72,7 +68,7 @@ MavParam.prototype.set = function(name, value, retries) {
             throw 'No ack returned when requesting to set param [' + name + '] to [' + value + ']';
         }
 
-    }, retries);
+    }, 3000);
 };
 
 MavParam.prototype.get = function(name) {
@@ -86,16 +82,4 @@ MavParam.prototype.getAll = function() {
     mavlinkParser.send(param_request_list);
 };
 
-
-/*
-
-    def show(self, wildcard='*'):
-        '''show parameters'''
-        k = sorted(self.keys())
-        for p in k:
-            if fnmatch.fnmatch(str(p).upper(), wildcard.upper()):
-                print("%-16.16s %f" % (str(p), self.get(p)))
-
-
-*/
 module.exports = MavParam;
