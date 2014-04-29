@@ -3,35 +3,85 @@ module.exports = function(grunt) {
     // Project configuration
     grunt.initConfig({
 
+        clean: ["build", "public/images", "public/javascripts", "public/stylesheets"],
+        
         // The Jade task must be run prior to this task, because the Backbone views
         // reference templates via require().
         requirejs: {
             compile: {
                 options: {
-                    baseUrl: "app/",
-                    mainConfigFile: "app/config.js",
+                    baseUrl: "./app/",
+                    mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "none"
+                    optimize: "none",
+                    generateSourceMaps: true,
+                    useStrict: true
                 }
+            }
+        },
+
+        bower_install: {
+            install: {
+                options: {
+                    targetDir: "./app/assets/bower"
+                }
+            }
+        },
+
+        bower: {
+            target: {
+                rjsConfig: './app/config.js',
+                options: {
+                    // Exclude Jade because we need to point the client to the runtime file, not the full Jade core
+                    exclude: ['jade']
+                }
+            }
+        },
+
+        // Used to copy some specific assets from Bower packages to public directories.
+        //
+        // Most Bower-managed javascript gets vacuumed in through the RequireJS process, look in app/config.js 
+        // for those inclusions.
+        // 
+        // Most Bower-managed CSS and LESS gets pulled in through the ```less``` and ```cssmin``` steps below.
+        //
+        // Oddballs and/or image assets belong here.
+        copy: {
+            main: {
+                files: [
+                    {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
+                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg'], dest: 'public/images/'}
+                ]
             }
         },
 
         watch: {
 
-            all: {
-                files: ['./app/**/*.js', './app/Templates/**/*.jade', './spec/**/*.js', 'assets/js/libs/**/*.js'],
-                tasks: ['jade requirejs'],
+            templates: {
+                files: ['./app/Templates/**/*.jade'],
+                tasks: ['jade', 'requirejs', 'develop'],
                 options: {
-                    interrupt: true
+                    interrupt: true,
+                    nospawn: true
+                }
+            },
+
+            all: {
+                files: ['./app/**/*.js', './spec/**/*.js', 'assets/js/libs/**/*.js'],
+                tasks: ['requirejs', 'develop'],
+                options: {
+                    interrupt: false,
+                    nospawn: true
                 }
             },
 
             styles: {
                 files: ['assets/less/**/*.less', 'assets/css/**/*.css'],
-                tasks: ['less mincss'],
+                tasks: ['less', 'cssmin', 'develop'],
                 options: {
-                    interrupt: true
+                    interrupt: true,
+                    nospawn: true
                 }
             }
 
@@ -46,7 +96,7 @@ module.exports = function(grunt) {
             },
             files: {
                 expand: false,
-                src: ['app/**/*.jade'],
+                src: ['app/Templates/**/*.jade'],
                 dest: 'app/Templates/templates.js'
             }
         },
@@ -67,8 +117,7 @@ module.exports = function(grunt) {
             }
         },
 
-        // Not really necessary since Express is doing it, but perhaps
-        // for bundling/packaging.
+        // Note that we're including Bootstrap's LESS via an @import to the Bootstrap Bower directory.
         less: {
             all: {
                 files: {
@@ -82,7 +131,12 @@ module.exports = function(grunt) {
         cssmin: {
             compress: {
                 files: {
-                    "public/stylesheets/min.css": ["build/less.css", "assets/css/**/*.css"]
+                    // These are enumerated specifically to be verbose about where they're from.
+                    "public/stylesheets/min.css": [
+                        "build/less.css",
+                        "assets/css/**/*.css",
+                        "app/assets/bower/leaflet-dist/leaflet.css"
+                    ]
                 }
             }
         },
@@ -98,23 +152,37 @@ module.exports = function(grunt) {
                     // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
                 }]
             }
+        },
 
+        develop: {
+            server: {
+                file: 'server.js'
+            }
         }
     });
 
     // Load additional tasks.
     grunt.loadNpmTasks('grunt-contrib-watch');
-    //grunt.loadNpmTasks('grunt-jade-plugin');
     grunt.loadNpmTasks('grunt-contrib-jade');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+
+    // Conflict with the bower-requirejs 'bower' task if not renamed.
+    grunt.loadNpmTasks('grunt-bower-task');
+    grunt.renameTask('bower', 'bower_install');
+
+    // grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-svgmin');
+    grunt.loadNpmTasks('grunt-bower-requirejs');
+    grunt.loadNpmTasks('grunt-develop');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['jade', 'requirejs', 'less', 'cssmin', 'svgmin']);
+    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'cssmin', 'svgmin', 'develop', 'watch']);
 
 };

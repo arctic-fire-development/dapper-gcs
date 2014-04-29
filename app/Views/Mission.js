@@ -15,7 +15,7 @@ define(['backbone', 'JST',
     'Views/Widgets/SignalStrength',
     'Views/Widgets/Toolbar',
 
-], function(Backbone, template,
+], function(Backbone, templates,
     // Models
     Mission,
 
@@ -35,12 +35,12 @@ define(['backbone', 'JST',
     var MissionView = Backbone.View.extend({
 
         model: Mission,
-        el: '#missionView',
-        template: template['app/Templates/missionLayout'],
+        el: '#mission',
+        template: templates['app/Templates/missionLayout'],
         hasRendered: false,
 
         initialize: function() {
-            _.bindAll(this);
+            _.bindAll(this, 'render', 'renderLayout');
         },
 
         render: function() {
@@ -62,7 +62,7 @@ define(['backbone', 'JST',
                 model: this.model.get('platform')
             });
             this.commsWidget = new CommsWidget({
-                model: this.model.get('platform')
+                model: this.model.get('connection')
             });
             this.mapWidget = new MapWidget({
                 model: this.model.get('platform')
