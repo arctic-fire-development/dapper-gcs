@@ -1,7 +1,8 @@
 /*
 Waypoint state manager.
 */
-var _ = require('underscore');
+var _ = require('underscore'),
+    Q = require('q');
 
 // Logging object (winston)
 var log;
@@ -18,6 +19,7 @@ var uavConnection;
 // Handler when the ArduPilot requests individual waypoints: upon receiving a request,
 // Send the next one.
 function missionRequestHandler(missionItemRequest) {
+    log.info('Sending mission sequence number ' + missionItemRequest.seq);
     mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
 }
 
@@ -46,7 +48,7 @@ util.inherits(MavMission, events.EventEmitter);
 
 // http://qgroundcontrol.org/mavlink/waypoint_protocol
 MavMission.prototype.sendToPlatform = function() {
-
+    log.info('Sending mission to platform...');
     // send mission_count
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
     mavlinkParser.send(missionCount, uavConnection);
@@ -58,6 +60,7 @@ MavMission.prototype.sendToPlatform = function() {
     // If the ack is OK, signal OK; if not, signal an error event
     mavlinkParser.on('MISSION_ACK', function(ack) {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
+            log.info('Mission loaded successfully!');
             self.emit('mission:loaded');
         } else {
             throw new Error('Unexpected mission acknowledgement received in mavMission.js');
@@ -74,13 +77,22 @@ MavMission.prototype.addMissionItem = function(missionItemMessage) {
 };
 
 MavMission.prototype.clearMission = function(first_argument) {
+    log.info('Clearing all mission items...');
     missionItems = [];
     var missionClearAll = new mavlink.messages.mission_clear_all(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
     mavlinkParser.send(missionClearAll);
 };
 
 MavMission.prototype.loadMission = function() {
-    loadMission(this);
+    var deferred = Q.defer();
+
+    this.on('mission:loaded', function() {
+        deferred.resolve();
+    });
+
+    loadMission(this, deferred);
+
+    return deferred.promise;
 };
 
 MavMission.prototype.getMissionItems = function() {
@@ -89,9 +101,10 @@ MavMission.prototype.getMissionItems = function() {
 
 // Stub for initial development/testing
 loadMission = function(mission) {
+
     mission.clearMission();
 
-    _.each(soccerFieldFlight, function(e, i, l) {
+    _.each(cmacToffLoop, function(e, i, l) {
         // target_system, target_component, seq, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z
         mi = new mavlink.messages.mission_item(
             mavlinkParser.srcSystem,
@@ -113,7 +126,20 @@ loadMission = function(mission) {
     });
 
     mission.sendToPlatform();
+
 };
+
+// Arduplane CMAC-toff-loop mission.
+var cmacToffLoop = [
+[0,1,0,16,0,0,0,0,-35.362938,149.165085,584.409973,1],
+[1,0,3,22,15,0,0,0,-35.361164,149.163986,28.110001,1],
+[2,0,3,16,0,0,0,0,-35.359467,149.161697,99.800003,1],
+[3,0,3,16,0,0,0,0,-35.366333,149.162659,100.730003,1],
+[4,0,3,16,0,0,0,0,-35.366131,149.164581,100,1],
+[5,0,3,16,0,0,0,0,-35.359272,149.163757,100,1],
+[6,0,3,177,2,-1,0,0,0,0,0,1],
+[7,0,3,16,0,0,0,0,-35.359272,149.163757,100,1]
+];
 
 // Flight plan for the UAF soccer field
 var soccerFieldFlight = [

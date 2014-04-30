@@ -1,0 +1,23 @@
+
+#sitl-preflight {
+  .statusWidget {
+    margin: 0; padding: 0;
+    div {
+      padding: 1em;
+      
+      span {
+        &.glyphicon {
+          display: inline-block;
+          padding-right: 1em;
+        }
+        &.extra {
+          display: inline;
+        }
+      }
+    }
+  }
+  // Override other styles from global widget styling.
+  #connectionWidget {
+    padding: 0;
+  }
+}

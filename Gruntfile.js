@@ -10,12 +10,15 @@ module.exports = function(grunt) {
         requirejs: {
             compile: {
                 options: {
+                    logLevel: 0,
                     baseUrl: "./app/",
                     mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "none",
+                    optimize: "uglify2",
+                    findNestedDependencies: true, // for dynamic local includes
                     generateSourceMaps: true,
+                    preserveLicenseComments: false, // so we can use source maps
                     useStrict: true
                 }
             }
@@ -51,7 +54,8 @@ module.exports = function(grunt) {
             main: {
                 files: [
                     {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
-                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg'], dest: 'public/images/'}
+                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg'], dest: 'public/images/'},
+                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'}
                 ]
             }
         },
@@ -59,7 +63,7 @@ module.exports = function(grunt) {
         watch: {
 
             templates: {
-                files: ['./app/Templates/**/*.jade'],
+                files: ['./app/Templates/**/*.jade', './app/routines/**/*.jade'],
                 tasks: ['jade', 'requirejs', 'develop'],
                 options: {
                     interrupt: true,
@@ -77,7 +81,7 @@ module.exports = function(grunt) {
             },
 
             styles: {
-                files: ['assets/less/**/*.less', 'assets/css/**/*.css'],
+                files: ['assets/less/**/*.less', 'assets/css/**/*.css', './app/routines/**/*.less'],
                 tasks: ['less', 'cssmin', 'develop'],
                 options: {
                     interrupt: true,
@@ -96,7 +100,7 @@ module.exports = function(grunt) {
             },
             files: {
                 expand: false,
-                src: ['app/Templates/**/*.jade'],
+                src: ['app/Templates/**/*.jade', 'app/routines/**/*.jade'],
                 dest: 'app/Templates/templates.js'
             }
         },
@@ -121,7 +125,7 @@ module.exports = function(grunt) {
         less: {
             all: {
                 files: {
-                    'build/less.css': ['assets/less/assets.less']
+                    'build/less.css': ['assets/less/assets.less', 'app/routines/**/*.less']
                 }
             }
         },

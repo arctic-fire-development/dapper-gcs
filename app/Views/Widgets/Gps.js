@@ -43,17 +43,17 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
         getIcon: function() {
             if (!this.model.get('satellites_visible')) {
-                return "images/gps-empty.min.svg";
+                return "/images/gps-empty.min.svg";
             } else {
                 var satellites_visible = this.model.get('satellites_visible');
                 if (satellites_visible >= 6) {
-                    return "images/gps-green.min.svg";
+                    return "/images/gps-green.min.svg";
                 } else if (satellites_visible >= 4) {
-                    return "images/gps-yellow.min.svg";
+                    return "/images/gps-yellow.min.svg";
                 } else if (satellites_visible >= 2) {
-                    return "images/gps-red.min.svg";
+                    return "/images/gps-red.min.svg";
                 } else {
-                    return "images/gps-empty.min.svg";
+                    return "/images/gps-empty.min.svg";
                 }
             }
         }
