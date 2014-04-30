@@ -6,7 +6,6 @@ define(['backbone', 'JST',
     // Widgets (subviews)
     'Views/Widgets/Speed',
     'Views/Widgets/Map',
-    'Views/Widgets/Comms',
     'Views/Widgets/Altitude',
     'Views/Widgets/Gps',
     'Views/Widgets/Health',
@@ -22,7 +21,6 @@ define(['backbone', 'JST',
     // Widgets (subviews)
     SpeedWidget,
     MapWidget,
-    CommsWidget,
     AltitudeWidget,
     GpsWidget,
     HealthWidget,
@@ -35,7 +33,7 @@ define(['backbone', 'JST',
     var MissionView = Backbone.View.extend({
 
         model: Mission,
-        el: '#mission',
+        el: '#fly',
         template: templates['app/Templates/missionLayout'],
         hasRendered: false,
 
@@ -60,9 +58,6 @@ define(['backbone', 'JST',
             // Instantiate subviews, now that their elements are present on the page
             this.speedWidget = new SpeedWidget({
                 model: this.model.get('platform')
-            });
-            this.commsWidget = new CommsWidget({
-                model: this.model.get('connection')
             });
             this.mapWidget = new MapWidget({
                 model: this.model.get('platform')
@@ -91,7 +86,6 @@ define(['backbone', 'JST',
 
             // Render party
             this.speedWidget.render();
-            this.commsWidget.render();
             this.mapWidget.render();
             this.altitudeWidget.render();
             this.batteryWidget.render();

@@ -26,6 +26,12 @@ function UavConnection(configObject, protocolParser, logObject) {
     // config is an nconf instance
     this.config = configObject;
 
+    // If true, then a connection has been initiated.
+    this.started = false;
+
+    // True if we're receiving heartbeat packets from the wire protocol
+    this.isConnected = false;
+
     // connection represents the socket-level connection through which MAVLink arrives
     this.connection = undefined;
 
@@ -65,9 +71,11 @@ UavConnection.prototype.changeState = function(newState) {
 // The point is to update some timing information and re-invoke whatever current state
 // the system is in to see if we need to change state/status.
 UavConnection.prototype.heartbeat = function() {
+
     this.timeSinceLastHeartbeat = Date.now() - this.lastHeartbeat;
     this.emit(this.state);
     this.emit('heartbeat');
+
     this.invokeState(this.state);
     log.info('time since last heartbeat: '+this.timeSinceLastHeartbeat);
 };
@@ -78,6 +86,15 @@ UavConnection.prototype.invokeState = function(state) {
 };
 
 UavConnection.prototype.start = function() {
+    
+    if(true === this.started) {
+        log.info('Asked to start connection manager, but connection already started, refused.');
+        return;
+    }
+
+    log.info('Starting connection manager...');
+    this.started = true;
+
     setInterval(_.bind(this.heartbeat, this), 1000);
     this.changeState('disconnected');
 };
@@ -89,15 +106,23 @@ UavConnection.prototype.getState = function() {
 
 // Update the remote heartbeat's last timestamp
 UavConnection.prototype.updateHeartbeat = function() {
+    
     this.emit('heartbeat:packet');
     log.info('Heartbeat updated: ' + Date.now());
     this.lastHeartbeat = Date.now();
+
+    // When we get a heartbeat, switch back to connected state.
+    if(false === this.isConnected) {
+        this.isConnected = true;
+        this.changeState('connected');
+    }
 };
 
 UavConnection.prototype.disconnected = function() {
 
     // Reset this because we've lost (or never had) the physical connection
     this.lastHeartbeat = undefined;
+    this.isConnected = false;
 
     // Request the protocol be reattached.
     this.attachDataEventListener = true;
@@ -156,24 +181,28 @@ UavConnection.prototype.disconnected = function() {
     }
 };
 
+// This state attaches listeners for a heartbeat from the protocol.
+// The heartbeat monitor will switch the connection to 'connected' when it sees heartbeats.
 UavConnection.prototype.connecting = function() {
     try {
+
+        this.isConnected = false;
+
         log.info('establishing MAVLink connection...');
 
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
         // to avoid attaching too many callbacks.
         if (this.attachDataEventListener === true) {
+
             this.connection.on(this.dataEventName, _.bind(function(msg) {
                 this.protocol.parseBuffer(msg);
             }, this));
 
-            this.protocol.on('HEARTBEAT', this.updateHeartbeat);
+            this.protocol.on('HEARTBEAT', _.bind(this.updateHeartbeat, this));
             this.emit('connecting:attached');
 
         }
-
-        this.protocol.once('HEARTBEAT', _.bind(this.changeState, this, 'connected'));
 
         this.attachDataEventListener = false;
 
@@ -204,38 +233,7 @@ UavConnection.prototype.write = function(data) {
 };
 
 exports.UavConnection = UavConnection;
-
-/* Swamp for refactoring
-
-
-   these belong elsewhere:
-
-// This function is defined once in the larger scope so that it can be invoked directly a single time
-var fetch_params = _.once(_.bind(function(done) {
-done();
-log.info('Starting to fetch params...');
-
-// Fetch the params from the APM, wait to exit this state until finished.
-param_request = new mavlink.messages.param_request_list(1, 1); // target system/component IDs
-_.extend(param_request, {
-srcSystem: 255,
-srcComponent: 0
-});
-
-p = new Buffer(param_request.pack());
-connection.write(p);
-
-// Listen for parameters
-protocol.on('PARAM_VALUE', _.bind(function(message) {
-apmConfig[message.param_id] = message.param_value;
-if( _.keys(apmConfig).length == message.param_count ) {
-log.info('...finished fetching parameters.');
-log.info(apmConfig);
-done();
-}
-}, this));
-
-}, this));
+/*
 
 // This function changes the initial requested data stream to get all data, at a rate of 1hz
 var request_data_stream = _.once(_.bind(function(done) {

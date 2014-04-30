@@ -41,7 +41,11 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
                 }, this);
             }
 
-            this.map.panTo(LatLng);
+            var map = this.map;
+            var panMap = _.throttle(function() {
+                map.panTo(LatLng);
+            }, 5000);
+            panMap();
 
             this.marker.setLatLng(LatLng);
 
@@ -56,13 +60,16 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
             // create a map in the "map" div, set the view to a given place and zoom
             this.map = L.map('mapWidget', {
                 minZoom: 1,
-                maxZoom: 24
+                maxZoom: 24,
+                zoomControl: false // to reposition
             }).setView([64.9, -147.1], 16);
 
+            new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
+
             this.myIcon = L.icon({
-                iconUrl: 'images/jet.min.svg',
+                iconUrl: '/images/jet.min.svg',
                 iconSize: [50, 100],
-                iconAnchor: [12, 25],
+                iconAnchor: [25, 50],
                 popupAnchor: [-3, -76]
             });
 
@@ -84,10 +91,18 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
             $('#mapWidget').width($(window).width());
             this.map.invalidateSize(false); // force Leaflet resize, do not animate
             $(window).resize(_.debounce(_.bind(function() {
-                $('#mapWidget').width($(window).width()).height($(window).height());
+                this.resizeMap();
                 this.map.invalidateSize();
             }, this), 250));
 
+            this.resizeMap();
+
+        },
+
+        resizeMap: function() {
+            var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+            var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+            $('#mapWidget').width(w).height(h - $('#main-navbar').height());
         }
     });
     return MapWidget;
