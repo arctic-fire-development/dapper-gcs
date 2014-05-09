@@ -5,6 +5,9 @@ define([
     "now",
     "underscore",
     "jquery",
+    "require",
+
+    "routines/sitl/RoutineSitl",
 
     // Models
     "Models/Mission",
@@ -15,7 +18,8 @@ define([
     "Views/Mission",
     "Views/Home",
     "Views/Plan"
-], function(app, now, _, $,
+], function(app, now, _, $, require,
+    RoutineSitl,
     Mission,
     Platform,
     Connection,
@@ -23,13 +27,15 @@ define([
     HomeView,
     PlanView) {
 
-    // Defining the application router, you can attach sub routers here.
     var Router = Backbone.Router.extend({
 
         routes: {
             "": "home",
             "plan" : "plan",
-            "mission" : "mission"
+            "mission" : "mission",
+            "mission/planning" : "planning",
+            "mission/preflight" : "preflight",
+            "mission/fly" : "fly"
         },
 
         initialize: function() {
@@ -39,7 +45,7 @@ define([
 
         // Pass the name of the div to show, others are hidden for "navigation" :)
         showOnly: function(name) {
-            var panes = ['home', 'plan', 'mission'];
+            var panes = ['home', 'plan', 'mission', 'preflight', 'planning', 'fly'];
             _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
             $('#'+name).show();
         },
@@ -54,40 +60,32 @@ define([
             this.planView.render();
         },
 
+        planning: function() {
+            this.showOnly('planning');
+            this.mission.planning().then(_.bind(function() {
+                this.navigate('mission/preflight', { trigger: true });
+            }, this));
+        },
+
+        preflight: function() {
+            this.showOnly('preflight');
+            this.mission.preflight().then(_.bind(function() {
+                this.navigate('mission/fly', { trigger: true });
+            }, this));
+        },
+
+        fly: function() {
+            this.showOnly('fly');
+            this.mission.fly();
+            /*.then(_.bind(function() {
+                this.navigate('mission/postflight', { trigger: true });
+            }, this));*/
+        },
+
         mission: function() {
-
             this.showOnly('mission');
-            var platform = this.platform = new Platform();
-            var connection = this.connection = new Connection();
-
-            this.mission = new Mission({
-                platform: this.platform,
-                connection: this.connection
-            });
-
-            this.missionView = new MissionView({
-                model: this.mission
-            });
-
-            // Assign locally for calling once the Now connection is ready
-            var missionView = this.missionView;
-
-            // Handle message events as they are provided from the server
-            // This won't scale =P
-            now.ready(function() {
-
-                missionView.render();
-
-                now.updatePlatform = function(platformJson) {
-                    platform.set(platformJson);
-                };
-
-                now.updateConnection = function(connectionJson) {
-                    connection.set(connectionJson);
-                };
-
-            });
-
+            this.mission = new RoutineSitl();
+            this.navigate('mission/planning', { trigger: true });
         }
 
     });
