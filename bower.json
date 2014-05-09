@@ -9,6 +9,8 @@
     "underscore": "",
     "jade": "",
     "leaflet-plugins": "~1.0.1",
-    "requirejs": "~2.1.10"
+    "requirejs": "~2.1.10",
+    "q": "~1.0",
+    "3l": "~1.4.4"
   }
 }

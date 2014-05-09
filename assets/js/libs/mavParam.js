@@ -12,64 +12,79 @@ TBD make #4 work
 
 **/
 var _ = require('underscore'),
+    Q = require('q'),
+    Qretry = require('qretry'),
     mavlink = require("mavlink_ardupilotmega_v1.0");
 
 // Logger, passed in object constructor for common logging
 var log;
 
-// Hash of pending-expected acks
-var pendingAcks = {};
+// Collection of promise objects.
+var promises = {};
 
-// Hash of handlers monitoring async send/receive pairs
-var senderHandler = {};
-
-// Hash of timers watching for timeouts on ongoing send/receive pairs
-var timeoutWatcher = {};
+// Deferred objects that can be resolved.
+var deferreds = {};
 
 // Reference to the active mavlink parser/link object in use
 var mavlinkParser;
 
-// Function that globallby binds to parameter-managing events and handles them as required
-function paramHandler(msg) {
-    // Unset any pending incoming parameter request for the specitifed param ID.
-    // There's some risk that this could get tangled if unrelated code
-    // is asking for + setting the same param around the same time, but it
-    // seems unlikely.
-    if (pendingAcks[msg.param_id]) {
-        delete pendingAcks[msg.param_id];
-    }
-}
+// True if the system is actively loading parameters.
+// This is just to prevent spurious triggers.
+var isLoadingParams;
 
 // Log object is assumed to be a winston object.
 function MavParam(mavlinkParserObject, logger) {
 
     log = logger;
     mavlinkParser = mavlinkParserObject;
-    mavlinkParser.on('PARAM_VALUE', paramHandler);
 
 }
 
 MavParam.prototype.set = function(name, value) {
-    return;
-    
-    // Build PARAM_SET message to send
-    var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
 
-    // Establish a handler to try and send the required packet every second until cancelled
-    senderHandler[name] = setInterval(function() {
-        log.info('Requesting parameter [' + name + '] be set to [' + value + ']...');
+    // Guard if active promise for the given key.
+    // Todo: enhance to also match key/value?
+    if( _.has(promises, name )) {
+        log.info('Duplicate parameter set request sent for [' + name + '], currently active and unresolved.');
+        return;
+    }
+
+    log.info('Requesting parameter [' + name + '] be set to [' + value + ']...');
+
+    // Build PARAM_SET message to send.
+    var paramSetter = function() {
+        var deferred = deferreds[name] = Q.defer();
+        var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
         mavlinkParser.send(param_set);
-    }, 1000);
+        return deferred.promise;
+    }
 
-    timeoutWatcher[name] = setTimeout(function() {
-        clearInterval(senderHandler[name]);
-        if (pendingAcks[name]) {
-            delete pendingAcks[msg.name];
-            throw 'No ack returned when requesting to set param [' + name + '] to [' + value + ']';
+    // Listen for verified parameters.
+    var paramVerifier = _.bind(function(message) {
+        if(name == message.param_id) {
+            deferreds[name].resolve();
+            delete deferreds[name];
+            delete promises[name];
+            log.info('Verified parameter [' + name + '] set to [' + value + ']');
         }
+    }, this);
 
-    }, 3000);
+    promises[name] = Qretry(paramSetter,
+    {
+        maxRetry: 5,
+        interval: 100,
+        intervalMultiplicator: 1.1
+    });
+
+    mavlinkParser.on('PARAM_VALUE', _.bind(paramVerifier, this));
+    return promises[name].promise;
+
 };
+
+// Set an array of params, returning a promise when they're all fulfilled.
+MavParam.prototype.setArray = function(params) {
+
+}
 
 MavParam.prototype.get = function(name) {
     var index = -1; // this will use the name as the lookup method

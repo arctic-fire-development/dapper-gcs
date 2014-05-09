@@ -38,17 +38,17 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
         getIcon: function() {
             if (!this.model.get('battery_remaining')) {
-                return "images/battery-empty.min.svg";
+                return "/images/battery-empty.min.svg";
             } else {
                 var battery_remaining = this.model.get('battery_remaining');
                 if (battery_remaining >= 90) {
-                    return "images/battery-green.min.svg";
+                    return "/images/battery-green.min.svg";
                 } else if (battery_remaining >= 60) {
-                    return "images/battery-yellow.min.svg";
+                    return "/images/battery-yellow.min.svg";
                 } else if (battery_remaining >= 30) {
-                    return "images/battery-red.min.svg";
+                    return "/images/battery-red.min.svg";
                 } else {
-                    return "images/battery-empty.min.svg";
+                    return "/images/battery-empty.min.svg";
                 }
             }
         }

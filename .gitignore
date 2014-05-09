@@ -12,9 +12,7 @@ config.json
 .monitor
 
 # These files and/or directory contents are always rebuilt during build processes.
-public/stylesheets/
-public/images/
-public/javascripts/
+public/
 app/Templates/templates.js
 build/
 
