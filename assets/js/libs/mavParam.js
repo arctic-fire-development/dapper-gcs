@@ -45,11 +45,11 @@ MavParam.prototype.set = function(name, value) {
     // Guard if active promise for the given key.
     // Todo: enhance to also match key/value?
     if( _.has(promises, name )) {
-        log.info('Duplicate parameter set request sent for [' + name + '], currently active and unresolved.');
+        log.warn('Duplicate parameter set request sent for [' + name + '], currently active and unresolved.');
         return;
     }
 
-    log.info('Requesting parameter [' + name + '] be set to [' + value + ']...');
+    log.debug('Requesting parameter [' + name + '] be set to [' + value + ']...');
 
     // Build PARAM_SET message to send.
     var paramSetter = function() {
@@ -65,7 +65,7 @@ MavParam.prototype.set = function(name, value) {
             deferreds[name].resolve();
             delete deferreds[name];
             delete promises[name];
-            log.info('Verified parameter [' + name + '] set to [' + value + ']');
+            log.debug('Verified parameter [' + name + '] set to [' + value + ']');
         }
     }, this);
 

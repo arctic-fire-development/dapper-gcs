@@ -19,14 +19,9 @@ var uavConnection;
 // Handler when the ArduPilot requests individual waypoints: upon receiving a request,
 // Send the next one.
 function missionRequestHandler(missionItemRequest) {
-    log.info('Sending mission sequence number ' + missionItemRequest.seq);
+    log.debug('Sending mission sequence number ' + missionItemRequest.seq);
     mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
 }
-
-function missionAckHandler(ack) {
-    log.info('Received mission ack, mission items loaded onto payload.');
-}
-
 
 // Mapping from numbers (as those stored in waypoint files) to MAVLink commands.
 var commandMap;
@@ -48,7 +43,7 @@ util.inherits(MavMission, events.EventEmitter);
 
 // http://qgroundcontrol.org/mavlink/waypoint_protocol
 MavMission.prototype.sendToPlatform = function() {
-    log.info('Sending mission to platform...');
+    log.silly('Sending mission to platform...');
     // send mission_count
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
     mavlinkParser.send(missionCount, uavConnection);

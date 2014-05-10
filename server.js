@@ -24,14 +24,16 @@ requirejs.config({
     baseUrl: './app'
 });
 
-// Logger
-var logger = new(winston.Logger)({
-    transports: [
-        new(winston.transports.File)({
-            filename: 'mavlink.dev.log'
-        })
-    ]
+// Configure Winston
+var logger = module.exports = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({
+      colorize: true,
+      level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
+    })
+  ]
 });
+logger.setLevels(winston.config.npm.levels);
 
 // Fetch configuration information.
 nconf.argv().env().file({
