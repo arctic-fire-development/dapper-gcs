@@ -63,7 +63,7 @@ util.inherits(UavConnection, events.EventEmitter);
 UavConnection.prototype.changeState = function(newState) {
     this.state = newState;
     this.emit(this.state);
-    log.info('[UavConnection] Changing state to [' + this.state + ']');
+    log.verbose('[UavConnection] Changing state to [' + this.state + ']');
     this.invokeState(this.state);
 };
 
@@ -77,7 +77,7 @@ UavConnection.prototype.heartbeat = function() {
     this.emit('heartbeat');
 
     this.invokeState(this.state);
-    log.info('time since last heartbeat: '+this.timeSinceLastHeartbeat);
+    log.silly('time since last heartbeat: '+this.timeSinceLastHeartbeat);
 };
 
 // Convenience function to make the meaning of the awkward syntax more clear.
@@ -88,7 +88,7 @@ UavConnection.prototype.invokeState = function(state) {
 UavConnection.prototype.start = function() {
     
     if(true === this.started) {
-        log.info('Asked to start connection manager, but connection already started, refused.');
+        log.warn('Asked to start connection manager, but connection already started, refused.');
         return;
     }
 
@@ -108,7 +108,7 @@ UavConnection.prototype.getState = function() {
 UavConnection.prototype.updateHeartbeat = function() {
     
     this.emit('heartbeat:packet');
-    log.info('Heartbeat updated: ' + Date.now());
+    log.silly('Heartbeat updated: ' + Date.now());
     this.lastHeartbeat = Date.now();
 
     // When we get a heartbeat, switch back to connected state.
@@ -162,22 +162,22 @@ UavConnection.prototype.disconnected = function() {
                     port: this.config.get('tcp:port')
                 }, _.bind(function() {
                     // 'connect' event listener
-                    log.info('[UavConnection] TCP connection established on port ' + this.config.get('tcp:port'));
+                    log.verbose('[UavConnection] TCP connection established on port ' + this.config.get('tcp:port'));
                     this.changeState('connecting');
                 }, this));
 
                 // We need to handle the 'error' event for TCP connections, otherwise its default behavior is to
                 // throw an exception, which may not be what is expected in the surrounding code.
                 this.connection.on('error', function(e) {
-                    log.info("[UavConnection] TCP connection error message: " + e);
+                    log.error("[UavConnection] TCP connection error message: " + e);
                 });
                 break;
 
             default:
-                log.info('Connection type not understood (' + this.config.get('connection') + ')');
+                log.error('Connection type not understood (%s)', this.config.get('connection'));
         }
     } catch (e) {
-        log.log('error', e);
+        log.error('error', e);
     }
 };
 
@@ -188,7 +188,7 @@ UavConnection.prototype.connecting = function() {
 
         this.isConnected = false;
 
-        log.info('establishing MAVLink connection...');
+        log.silly('establishing MAVLink connection...');
 
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
@@ -207,7 +207,7 @@ UavConnection.prototype.connecting = function() {
         this.attachDataEventListener = false;
 
     } catch (e) {
-        log.info('Error!');
+        log.error('Error!', e);
         throw (e);
     }
 };
