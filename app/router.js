@@ -7,7 +7,7 @@ define([
     "jquery",
     "require",
 
-    "routines/sitl/RoutineSitl",
+    "routines/freeFlight/Routine",
 
     // Models
     "Models/Mission",
@@ -15,15 +15,16 @@ define([
     "Models/Connection",
 
     // Dependent views
-    "Views/Mission",
     "Views/Home",
     "Views/Plan"
 ], function(app, now, _, $, require,
-    RoutineSitl,
+    
+    RoutineFreeFlight,
+
     Mission,
     Platform,
     Connection,
-    MissionView,
+    
     HomeView,
     PlanView) {
 
@@ -40,7 +41,11 @@ define([
 
         initialize: function() {
             this.homeView = new HomeView();
-            this.planView = new PlanView();
+            this.mission = new Mission();
+
+            this.planView = new PlanView({
+                model: this.mission
+            });
         },
 
         // Pass the name of the div to show, others are hidden for "navigation" :)
@@ -62,21 +67,21 @@ define([
 
         planning: function() {
             this.showOnly('planning');
-            this.mission.planning().then(_.bind(function() {
+            this.routine.planning().then(_.bind(function() {
                 this.navigate('mission/preflight', { trigger: true });
             }, this));
         },
 
         preflight: function() {
             this.showOnly('preflight');
-            this.mission.preflight().then(_.bind(function() {
+            this.routine.preflight().then(_.bind(function() {
                 this.navigate('mission/fly', { trigger: true });
             }, this));
         },
 
         fly: function() {
             this.showOnly('fly');
-            this.mission.fly();
+            this.routine.fly();
             /*.then(_.bind(function() {
                 this.navigate('mission/postflight', { trigger: true });
             }, this));*/
@@ -84,8 +89,19 @@ define([
 
         mission: function() {
             this.showOnly('mission');
-            this.mission = new RoutineSitl();
+            var routine = require(this.getRoutineName());
+            this.routine = new routine().set({
+                mission: this.mission
+            });
             this.navigate('mission/planning', { trigger: true });
+        },
+
+        // TODO GH#96
+        getRoutineName: function() {
+
+            // Pending real plugin architecture, hardcode to free flight mode.
+            return routineName = 'routines/freeFlight/Routine';
+            
         }
 
     });

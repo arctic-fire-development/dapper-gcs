@@ -4,6 +4,7 @@
 
 exports.index = function(req, res) {
     res.render('index', {
-        title: 'DapperGCS'
+        title: 'DapperGCS',
+        platforms: req.app.get('platforms')
     });
 };

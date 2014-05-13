@@ -43,6 +43,8 @@ After installing prerequisites, clone this project and install dependencies, the
 
 ```
 git clone git@github.com:arctic-fire-development/dapper-gcs.git
+git submodule init
+git submodule update
 npm install
 bower install
 grunt

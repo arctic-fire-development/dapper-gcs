@@ -1,0 +1,69 @@
+@import "../../../../assets/less/variables.less";
+@import "../../../assets/bower/3l/styles.less";
+@import "../../../assets/bower/3l/3L/assets/animations/animation1.less";
+
+.animation1() {
+	from {
+		background-color: @brand-primary;
+		.box-shadow(0 0 3px @brand-info); 
+	}
+	to {
+		background-color: @brand-info;
+		.box-shadow(0 0 10px white);
+	}
+}
+
+#fly {
+	.freeFlight {
+		#widgets {
+			width: 160px;
+			z-index: 500;
+			padding: 2ex;
+			margin: 0;
+			height: 100%;
+			background: rgba(0, 0, 0, .5);
+
+			.widget {
+				h3 {
+					display: none;
+				}
+				.value {
+				    font-size: 300%;
+				    font-weight: 600;
+				}
+			}
+
+			#altitudeWidget {
+				margin-top: 2em;
+			}
+		}
+		
+		#controls {
+			position: absolute;
+			bottom: 0;
+			margin: 1ex;
+			z-index: 5000;
+
+			button {
+				.animation(animation1 1s linear 0s infinite alternate);
+			}
+		}
+
+		#waitForGps {
+			margin: auto;
+			position: absolute;
+			height: 3.5em;
+			width: 50%;
+			top: 0; left: 0; bottom: 0; right: 0;
+			span {
+				display: inline-block;
+				padding-left: 1em;
+			}
+			img {
+				display: inline-block;
+				position: relative;
+				bottom: 1px;
+			}
+		}
+	}
+}
