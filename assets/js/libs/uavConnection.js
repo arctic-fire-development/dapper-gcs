@@ -127,7 +127,7 @@ UavConnection.prototype.disconnected = function() {
     // Request the protocol be reattached.
     this.attachDataEventListener = true;
 
-    log.info('[UavConnection] Trying to connect from disconnected state...');
+    log.silly('[UavConnection] Trying to connect from disconnected state...');
 
     try {
 

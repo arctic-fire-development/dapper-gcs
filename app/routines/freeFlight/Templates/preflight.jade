@@ -1,0 +1,20 @@
+.jumbotron
+  .row
+    .col-md-4.col-md-offset-4
+      h1 Free Flight<span>.</span>
+      #sitl-preflight.panel.panel-default
+        .panel-heading Free Flight mode: Preflight.
+        .panel-body
+
+          ul.list-group
+            li.list-group-item
+              #preflightSitlConnectionManager.statusWidget
+            li.list-group-item
+              #loadParameters.statusWidget
+                .disconnected <span class="glyphicon glyphicon-tasks"></span> Flight parameters not loaded.
+                .connecting(style="display:none") <span class="glyphicon glyphicon-tasks"></span> Loading flight parameters&hellip;
+                .connected(style="display:none") <span class="glyphicon glyphicon-ok"></span> Flight parameters loaded.
+ 
+          form(role="form")
+            div.form-group
+              button.continue.pull-right.btn.btn-primary.btn-lg Fly routine

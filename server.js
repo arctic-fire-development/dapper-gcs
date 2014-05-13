@@ -15,7 +15,8 @@ var mavlink = require("mavlink_ardupilotmega_v1.0"),
     MavFlightMode = require("./assets/js/libs/mavFlightMode.js"),
     MavMission = require('./assets/js/libs/mavMission.js'),
     quadUdl = require("./assets/js/libs/udlImplementations/quadcopter.js"),
-    planeUdl = require("./assets/js/libs/udlImplementations/plane.js");
+    planeUdl = require("./assets/js/libs/udlImplementations/plane.js"),
+    platforms = require("./assets/js/libs/platforms.js");
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -57,19 +58,21 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
+app.set('platforms', platforms);
+
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
 
 // Catchall/redirect for routes not otherwise handled, go home.
 app.use(function(req, res){
-    console.log(req);
+    logger.debug('unhandled request', req.path);
     res.redirect('/');
 });
 
 // We need to take care with syntax when using Express 3.x and Socket.io.
 // https://github.com/Flotype/now/issues/200
 var server = http.createServer(app).listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'));
+    logger.info('Express server listening on port ' + app.get('port'));
 });
 
 // Set up connections between clients/server
@@ -77,7 +80,6 @@ var everyone = nowjs.initialize(server);
 
 // Establish parser
 var mavlinkParser = new mavlink(logger);
-
 
 // Connection to UAV.  Started/stopped by client.
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
@@ -228,13 +230,13 @@ app.get('/connection/start', function(req, res) {
     res.send(204);
 });
 
-app.get('/plugins/sitl/params/load', function(req, res) {
 
-    console.log('loading parameters');
-
+function loadParameters(parameters) {
+  exit('23')
+    logger.silly('in loadParameters');
     var promises = [];
 
-    _.each(arduplaneParams, function(e) {
+    _.each(parameters, function(e) {
         promises.push(mavParams.set(e[0], e[1]));
     });
 
@@ -242,26 +244,40 @@ app.get('/plugins/sitl/params/load', function(req, res) {
         res.send(200);
     }); 
 
+}
+
+app.get('/plugins/sitl/params/load', function(req, res) {
+    logger.info('loading parameters');
+    loadParameters(arduplaneParams);
 });
+
+app.get('/plugins/freeFlight/params/load', function(req, res) {
+    logger.info('loading parameters');
+    loadParameters(platforms[2].parameters);
+});
+
 
 app.get('/plugins/sitl/mission/load', function(req, res) {
 
     var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
     var promise = mm.loadMission();
-    console.log(promise);
+    
     Q.when(promise, function() {
         res.send(200);
     });
 });
 
 app.get('/plugins/sitl/mission/launch', function(req, res) {
-  console.log('launching plane...');
+  logger.debug('launching plane...');
 
   var plane = new planeUdl(logger, nconf);
   plane.setProtocol(mavlinkParser);
   plane.takeoff();
 });
 
+app.get('/platforms', function(req, res) {
+  res.json(platforms);
+});
 
 // Refactoring swamp
 

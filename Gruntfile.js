@@ -87,6 +87,11 @@ module.exports = function(grunt) {
                     interrupt: true,
                     nospawn: true
                 }
+            },
+
+            server: {
+                files: ['server.js'],
+                tasks: ['develop']
             }
 
         },
