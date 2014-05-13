@@ -14,8 +14,8 @@ var mavlink = require("mavlink_ardupilotmega_v1.0"),
     Q = require('q'),
     MavFlightMode = require("./assets/js/libs/mavFlightMode.js"),
     MavMission = require('./assets/js/libs/mavMission.js'),
-    quadUdl = require("./assets/js/libs/udlImplementations/quadcopter.js"),
-    planeUdl = require("./assets/js/libs/udlImplementations/plane.js");
+    quadUdl = require("./assets/js/libs/udlImplementations/ArduCopter.js"),
+    platforms = require("./assets/js/libs/platforms.js");
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -57,19 +57,21 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
+app.set('platforms', platforms);
+
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
 
 // Catchall/redirect for routes not otherwise handled, go home.
 app.use(function(req, res){
-    console.log(req);
+    logger.debug('unhandled request', req.path);
     res.redirect('/');
 });
 
 // We need to take care with syntax when using Express 3.x and Socket.io.
 // https://github.com/Flotype/now/issues/200
 var server = http.createServer(app).listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'));
+    logger.info('Express server listening on port ' + app.get('port'));
 });
 
 // Set up connections between clients/server
@@ -77,7 +79,6 @@ var everyone = nowjs.initialize(server);
 
 // Establish parser
 var mavlinkParser = new mavlink(logger);
-
 
 // Connection to UAV.  Started/stopped by client.
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
@@ -89,11 +90,10 @@ var mavFlightMode = new MavFlightMode(mavlink, mavlinkParser, uavConnectionManag
 var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
 
+var platform = {};
+
 // Client integration code, TODO refactor away to elsewhere
 requirejs(["Models/Platform", "now"], function(Platform, now) {
-
-
-    var platform = {};
 
     mavFlightMode.on('change', function() {
         platform = _.extend(platform, mavFlightMode.getState());
@@ -102,24 +102,22 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
 
     // This won't scale =P still
     // But it's closer to what we want to do.
-    // mavlinkParser.on('HEARTBEAT', function(message) {
-    //     platform = _.extend(platform, {
-    //         type: message.type,
-    //         autopilot: message.autopilot,
-    //         base_mode: message.base_mode,
-    //         custom_mode: message.custom_mode,
-    //         system_status: message.system_status,
-    //         mavlink_version: message.mavlink_version
-    //     });
-    //     log.info(message);
-    //     console.log('got heartbeat');
-
+    mavlinkParser.on('HEARTBEAT', function(message) {
+        platform = _.extend(platform, {
+            type: message.type,
+            autopilot: message.autopilot,
+            base_mode: message.base_mode,
+            custom_mode: message.custom_mode,
+            system_status: message.system_status,
+            mavlink_version: message.mavlink_version
+        });
+   
         //everyone.now.updatePlatform(platform);
 
         // Also update the connection status, just so it stays current on page navigations.
         //everyone.now.updateConnection(connection);
 
-  //  });
+   });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
@@ -188,39 +186,37 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
 }); // end scope of requirejs
 
 // Start connection management.
-everyone.now.startConnection = function(ifReal) {
+everyone.now.startConnection = function() {
 
-    if(true === ifReal) {
+      uavConnectionManager.start();
 
-        uavConnectionManager.start();
+      // eat error for the moment, remove this soon!
+      var connection = {};
 
-        // eat error for the moment, remove this soon!
-        var connection = {};
+      uavConnectionManager.on('disconnected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
 
-        uavConnectionManager.on('disconnected', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
+      uavConnectionManager.on('connecting', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
 
-        uavConnectionManager.on('connecting', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
-
-        uavConnectionManager.on('connected', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
-    }
+      uavConnectionManager.on('connected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
+  
 }
 
 app.get('/connection/start', function(req, res) {
@@ -228,123 +224,103 @@ app.get('/connection/start', function(req, res) {
     res.send(204);
 });
 
-app.get('/plugins/sitl/params/load', function(req, res) {
-
-    console.log('loading parameters');
+// TODO move this to MavParams module.
+function loadParameters(parameters) {
+    
+    if(_.isEmpty(parameters)) {
+      logger.error('Empty param list provided to loadParameters()');
+      throw new Error('Empty param list provided to loadParameters()');
+    }
 
     var promises = [];
 
-    _.each(arduplaneParams, function(e) {
+    _.each(parameters, function(e) {
         promises.push(mavParams.set(e[0], e[1]));
     });
 
-    Q.allSettled(promises).then(function(results) {
+    return promises;
+
+}
+
+app.get('/drone/params/load', function(req, res) {
+    logger.info('loading parameters for SITL Copter...');
+    // TODO hardcoded platform D:
+    logger.debug(platforms[0].parameters);
+    promises = loadParameters(platforms[0].parameters);
+
+    Q.allSettled(promises).then(
+      function(results) {
         res.send(200);
-    }); 
+      },
+      function(failed) {
+        logger.error(failed);
+        res.sent(500);
+      }
+    ); 
 
 });
 
-app.get('/plugins/sitl/mission/load', function(req, res) {
+app.get('/drone/mission/load', function(req, res) {
 
     var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
     var promise = mm.loadMission();
-    console.log(promise);
+    
     Q.when(promise, function() {
         res.send(200);
     });
 });
 
-app.get('/plugins/sitl/mission/launch', function(req, res) {
-  console.log('launching plane...');
+var quad = new quadUdl(logger, nconf);
+quad.setProtocol(mavlinkParser);
 
-  var plane = new planeUdl(logger, nconf);
-  plane.setProtocol(mavlinkParser);
-  plane.takeoff();
+app.get('/drone/launch', function(req, res) {
+
+  logger.debug('launching freeflight mission');
+
+  try {
+
+  Q.fcall(quad.arm)
+    .then(quad.setAutoMode)
+    .then(quad.takeoff)
+    .then(function() {
+      res.send(200);
+    })
+    .done();
+
+  } catch(e) {
+    logger.error('error caught in server:freeglight:launch:trycatch', e)
+  }
 });
 
+app.get('/drone/flyToPoint', function(req, res) {
 
-// Refactoring swamp
+  var lat = parseFloat(req.query.lat);
+  var lng = parseFloat(req.query.lng);
+  logger.info('Flying to %d %d', lat, lng);
+  Q.fcall(quad.flyToPoint, lat, lng, platform).then(function(){
+    res.send(200);
+    }
+  );
 
-/*
+});
 
+app.get('/drone/loiter', function(req, res) {
+  logger.verbose('Setting LOITER mode...');
+  Q.fcall(quad.setLoiterMode).then(function() {
+      res.send(200)
+    }
+  );
+});
 
-everyone.now.loadMission = function(msg) {
-    
-};
+app.get('/drone/changeAltitude', function(req, res) {
 
-everyone.now.startMission = function(msg) {
-    console.log('taking off');
-    quad.takeoff();
-};
-*/
+  var alt = parseInt(req.query.alt);
+  logger.info('Changing altitude to %d', alt);
+  quad.changeAltitude(alt, platform);
+  res.send(200);
 
-// Static/hardcoded data
-var arduplaneParams = [
-  ["AHRS_EKF_USE",1  ],
-  ["ALT_CTRL_ALG",2  ],
-  ["LOG_BITMASK",4095  ],
-  ["MAG_ENABLE",1  ],
-  ["TRIM_ARSPD_CM",2200  ],
-  ["TRIM_PITCH_CD",0  ],
-  ["TRIM_THROTTLE",50  ],
-  ["LIM_PITCH_MIN",-2000  ],
-  ["LIM_PITCH_MAX",2500  ],
-  ["LIM_ROLL_CD",6500  ],
-  ["LAND_PITCH_CD",100  ],
-  ["LAND_FLARE_SEC",5  ],
-  ["ARSPD_ENABLE",1  ],
-  ["ARSPD_USE",1  ],
-  ["ARSPD_FBW_MAX",30  ],
-  ["ARSPD_FBW_MIN",10  ],
-  ["KFF_RDDRMIX",0.5  ],
-  ["THR_MAX",100  ],
-  ["RC2_REV",-1  ],
-  ["RC4_REV",-1  ],
-  ["RC1_MAX",2000  ],
-  ["RC1_MIN",1000  ],
-  ["RC1_TRIM",1500  ],
-  ["RC2_MAX",2000  ],
-  ["RC2_MIN",1000  ],
-  ["RC2_TRIM",1500  ],
-  ["RC3_MAX",2000  ],
-  ["RC3_MIN",1000  ],
-  ["RC3_TRIM",1000  ],
-  ["RC4_MAX",2000  ],
-  ["RC4_MIN",1000  ],
-  ["RC4_TRIM",1500  ],
-  ["RC5_MAX",2000  ],
-  ["RC5_MIN",1000  ],
-  ["RC5_TRIM",1500  ],
-  ["RC6_MAX",2000  ],
-  ["RC6_MIN",1000  ],
-  ["RC6_TRIM",1500  ],
-  ["RC7_MAX",2000  ],
-  ["RC7_MIN",1000  ],
-  ["RC7_TRIM",1500  ],
-  ["RC8_MAX",2000  ],
-  ["RC8_MIN",1000  ],
-  ["RC8_TRIM",1500  ],
-  ["FLTMODE1",10  ],
-  ["FLTMODE2",11  ],
-  ["FLTMODE3",12  ],
-  ["FLTMODE4",5  ],
-  ["FLTMODE5",2  ],
-  ["FLTMODE6",0  ],
-  ["FLTMODE_CH",8  ],
-  ["WP_LOITER_RAD",80  ],
-  ["WP_RADIUS",50  ],
-  ["RLL2SRV_D",0.2  ],
-  ["RLL2SRV_I",0.3  ],
-  ["RLL2SRV_P",2.5  ],
-  ["RLL2SRV_RMAX",0  ],
-  ["RLL2SRV_TCONST",0.5  ],
-  ["PTCH2SRV_D",0.2  ],
-  ["PTCH2SRV_I",0.3  ],
-  ["PTCH2SRV_P",2.5  ],
-  ["PTCH2SRV_RLL",1  ],
-  ["NAVL1_PERIOD",15  ],
-  ["ACRO_LOCKING",1  ],
-  ["ELEVON_OUTPUT",0  ],
-  ["VTAIL_OUTPUT",0  ],
-  ["SKIP_GYRO_CAL",1  ]
-]
+});
+
+app.get('/platforms', function(req, res) {
+  res.json(platforms);
+});

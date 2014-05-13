@@ -1,0 +1,36 @@
+.row
+  .col-md-4.col-md-offset-4.region
+    h1 Free flight<span>.</span>
+    .panel.planning.panel-default
+      .panel-heading Free flight: Planning.
+      .panel-body
+        p Set these required flight options.
+        form(role="form")
+          div.form-group
+            label(for="maxSpeed") Maximum speed (mph)
+              span.fake not implemented
+            input(type="text", class="form-control", id="maxSpeed", value="10")
+          div.form-group
+            label(for="maxAltitude") Maximum altitude (feet)
+              span.fake not implemented
+            input(type="text", class="form-control", id="maxAltitude", value="400")
+          div.form-group
+            label(for="rtlBehavior") Loss of link behavior
+              span.fake not implemented
+            select(id="rtlBehavior").form-control
+              option(selected) Return to home and <strong>hover</strong>
+              option Return to home and <strong>land</strong>
+
+        p (Optional) Create fences around no-fly areas near your planned flight.
+          span.fake not implemented
+
+        p (Optional) Download maps so you don't need an internet connection on-site.
+          span.fake not implemented
+
+        p Want a recommended equipment list for this flight?
+          span.fake not implemented
+          button.btn.btn-info Show equipment checklist
+      .panel-footer
+        form(role="form")
+          div.form-group
+            a.btn.btn-primary.btn-lg(href="/mission/preflight") Continue to preflight

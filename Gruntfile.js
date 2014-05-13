@@ -42,7 +42,7 @@ module.exports = function(grunt) {
             }
         },
 
-        // Used to copy some specific assets from Bower packages to public directories.
+        // Used to copy some specific assets from various packages to public directories.
         //
         // Most Bower-managed javascript gets vacuumed in through the RequireJS process, look in app/config.js 
         // for those inclusions.
@@ -54,8 +54,9 @@ module.exports = function(grunt) {
             main: {
                 files: [
                     {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
-                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg'], dest: 'public/images/'},
-                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'}
+                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg', '**/*.gif'], dest: 'public/images/'},
+                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
+                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'}
                 ]
             }
         },
@@ -72,12 +73,21 @@ module.exports = function(grunt) {
             },
 
             all: {
-                files: ['./app/**/*.js', './spec/**/*.js', 'assets/js/libs/**/*.js'],
+                files: ['./app/**/*.js', './spec/**/*.js'],
                 tasks: ['requirejs', 'develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
                 }
+            },
+
+            server_js: {
+              files: ['assets/js/libs/**/*.js'],
+                tasks: [ 'develop'],
+                options: {
+                    interrupt: false,
+                    nospawn: true
+                }  
             },
 
             styles: {
@@ -87,6 +97,11 @@ module.exports = function(grunt) {
                     interrupt: true,
                     nospawn: true
                 }
+            },
+
+            server: {
+                files: ['server.js'],
+                tasks: ['develop']
             }
 
         },
@@ -122,6 +137,7 @@ module.exports = function(grunt) {
         },
 
         // Note that we're including Bootstrap's LESS via an @import to the Bootstrap Bower directory.
+        // The order in the array matters, keep the app/routines/**/*.less last so styles there can overwrite others.
         less: {
             all: {
                 files: {
@@ -132,6 +148,8 @@ module.exports = function(grunt) {
 
         // Must be after the less task, or that won't get minified
         // into the final client file.
+        //
+        // Also pulls in files from Bower-installed components as required.
         cssmin: {
             compress: {
                 files: {
@@ -139,7 +157,8 @@ module.exports = function(grunt) {
                     "public/stylesheets/min.css": [
                         "build/less.css",
                         "assets/css/**/*.css",
-                        "app/assets/bower/leaflet-dist/leaflet.css"
+                        "app/assets/bower/leaflet-dist/leaflet.css",
+                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css"
                     ]
                 }
             }
@@ -187,6 +206,6 @@ module.exports = function(grunt) {
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'cssmin', 'svgmin', 'develop', 'watch']);
+    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'svgmin', 'cssmin', 'develop', 'watch']);
 
 };

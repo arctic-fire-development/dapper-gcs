@@ -14,12 +14,21 @@ var mavlink;
 var mavlinkParser;
 
 // This really needs to not be here.
+// TODO really?
 var uavConnection;
 
 // Handler when the ArduPilot requests individual waypoints: upon receiving a request,
 // Send the next one.
 function missionRequestHandler(missionItemRequest) {
-    log.debug('Sending mission sequence number ' + missionItemRequest.seq);
+    log.verbose('Sending mission sequence number ' + missionItemRequest.seq);
+    log.debug('Sending mission item packet', missionItems[missionItemRequest.seq]);
+
+    // If the requested mission item isn't present, bail
+    if( _.isUndefined(missionItems[missionItemRequest.seq])) {
+        log.error('APM asked to send undefined mission packet [#%d]', missionItemRequest.seq, missionItems);
+        throw new Error("APM asked to send undefined mission packet");
+    }
+
     mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
 }
 
@@ -44,6 +53,7 @@ util.inherits(MavMission, events.EventEmitter);
 // http://qgroundcontrol.org/mavlink/waypoint_protocol
 MavMission.prototype.sendToPlatform = function() {
     log.silly('Sending mission to platform...');
+
     // send mission_count
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
     mavlinkParser.send(missionCount, uavConnection);
@@ -52,12 +62,15 @@ MavMission.prototype.sendToPlatform = function() {
     mavlinkParser.on('MISSION_REQUEST', missionRequestHandler);
 
     var self = this;
+
     // If the ack is OK, signal OK; if not, signal an error event
-    mavlinkParser.on('MISSION_ACK', function(ack) {
+    // http://qgroundcontrol.org/mavlink/waypoint_protocol
+    mavlinkParser.on('MISSION_ACK', function ackMission(ack) {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
-            log.info('Mission loaded successfully!');
+            mavlinkParser.removeListener('MISSION_ACK', ackMission);
             self.emit('mission:loaded');
         } else {
+            log.error('Unexpected MISSION_ACK type received: %d', ack.type);
             throw new Error('Unexpected mission acknowledgement received in mavMission.js');
         }
     });
@@ -82,6 +95,7 @@ MavMission.prototype.loadMission = function() {
     var deferred = Q.defer();
 
     this.on('mission:loaded', function() {
+        log.info('Mission loaded successfully!');
         deferred.resolve();
     });
 
@@ -99,7 +113,7 @@ loadMission = function(mission) {
 
     mission.clearMission();
 
-    _.each(cmacToffLoop, function(e, i, l) {
+    _.each(takeoffAndThenLand, function(e, i, l) {
         // target_system, target_component, seq, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z
         mi = new mavlink.messages.mission_item(
             mavlinkParser.srcSystem,
@@ -124,146 +138,19 @@ loadMission = function(mission) {
 
 };
 
-// Arduplane CMAC-toff-loop mission.
-var cmacToffLoop = [
-[0,1,0,16,0,0,0,0,-35.362938,149.165085,584.409973,1],
-[1,0,3,22,15,0,0,0,-35.361164,149.163986,28.110001,1],
-[2,0,3,16,0,0,0,0,-35.359467,149.161697,99.800003,1],
-[3,0,3,16,0,0,0,0,-35.366333,149.162659,100.730003,1],
-[4,0,3,16,0,0,0,0,-35.366131,149.164581,100,1],
-[5,0,3,16,0,0,0,0,-35.359272,149.163757,100,1],
-[6,0,3,177,2,-1,0,0,0,0,0,1],
-[7,0,3,16,0,0,0,0,-35.359272,149.163757,100,1]
-];
-
-// Flight plan for the UAF soccer field
-var soccerFieldFlight = [
-    [0, 1, 0, 16, 0, 0, 0, 0, 64.854843, -147.835846, 0.000000, 1],
-    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 30.000000, 1],
-    [2, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.854864, -147.838436, 30.000000, 1],
-    [3, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.854860, -147.837739, 30.000000, 1],
-    [4, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.854851, -147.837170, 30.000000, 1],
-    [5, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.854842, -147.836484, 30.000000, 1],
-    [6, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.855129, -147.836452, 30.000000, 1],
-    [7, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.855129, -147.837203, 30.000000, 1],
-    [8, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.855138, -147.837771, 30.000000, 1],
-    [9, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, 64.855152, -147.838404, 30.000000, 1],
-    [10, 0, 3, 20, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1],
-
-];
-
-// Shim for testing mission
-var missionItemsTesting = [
-    [0, 1, 3, 0, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 582.000000, 1],
-    [1, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362324, 149.164291, 120.000000, 1],
-    [2, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.363670, 149.164505, 120.000000, 1],
-    [3, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362358, 149.163651, 120.000000, 1],
-    [4, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.363777, 149.163895, 120.000000, 1],
-    [5, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362411, 149.163071, 120.000000, 1],
-    [6, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.363865, 149.163223, 120.000000, 1],
-    [7, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362431, 149.162384, 120.000000, 1],
-    [8, 0, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.363968, 149.162567, 120.000000, 1],
-    [9, 0, 3, 20, 0.000000, 0.000000, 0.000000, 0.000000, -35.363228, 149.161896, 30.000000, 1]
-];
-
-// Another shim for testing quadcopter
-var missionItemsQuadTesting = [
+// This mission simply takes off and hovers at 20 meters.
+var takeoffAndThenLand = [
     //QGC,WPL,110
+    // ref frame 3 = Global coordinate frame, WGS84 coordinate system, relative altitude
+
     //s,fr,ac,cmd,p1,p2,p3,p4,lat,lon,alt,continue
-    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 582, 1],
+    // the 0th waypoint.  what's this good for?
+    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 0, 1],
 
-    //,takeoff
-    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 20, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,A
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [2, 0, 3, 16, 0, 3, 0, 0, -35.363949, 149.164151, 20, 1],
-
-    //,MAV_CMD_CONDITION_YAW
-    //,delta,deg,sec,Dir,1=CW,Rel/Abs,Lat,lon,Alt,continue
-    [3, 0, 3, 115, 640, 20, 1, 1, 0, 0, 0, 1],
-
-    //,MAV_CMD_NAV_LOITER_TIME
-    //,seconds,empty,rad,Yaw,per,Lat,lon,Alt,continue
-    [4, 0, 3, 19, 35, 0, 0, 1, 0, 0, 20, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,B
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [5, 0, 3, 16, 0, 3, 0, 0, -35.363287, 149.164958, 20, 1],
-
-    //,MAV_CMD_NAV_LOITER_TURNS
-    //,Turns,lat,lon,alt,continue
-    //6,0,3,18,2,0,0,0,0,0,20,1
-
-    //,MAV_CMD_DO_SET_ROI,,MAV_ROI_WPNEXT,=,1
-    //,MAV_ROI,WP,index,ROI,index,lat,lon,alt,continue
-    [7, 0, 3, 201, 1, 0, 0, 0, 0, 0, 0, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,C
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [8, 0, 3, 16, 0, 3, 0, 0, -35.364865, 149.164952, 20, 1],
-
-    //,MAV_CMD_CONDITION_DISTANCE
-    //,meters,continue
-    [9, 0, 3, 114, 100, 0, 0, 0, 0, 0, 0, 1],
-
-    //,MAV_CMD_CONDITION_CHANGE_ALT
-    //,climb_rate,alt,continue
-    [10, 0, 3, 113, 0, 0, 0, 0, 0, 0, 40, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,D
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [11, 0, 3, 16, 0, 3, 0, 0, -35.363165, 149.163905, 20, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,E
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [12, 0, 3, 16, 0, 3, 0, 0, -35.363611, 149.163583, 20, 1],
-
-    //,MAV_CMD_DO_JUMP
-    //,seq//,repeat,.,.,.,.,.,continue
-    [13, 0, 3, 177, 11, 3, 0, 0, 0, 0, 0, 1],
-
-    //,MAV_CMD_NAV_RETURN_TO_LAUNCH
-    //,.,.,.,.,alt,continue
-    [14, 0, 3, 20, 0, 0, 0, 0, 0, 0, 20, 1],
-
-    //,MAV_CMD_NAV_LAND
-    //
-    [15, 0, 3, 21, 0, 0, 0, 0, 0, 0, 0, 1],
-
-    //,WP_total,=,10
-    //,0,=,home
-
-    //,seq
-    //,current
-    //,frame
-    //,command
-    //,param1,
-    //,param2,
-    //,param3
-    //,param4
-    //,x,(latitude)
-    //,y,(longitude)
-    //,z,(altitude)
-    //,autocontinue
+    //,takeoff, do not continue to next waypoint
+    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 20, 0]
 
 ];
 
-// Static placeholder for a mission to test
-
-/*
-# seq
-# frame
-# action
-# current
-# autocontinue
- # param1,
- # param2,
- # param3
- # param4
- # x, latitude
- # y, longitude
-  # z
-  */
 
 module.exports = MavMission;
