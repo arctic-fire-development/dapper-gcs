@@ -35,7 +35,6 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 mission: this.$el.find('#routineSelection')[0].value,
                 payload: payload
             });
-            console.log(this.model.toJSON());
         }
     });
 

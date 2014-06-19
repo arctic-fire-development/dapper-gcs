@@ -36,7 +36,9 @@ define([
         preflight: function() {
             var preflightCompletedDeferred = Q.defer(); // will be resolved when all others are done + user confirms OK
             var parametersUploadedDeferred = Q.defer(); // After custom params loaded onto APM
-            BaseRoutine.prototype.preflight.apply(this); // call parent code
+            var missionUploadedDeferred = Q.defer(); // After waypoints are done loading!
+
+            BaseRoutine.prototype.preflight.apply(this, [preflightCompletedDeferred]); // call parent code
 
             // Upload specific parameters
             this.on('change:connected', _.bind(function(model) {
@@ -59,6 +61,29 @@ define([
                     $('#loadParameters .connecting').show();
                 
             }, this));
+
+
+        // Upload mission plan
+        this.on('change:paramsLoaded', _.bind(function() {
+
+            var missionLoaded = _.bind(function() {
+                    $('#loadMission .connecting').hide();
+                    $('#loadMission .connected').show();
+                    this.set( { 'missionLoaded':true });
+                    missionUploadedDeferred.resolve();
+            }, this);
+
+                Q($.get('/plugins/freeFlight/mission/load')).then(_.bind(function(data) {
+                    missionLoaded();
+                }, function(xhr) {
+                    // on failure
+                    console.log(xhr);
+                }, this));
+                
+                $('#loadMission .disconnected').hide();
+                $('#loadMission .connecting').show();
+            
+        }, this));
 
             return preflightCompletedDeferred.promise;
 

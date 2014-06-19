@@ -82,9 +82,6 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
                 zIndex: 0
             });
             this.map.addLayer(bing);
-            this.map.on('click', function(e) {
-                alert(e.latlng);
-            });
 
             // Resize to fill the screen; respond to screen size change events.
             $('#mapWidget').height($(window).height());

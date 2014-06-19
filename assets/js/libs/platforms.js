@@ -45,24 +45,7 @@ var sitlCopterParams = [
   ["SIM_WIND_SPD","0"  ],
   ["SIM_WIND_TURB","0"  ],
   ["SIM_BARO_RND","0"  ],
-  ["SIM_MAG_RND","0"  ],
-  ["#","flightmodes"  ],
-  ["#","switch"  ],
-  ["#","switch"  ],
-  ["#","switch"  ],
-  ["#","switch"  ],
-  ["#","switch"  ],
-  ["#","switch"  ],
-  ["#","STABILIZE"  ],
-  ["#","ACRO"  ],
-  ["#","ALT_HOLD"  ],
-  ["#","AUTO"  ],
-  ["#","GUIDED"  ],
-  ["#","LOITER"  ],
-  ["#","RTL"  ],
-  ["#","CIRCLE"  ],
-  ["#","POSITION"  ],
-  ["#","LAND"  ]
+  ["SIM_MAG_RND","0"  ]
 ];
 
 var platforms = [

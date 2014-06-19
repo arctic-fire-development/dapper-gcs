@@ -186,7 +186,11 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
         });
         everyone.now.updatePlatform(platform);
     });
-
+/*
+    mavlinkParser.on('message', function(m) {
+//      console.log(m);
+    });
+*/
 }); // end scope of requirejs
 
 // Start connection management.
@@ -232,28 +236,35 @@ app.get('/connection/start', function(req, res) {
 
 
 function loadParameters(parameters) {
-  exit('23')
-    logger.silly('in loadParameters');
+    
     var promises = [];
 
     _.each(parameters, function(e) {
         promises.push(mavParams.set(e[0], e[1]));
     });
 
-    Q.allSettled(promises).then(function(results) {
-        res.send(200);
-    }); 
+    return promises;
 
 }
 
 app.get('/plugins/sitl/params/load', function(req, res) {
-    logger.info('loading parameters');
-    loadParameters(arduplaneParams);
+    logger.info('loading parameters for Plane...');
+    promises = loadParameters(arduplaneParams);
+
+    Q.allSettled(promises).then(function(results) {
+        res.send(200);
+    }); 
+
 });
 
 app.get('/plugins/freeFlight/params/load', function(req, res) {
-    logger.info('loading parameters');
-    loadParameters(platforms[2].parameters);
+    logger.info('loading parameters for SITL Copter...');
+    promises = loadParameters(platforms[1].parameters);
+
+    Q.allSettled(promises).then(function(results) {
+        res.send(200);
+    }); 
+
 });
 
 
@@ -279,20 +290,50 @@ app.get('/platforms', function(req, res) {
   res.json(platforms);
 });
 
-// Refactoring swamp
 
-/*
+app.get('/plugins/freeFlight/mission/load', function(req, res) {
 
-
-everyone.now.loadMission = function(msg) {
+    var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+    var promise = mm.loadMission();
     
-};
+    Q.when(promise, function() {
+        res.send(200);
+    });
+});
 
-everyone.now.startMission = function(msg) {
-    console.log('taking off');
-    quad.takeoff();
-};
-*/
+app.get('/plugins/freeFlight/mission/launch', function(req, res) {
+  var quad = new quadUdl(logger, nconf);
+  quad.setProtocol(mavlinkParser);
+
+  logger.debug('launching freeflight mission');
+
+  try {
+
+  quad.takeoff().then(quad.setGuidedMode);
+
+} catch(e) {
+  logger.error('error caught in server:freeglight:launch:trycatch')
+  console.log(e);
+  logger.error(e);
+}
+});
+
+app.get('/plugins/freeFlight/mission/flyToPoint', function(req, res) {
+  var quad = new quadUdl(logger, nconf);
+  quad.setProtocol(mavlinkParser);
+
+  var lat = parseFloat(req.query.lat);
+  var lng = parseFloat(req.query.lng);
+  logger.info('Flying to %d %d', lat, lng);
+  quad.flyToPoint(parseFloat(req.query.lat), parseFloat(req.query.lng), 50);
+
+});
+
+app.get('/platforms', function(req, res) {
+  res.json(platforms);
+});
+
+var arducopterParams = [];
 
 // Static/hardcoded data
 var arduplaneParams = [

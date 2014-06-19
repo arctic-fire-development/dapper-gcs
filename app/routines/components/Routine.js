@@ -55,7 +55,7 @@ define([
             return deferred.promise;
         },
 
-    preflight: function() {
+    preflight: function(preflightCompletedDeferred) {
 
         // A few promises for keeping track of various async processes.
         var connectionEstablishedDeferred = Q.defer(); // After connection is confirmed with UAV
@@ -71,7 +71,7 @@ define([
 */
 
         var preflightView = new PreflightView( {
-  //          deferred: preflightCompletedDeferred,
+           deferred: preflightCompletedDeferred,
             model: this.connection
         }).render();
         

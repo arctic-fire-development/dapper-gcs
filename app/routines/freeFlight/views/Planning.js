@@ -19,7 +19,6 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         },
 
         render: function() {
-            console.log(this);
             this.$el.html(this.template, {
                 mission: this.options.mission.toJSON()
             });

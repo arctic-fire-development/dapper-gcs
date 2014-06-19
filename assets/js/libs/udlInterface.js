@@ -14,5 +14,8 @@ udlInterface.prototype.land = function() {};
 udlInterface.prototype.arm = function() {};
 udlInterface.prototype.disarm = function() {};
 udlInterface.prototype.setAutoMode = function() {};
+udlInterface.prototype.setLoiterMode = function() {};
+udlInterface.prototype.setGuidedMode = function() {};
+udlInterface.prototype.flyToPoint = function() {};
 
 module.exports = udlInterface;

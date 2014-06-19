@@ -35,22 +35,22 @@ define(['backbone', 'JST', 'q',
 
         launch: function() {
             console.log('launching!');
-            Q($.get('/plugins/sitl/mission/launch')).then(_.bind(function(data) {
+            Q($.get('/plugins/freeFlight/mission/launch')).then(_.bind(function(data) {
                 console.log('launched');
             }, function(xhr) {
-                // on failure
+                // on failure?
                 console.log(xhr);
             }, this));
         },
 
         render: function() {
             try {
-            if (false === this.hasRendered) {
-                this.renderLayout();
+                if (false === this.hasRendered) {
+                    this.renderLayout();
+                }
+            } catch(e) {
+                console.log(e);
             }
-        } catch(e) {
-            console.log(e);
-        }
         },
 
         // Meant to be run only once; renders scaffolding and subviews.
@@ -75,6 +75,12 @@ define(['backbone', 'JST', 'q',
             this.mapWidget.render();
             this.altitudeWidget.render();
             
+             this.mapWidget.map.on('click', function(e) {
+                
+                $.get('/plugins/freeFlight/mission/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+                
+            });
+
         }
 
     });

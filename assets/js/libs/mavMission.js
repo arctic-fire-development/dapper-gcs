@@ -53,10 +53,11 @@ MavMission.prototype.sendToPlatform = function() {
 
     var self = this;
     // If the ack is OK, signal OK; if not, signal an error event
-    mavlinkParser.on('MISSION_ACK', function(ack) {
+    mavlinkParser.on('MISSION_ACK', function ackMission(ack) {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
             log.info('Mission loaded successfully!');
             self.emit('mission:loaded');
+            mavlinkParser.removeListener('MISSION_ACK', ackMission);
         } else {
             throw new Error('Unexpected mission acknowledgement received in mavMission.js');
         }
@@ -99,7 +100,7 @@ loadMission = function(mission) {
 
     mission.clearMission();
 
-    _.each(cmacToffLoop, function(e, i, l) {
+    _.each(takeoffAndThenLand, function(e, i, l) {
         // target_system, target_component, seq, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z
         mi = new mavlink.messages.mission_item(
             mavlinkParser.srcSystem,
@@ -123,6 +124,30 @@ loadMission = function(mission) {
     mission.sendToPlatform();
 
 };
+
+var takeoffAndThenLand = [
+    //QGC,WPL,110
+    // ref frame 3 = Global coordinate frame, WGS84 coordinate system, relative altitude
+
+    //s,fr,ac,cmd,p1,p2,p3,p4,lat,lon,alt,continue
+    // the 0th waypoint.  what's this good for?
+    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 582, 1],
+
+    //,takeoff
+    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 700, 1],
+
+    //,MAV_CMD_NAV_WAYPOINT,A
+    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
+    [2, 0, 3, 16, 0, 3, 0, 0, -35.363949, 149.164151, 800, 1],
+
+    //,MAV_CMD_NAV_RETURN_TO_LAUNCH
+    //,.,.,.,.,alt,continue
+    [14, 0, 3, 20, 0, 0, 0, 0, 0, 0, 20, 1],
+
+    //,MAV_CMD_NAV_LAND
+    //
+    [15, 0, 3, 21, 0, 0, 0, 0, 0, 0, 0, 1]
+];
 
 // Arduplane CMAC-toff-loop mission.
 var cmacToffLoop = [
@@ -169,6 +194,8 @@ var missionItemsTesting = [
 // Another shim for testing quadcopter
 var missionItemsQuadTesting = [
     //QGC,WPL,110
+    // ref frame 3 = Global coordinate frame, WGS84 coordinate system, relative altitude
+
     //s,fr,ac,cmd,p1,p2,p3,p4,lat,lon,alt,continue
     [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 582, 1],
 
