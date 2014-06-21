@@ -45,7 +45,8 @@ var sitlCopterParams = [
   ["SIM_WIND_SPD","0"  ],
   ["SIM_WIND_TURB","0"  ],
   ["SIM_BARO_RND","0"  ],
-  ["SIM_MAG_RND","0"  ]
+  ["SIM_MAG_RND","0"  ],
+  ["ARMING_CHECK", "0" ]
 ];
 
 var platforms = [

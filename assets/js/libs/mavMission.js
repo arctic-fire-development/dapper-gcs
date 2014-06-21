@@ -125,20 +125,17 @@ loadMission = function(mission) {
 
 };
 
+// This mission simply takes off and hovers at 20 meters.
 var takeoffAndThenLand = [
     //QGC,WPL,110
     // ref frame 3 = Global coordinate frame, WGS84 coordinate system, relative altitude
 
     //s,fr,ac,cmd,p1,p2,p3,p4,lat,lon,alt,continue
     // the 0th waypoint.  what's this good for?
-    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 582, 1],
+    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 0, 1],
 
     //,takeoff
-    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 700, 1],
-
-    //,MAV_CMD_NAV_WAYPOINT,A
-    //,Hold,sec,Hit,rad,empty,Yaw,angle,lat,lon,alt,continue
-    [2, 0, 3, 16, 0, 3, 0, 0, -35.363949, 149.164151, 800, 1],
+    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 20, 0],
 
     //,MAV_CMD_NAV_RETURN_TO_LAUNCH
     //,.,.,.,.,alt,continue

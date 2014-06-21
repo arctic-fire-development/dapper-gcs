@@ -57,6 +57,9 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
 
         renderLayout: function() {
 
+            // Define specific path to default Leaflet images
+            L.Icon.Default.imagePath = '/images/leaflet';
+
             // create a map in the "map" div, set the view to a given place and zoom
             this.map = L.map('mapWidget', {
                 minZoom: 1,

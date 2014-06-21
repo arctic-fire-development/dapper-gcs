@@ -55,7 +55,8 @@ module.exports = function(grunt) {
                 files: [
                     {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
                     {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg'], dest: 'public/images/'},
-                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'}
+                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
+                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'}
                 ]
             }
         },
@@ -72,12 +73,21 @@ module.exports = function(grunt) {
             },
 
             all: {
-                files: ['./app/**/*.js', './spec/**/*.js', 'assets/js/libs/**/*.js'],
+                files: ['./app/**/*.js', './spec/**/*.js'],
                 tasks: ['requirejs', 'develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
                 }
+            },
+
+            server_js: {
+              files: ['assets/js/libs/**/*.js'],
+                tasks: [ 'develop'],
+                options: {
+                    interrupt: false,
+                    nospawn: true
+                }  
             },
 
             styles: {
@@ -127,6 +137,7 @@ module.exports = function(grunt) {
         },
 
         // Note that we're including Bootstrap's LESS via an @import to the Bootstrap Bower directory.
+        // The order in the array matters, keep the app/routines/**/*.less last so styles there can overwrite others.
         less: {
             all: {
                 files: {
@@ -137,6 +148,8 @@ module.exports = function(grunt) {
 
         // Must be after the less task, or that won't get minified
         // into the final client file.
+        //
+        // Also pulls in files from Bower-installed components as required.
         cssmin: {
             compress: {
                 files: {
@@ -144,7 +157,8 @@ module.exports = function(grunt) {
                     "public/stylesheets/min.css": [
                         "build/less.css",
                         "assets/css/**/*.css",
-                        "app/assets/bower/leaflet-dist/leaflet.css"
+                        "app/assets/bower/leaflet-dist/leaflet.css",
+                        "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css"
                     ]
                 }
             }

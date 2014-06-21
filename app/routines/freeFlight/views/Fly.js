@@ -1,4 +1,4 @@
-define(['backbone', 'JST', 'q',
+define(['backbone', 'JST', 'q', 'leaflet-dist', 'seiyria-bootstrap-slider',
 
     // Models
     'Models/Mission',
@@ -8,7 +8,7 @@ define(['backbone', 'JST', 'q',
     'Views/Widgets/Map',
     'Views/Widgets/Altitude',
 
-], function(Backbone, templates, Q,
+], function(Backbone, templates, Q, L, BS,
     // Models
     Mission,
 
@@ -18,7 +18,7 @@ define(['backbone', 'JST', 'q',
     AltitudeWidget
 ) {
 
-    var SitlFlyView = Backbone.View.extend({
+    var FreeFlightFlyView = Backbone.View.extend({
 
         model: Mission,
         el: '#fly',
@@ -26,17 +26,24 @@ define(['backbone', 'JST', 'q',
         hasRendered: false,
 
         events: {
-            'click #launch' : 'launch'
+            'click button.launch' : 'launch'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout');
+            _.bindAll(this, 'render', 'renderLayout', 'launch');
         },
 
         launch: function() {
-            console.log('launching!');
+
             Q($.get('/plugins/freeFlight/mission/launch')).then(_.bind(function(data) {
-                console.log('launched');
+
+                // Swap buttons out
+                this.$el.find('button.launch').hide();
+                this.$el.find('button.home').show();
+
+                // Enable altitude control
+                this.altitudeWidget.enable();
+
             }, function(xhr) {
                 // on failure?
                 console.log(xhr);
@@ -75,16 +82,34 @@ define(['backbone', 'JST', 'q',
             this.mapWidget.render();
             this.altitudeWidget.render();
             
-             this.mapWidget.map.on('click', function(e) {
-                
+            this.mapWidget.map.on('mousedown', function(e) {
+                console.log(this.model.get('platform'));
+                this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.mapWidget.map);
                 $.get('/plugins/freeFlight/mission/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
-                
-            });
+                this.targetLine = L.polyline(
+                    [
+                        L.latLng(e.latlng.lat, e.latlng.lng),
+                        L.latLng(
+                            this.model.get('platform').get('lat'),
+                            this.model.get('platform').get('lon')
+                        )
+                    ],
+                    {
+                        color: 'red'
+                    }
+                ).addTo(this.mapWidget.map);
+            }, this);
+
+            this.mapWidget.map.on('mouseup', function(e) {
+                console.log(this.targetMarker);
+                this.mapWidget.map.removeLayer(this.targetMarker);
+                this.mapWidget.map.removeLayer(this.targetLine);
+            }, this);
 
         }
 
     });
 
-    return SitlFlyView;
+    return FreeFlightFlyView;
 
 });

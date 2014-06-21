@@ -16,7 +16,8 @@ require.config({
         "leaflet-dist": "assets/bower/leaflet-dist/leaflet",
         "leaflet-bing-plugin": "assets/bower/leaflet-plugins/layer/tile/Bing",
         requirejs: "assets/bower/requirejs/require",
-        q: "assets/bower/q/q"
+        q: "assets/bower/q/q",
+        "seiyria-bootstrap-slider": "assets/bower/seiyria-bootstrap-slider/js/bootstrap-slider"
     },
     shim: {
         backbone: {

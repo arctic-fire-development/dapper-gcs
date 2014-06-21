@@ -28,7 +28,7 @@ define([
     BaseRoutine,
     PlanningView,
     PreflightView,
-    SitlFlyView
+    FreeFlightFlyView
 ) {
 
     var Routine = BaseRoutine.extend({
@@ -87,6 +87,30 @@ define([
 
             return preflightCompletedDeferred.promise;
 
+        },
+
+        fly: function() {
+            var flightCompletedDeferred = Q.defer();
+            var platform = this.platform; // to juggle context references
+            var mission = new Mission({
+                platform: this.platform,
+                connection: this.connection
+            });
+
+            var flyView = new FreeFlightFlyView({
+                model: mission
+            });
+
+            // Handle message events as they are provided from the server
+            // This won't scale =P
+            now.ready(function() {
+                flyView.render();
+                now.updatePlatform = function(platformJson) {
+                   platform.set(platformJson);
+               };
+            });
+
+            //return flightCompletedDeferred.promise;
         }
 
     });

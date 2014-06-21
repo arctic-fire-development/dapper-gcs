@@ -8,10 +8,10 @@ define(['backbone'], function(Backbone) {
             // this can likely be removed since we are most likely interested in ground speed
 
             // Set by mavlink.global_position_int packets
-            lat: undefined,
-            lon: undefined,
-            alt: undefined,
-            relative_alt: undefined,
+            lat: 64.9,
+            lon: -147.1,
+            alt: 0,
+            relative_alt: 0,
             vx: undefined,
             vy: undefined,
             vz: undefined,

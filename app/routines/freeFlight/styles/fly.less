@@ -14,38 +14,39 @@
 }
 
 #fly {
-	position: relative;
+	.freeFlight {
+		#widgets {
+			width: 160px;
+			z-index: 500;
+			padding: 2ex;
+			margin: 0;
+			height: 100%;
+			background: rgba(0, 0, 0, .5);
 
-	#widgets {
-		position: absolute;
-		padding: 0 1ex;
-		margin: 1ex;
-		top: 0;
-		left: 0;
-		.widget {
-			h3 {
-				display: inline;
+			.widget {
+				h3 {
+					display: none;
+				}
+				.value {
+				    font-size: 300%;
+				    font-weight: 600;
+				}
 			}
-			div {
-				display: inline;
+
+			#altitudeWidget {
+				margin-top: 2em;
 			}
 		}
-		border: none;
-		box-shadow: none;
-		border-radius: none;
-		background: @brand-info;
-	}
-	
-	#controls {
-		position: absolute;
-		left: 0;
-		bottom: 0;
-		margin: 1ex;
-		background-color: rgba(0, 0, 0, .2);
-		z-index: 5000;
+		
+		#controls {
+			position: absolute;
+			bottom: 0;
+			margin: 1ex;
+			z-index: 5000;
 
-		button {
-			.animation(animation1 1s linear 0s infinite alternate);
+			button {
+				.animation(animation1 1s linear 0s infinite alternate);
+			}
 		}
 	}
 }

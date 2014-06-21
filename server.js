@@ -91,11 +91,10 @@ var mavFlightMode = new MavFlightMode(mavlink, mavlinkParser, uavConnectionManag
 var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
 
+var platform = {};
+
 // Client integration code, TODO refactor away to elsewhere
 requirejs(["Models/Platform", "now"], function(Platform, now) {
-
-
-    var platform = {};
 
     mavFlightMode.on('change', function() {
         platform = _.extend(platform, mavFlightMode.getState());
@@ -104,24 +103,22 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
 
     // This won't scale =P still
     // But it's closer to what we want to do.
-    // mavlinkParser.on('HEARTBEAT', function(message) {
-    //     platform = _.extend(platform, {
-    //         type: message.type,
-    //         autopilot: message.autopilot,
-    //         base_mode: message.base_mode,
-    //         custom_mode: message.custom_mode,
-    //         system_status: message.system_status,
-    //         mavlink_version: message.mavlink_version
-    //     });
-    //     log.info(message);
-    //     console.log('got heartbeat');
-
+    mavlinkParser.on('HEARTBEAT', function(message) {
+        platform = _.extend(platform, {
+            type: message.type,
+            autopilot: message.autopilot,
+            base_mode: message.base_mode,
+            custom_mode: message.custom_mode,
+            system_status: message.system_status,
+            mavlink_version: message.mavlink_version
+        });
+   
         //everyone.now.updatePlatform(platform);
 
         // Also update the connection status, just so it stays current on page navigations.
         //everyone.now.updateConnection(connection);
 
-  //  });
+   });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
@@ -194,39 +191,37 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
 }); // end scope of requirejs
 
 // Start connection management.
-everyone.now.startConnection = function(ifReal) {
+everyone.now.startConnection = function() {
 
-    if(true === ifReal) {
+      uavConnectionManager.start();
 
-        uavConnectionManager.start();
+      // eat error for the moment, remove this soon!
+      var connection = {};
 
-        // eat error for the moment, remove this soon!
-        var connection = {};
+      uavConnectionManager.on('disconnected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
 
-        uavConnectionManager.on('disconnected', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
+      uavConnectionManager.on('connecting', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
 
-        uavConnectionManager.on('connecting', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
-
-        uavConnectionManager.on('connected', function() {
-            connection = _.extend(connection, {
-                status: uavConnectionManager.getState(),
-                time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-            });
-            everyone.now.updateConnection(connection);
-        });
-    }
+      uavConnectionManager.on('connected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          everyone.now.updateConnection(connection);
+      });
+  
 }
 
 app.get('/connection/start', function(req, res) {
@@ -301,31 +296,38 @@ app.get('/plugins/freeFlight/mission/load', function(req, res) {
     });
 });
 
+var quad = new quadUdl(logger, nconf);
+quad.setProtocol(mavlinkParser);
+
 app.get('/plugins/freeFlight/mission/launch', function(req, res) {
-  var quad = new quadUdl(logger, nconf);
-  quad.setProtocol(mavlinkParser);
 
   logger.debug('launching freeflight mission');
 
   try {
 
-  quad.takeoff().then(quad.setGuidedMode);
+  Q.fcall(quad.arm)
+    .then(quad.setAutoMode)
+    .then(quad.takeoff)
+    .then(function() {
+      res.send(200);
+    })
+    .fail(function(error) {
+      logger.error(error);
+      res.send(500, error);
+    })
+    .done();
 
-} catch(e) {
-  logger.error('error caught in server:freeglight:launch:trycatch')
-  console.log(e);
-  logger.error(e);
-}
+  } catch(e) {
+    logger.error('error caught in server:freeglight:launch:trycatch', e)
+  }
 });
 
 app.get('/plugins/freeFlight/mission/flyToPoint', function(req, res) {
-  var quad = new quadUdl(logger, nconf);
-  quad.setProtocol(mavlinkParser);
 
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
-  quad.flyToPoint(parseFloat(req.query.lat), parseFloat(req.query.lng), 50);
+  quad.flyToPoint(parseFloat(req.query.lat), parseFloat(req.query.lng), 50, platform);
 
 });
 
