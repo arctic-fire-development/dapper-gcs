@@ -42,7 +42,7 @@ module.exports = function(grunt) {
             }
         },
 
-        // Used to copy some specific assets from Bower packages to public directories.
+        // Used to copy some specific assets from various packages to public directories.
         //
         // Most Bower-managed javascript gets vacuumed in through the RequireJS process, look in app/config.js 
         // for those inclusions.
@@ -158,7 +158,7 @@ module.exports = function(grunt) {
                         "build/less.css",
                         "assets/css/**/*.css",
                         "app/assets/bower/leaflet-dist/leaflet.css",
-                        "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css"
+                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css"
                     ]
                 }
             }

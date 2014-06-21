@@ -183,11 +183,7 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
         });
         everyone.now.updatePlatform(platform);
     });
-/*
-    mavlinkParser.on('message', function(m) {
-//      console.log(m);
-    });
-*/
+
 }); // end scope of requirejs
 
 // Start connection management.
@@ -311,10 +307,6 @@ app.get('/plugins/freeFlight/mission/launch', function(req, res) {
     .then(function() {
       res.send(200);
     })
-    .fail(function(error) {
-      logger.error(error);
-      res.send(500, error);
-    })
     .done();
 
   } catch(e) {
@@ -327,7 +319,16 @@ app.get('/plugins/freeFlight/mission/flyToPoint', function(req, res) {
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
-  quad.flyToPoint(parseFloat(req.query.lat), parseFloat(req.query.lng), 50, platform);
+  quad.flyToPoint(lat, lng, platform);
+
+});
+
+app.get('/plugins/freeFlight/mission/changeAltitude', function(req, res) {
+
+  var alt = parseInt(req.query.alt);
+  logger.info('Changing altitude to %d', alt);
+  quad.changeAltitude(alt, platform);
+  res.send(200);
 
 });
 

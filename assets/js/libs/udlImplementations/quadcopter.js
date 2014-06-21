@@ -77,7 +77,6 @@ quadcopterUdl.prototype.arm = function() {
     // So we need to examine the command ack relative to this arming request and be prepared
     // to handle edge cases around it.
     protocol.on('COMMAND_ACK', function verifyArmingAck(msg) {
-        console.log(msg);
         if( msg.result != 0 ) {
             throw new Error('Result of COMMAND_ACK for arming failed');
         }
@@ -109,7 +108,6 @@ quadcopterUdl.prototype.setAutoMode = function() {
 
     try {
         protocol.on('HEARTBEAT', function confirmAutoMode(msg) {
-            console.log(msg.custom_mode);
             if (msg.custom_mode = 3) {
                 protocol.removeListener('HEARTBEAT', confirmAutoMode);
                 deferred.resolve();
@@ -150,9 +148,9 @@ quadcopterUdl.prototype.setGuidedMode = function() {
         
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_GUIDED) {
-                deferred.resolve();
                 log.info('Quadcopter UDL: mode confirmed set to Guided mode!');
                 protocol.removeListener('HEARTBEAT', confirmGuidedMode);
+                deferred.resolve();
             } else {
                 log.debug('base mode: %d', msg.base_mode);
             }
@@ -172,7 +170,32 @@ quadcopterUdl.prototype.setGuidedMode = function() {
 
 };
 
-quadcopterUdl.prototype.flyToPoint = function(lat, lon, alt, platform) {
+quadcopterUdl.prototype.changeAltitude = function(alt, platform) {
+    log.info('Quadcopter UDL: changing altitude to %d...', alt);
+    
+    var guided_mission_item = new mavlink.messages.mission_item(
+        1, 1, // system ids
+        0, // ?
+        mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+        mavlink.MAV_CMD_NAV_WAYPOINT,
+        2, 0, 0, 0, 0, 0, // 3 is the magic number meaning change altitude.  See apm source code.
+        platform.lat, platform.lon, alt
+    );
+
+    if(platform.custom_mode != 4) { // todo: remove magic number: 4 == guided mode
+        // Need to set guided mode first.
+        log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
+        Q.fcall(this.setGuidedMode)
+            .then(function(){
+                protocol.send(guided_mission_item);       
+            });
+    } else {
+        protocol.send(guided_mission_item);    
+    }
+
+};
+
+quadcopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
     log.info('Quadcopter UDL: flying to point...');
     
     var guided_mission_item = new mavlink.messages.mission_item(
@@ -181,10 +204,12 @@ quadcopterUdl.prototype.flyToPoint = function(lat, lon, alt, platform) {
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_WAYPOINT,
         2, 0, 0, 0, 0, 0, // ? is 2 the magic number here?
-        lat, lon, alt
+        lat, lon, platform.relative_alt // use current altitude
     );
 
-    if(platform.custom_mode != 4) {
+    log.verbose('Flying to %d %d %d', lat, lon, platform.relative_alt);
+
+    if(platform.custom_mode != 4) { // todo: remove magic number: 4 == guided mode
         // Need to set guided mode first.
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
