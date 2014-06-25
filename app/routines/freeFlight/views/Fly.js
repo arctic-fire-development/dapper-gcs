@@ -36,7 +36,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider',
         launch: function() {
 
             Q($.get('/plugins/freeFlight/mission/launch')).then(_.bind(function(data) {
-                alert('dogs')
+
                 // Swap buttons out
                 this.$el.find('button.launch').hide();
                 this.$el.find('button.home').show();
