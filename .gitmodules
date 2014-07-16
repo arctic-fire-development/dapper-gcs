@@ -1,0 +1,3 @@
+[submodule "assets/js/libs/bootstrap-slider"]
+	path = assets/js/libs/bootstrap-slider
+	url = https://github.com/seiyria/bootstrap-slider.git

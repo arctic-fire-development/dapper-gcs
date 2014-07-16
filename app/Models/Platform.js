@@ -1,11 +1,16 @@
-define(['backbone'], function(Backbone) {
+define(['backbone', 'underscore'], function(Backbone, _) {
 
     var Platform = Backbone.Model.extend({
 
         defaults: {
 
-            speed: undefined, // kph.  Who the hell sets this?? TODO =P
-            // this can likely be removed since we are most likely interested in ground speed
+/*
+We leave all items undefined and require that the client code using this model enforce its own handling.
+This is because the defaults are _unknown_ until they're set from real data from a UAV, and it's misleading
+to assign them defaults.
+
+For convenience/reference, items that will be set/used by client code are enumerated below, with references back to
+the MAVLink messages that set them.
 
             // Set by mavlink.global_position_int packets
             lat: undefined,
@@ -50,13 +55,66 @@ define(['backbone'], function(Backbone) {
             heading: undefined,
             throttle: undefined,
             climb: undefined
+*/
 
         },
 
-        validate: function(attrs) {
-            attrs.lat /= 1e07;
-            attrs.lon /= 1e07;
-            attrs.alt /= 100;
+        initialize: function() {
+            _.bindAll(this, 'set');
+            this.on('change:fix_type', function() {
+                if(this.hasGpsFix()) {
+                    this.trigger('gps:fix_established');
+                }
+            }, this);
+        },
+
+        // We override the set function in order to manipulate values as required when they are set.
+        set: function(key, val, options) {
+
+            // The block below is what Backbone does to handle different ways of calling Set.
+            var attrs;
+            if (key == null) return this;
+            if (typeof key === 'object') {
+                attrs = key;
+                options = val;
+            } else {
+                (attrs = {})[key] = val;
+            }
+
+            // Clean up properties.   attrs is passed by reference since it's an object,
+            // so properties are changed in-place by the cleanup function.
+            this.cleanup(attrs);
+    
+            // Call Backbone's core set() method.
+            return Backbone.Model.prototype.set.call(this, attrs, options);
+        },
+
+        cleanup: function(attrs) {
+
+            if('relative_alt' in attrs) {
+                attrs.relative_alt = this.parseAltitude(attrs.relative_alt);
+            }
+
+            if('alt' in attrs) {
+                attrs.alt = this.parseAltitude(attrs.alt);
+            }
+
+        },
+
+        // Force altitude to be an integer.  Used for both alt and relative_alt.
+        parseAltitude: function(alt) {
+            alt = parseInt(Number(alt).toFixed(0));
+            return alt;
+        },
+
+        // We have a GPS fix if we have lat, lon, and a known good fix_type.
+        // This may not be a complete set of criteria, but it's close.
+        hasGpsFix: function() {
+            return (
+                this.get('fix_type') >= 2 // 2 + greater means has x/y fix.  See MAVLink spec for this, GPS_RAW_INT
+                && _.isNumber(this.get('lat'))
+                && _.isNumber(this.get('lon'))
+            );
         }
 
     });
