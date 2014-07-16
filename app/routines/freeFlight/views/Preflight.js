@@ -1,15 +1,15 @@
-define(['backbone', 'JST', 'q',
+define(['backbone', 'JST',
 
     // Common widgets
     'Views/Widgets/Connection'
 
-], function(Backbone, templates, Q,
+], function(Backbone, templates,
     ConnectionWidget) {
 
     var Preflight = Backbone.View.extend({
 
         el: '#preflight',
-        template: templates['app/routines/sitl/Templates/preflight'],
+        template: templates['app/routines/freeFlight/Templates/preflight'],
 
         initialize : function (options) {
           this.options = options || {};

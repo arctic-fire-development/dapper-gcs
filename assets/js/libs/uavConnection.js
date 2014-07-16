@@ -10,7 +10,8 @@ var SerialPort = require("serialport").SerialPort,
     child = require("child_process"),
     dgram = require("dgram"),
     net = require('net'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    mavlink = require('mavlink_ardupilotmega_v1.0');
 
 // log is expected to be a winston instance; keep it in the shared global namespace for convenience.
 var log;
@@ -127,7 +128,7 @@ UavConnection.prototype.disconnected = function() {
     // Request the protocol be reattached.
     this.attachDataEventListener = true;
 
-    log.info('[UavConnection] Trying to connect from disconnected state...');
+    log.silly('[UavConnection] Trying to connect from disconnected state...');
 
     try {
 
@@ -207,12 +208,27 @@ UavConnection.prototype.connecting = function() {
         this.attachDataEventListener = false;
 
     } catch (e) {
-        log.error('Error!', e);
+        log.error(e);
         throw (e);
     }
 };
 
+// Upon connection for the first time, request all MAVLink data streams available.
+// Also switch back to "connecting" state in case we lose the link.
 UavConnection.prototype.connected = function() {
+
+    // Only do this once upon obtaining connection.
+    var request_data_stream = _.once(_.bind(function() {
+        request = new mavlink.messages.request_data_stream(1, 1, mavlink.MAV_DATA_STREAM_ALL, 1, 1);
+        _.extend(request, {
+            srcSystem: 255,
+            srcComponent: 0,
+            seq: 1
+        });
+        p = new Buffer(request.pack());
+        this.connection.write(p);
+    }, this));
+    request_data_stream();
 
     if (this.timeSinceLastHeartbeat > 5000 || true === _.isNaN(this.timeSinceLastHeartbeat)) {
         this.changeState('connecting');
@@ -233,25 +249,3 @@ UavConnection.prototype.write = function(data) {
 };
 
 exports.UavConnection = UavConnection;
-/*
-
-// This function changes the initial requested data stream to get all data, at a rate of 1hz
-var request_data_stream = _.once(_.bind(function(done) {
-request = new mavlink.messages.request_data_stream(1, 1, mavlink.MAV_DATA_STREAM_ALL, 1, 1);
-_.extend(request, {
-srcSystem: 255,
-srcComponent: 0,
-seq: 1
-});
-
-protocol.on('message', function(message) {
-log.info(message.name);
-});
-
-p = new Buffer(request.pack());
-
-log.info(p);
-connection.write(p);
-}, this));
-
-*/

@@ -81,11 +81,6 @@ MavParam.prototype.set = function(name, value) {
 
 };
 
-// Set an array of params, returning a promise when they're all fulfilled.
-MavParam.prototype.setArray = function(params) {
-
-}
-
 MavParam.prototype.get = function(name) {
     var index = -1; // this will use the name as the lookup method
     var param_request_read = new mavlink.messages.param_request_read(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, index);
