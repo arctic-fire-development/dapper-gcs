@@ -33,7 +33,8 @@
     "q": "",
     "mavlink_ardupilotmega_v1.0": "",
     "jade": "",
-    "qretry": "^0.2.1"
+    "qretry": "^0.2.1",
+    "moment":"~2.7.0"
   },
   "devDependencies": {
     "mocha": "",
