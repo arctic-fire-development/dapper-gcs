@@ -297,11 +297,7 @@ app.get('/drone/flyToPoint', function(req, res) {
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
-  Q.fcall(quad.flyToPoint, lat, lng, platform).then(function(){
-    res.send(200);
-    }
-  );
-
+  quad.flyToPoint(lat,lng,platform);
 });
 
 app.get('/drone/loiter', function(req, res) {

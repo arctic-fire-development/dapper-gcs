@@ -82,7 +82,7 @@ var platforms = [
     id: 2,
     parameters: sitlCopterParams,
     defaults: {
-      topSpeed: 10 // mph
+      topSpeed: 10 // kph
     }
   }
 ];
