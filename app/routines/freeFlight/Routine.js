@@ -12,6 +12,7 @@ define([
     "Models/Mission",
     "Models/Platform",
     "Models/Connection",
+    "routines/freeFlight/models/Planning",
 
     // Parent objects
     "routines/components/Routine",
@@ -25,6 +26,7 @@ define([
     Mission,
     Platform,
     Connection,
+    PlanningModel,
     BaseRoutine,
     PlanningView,
     PreflightView,
@@ -32,6 +34,17 @@ define([
 ) {
 
     var Routine = BaseRoutine.extend({
+
+        planning: function() {
+            var deferred = Q.defer();
+            this.planningModel = new PlanningModel();
+            var planningView = new PlanningView({
+                model: this.planningModel,
+                deferred: deferred,
+                mission: this.get('mission')
+            }).render();
+            return deferred.promise;
+        },
 
         preflight: function() {
             var preflightCompletedDeferred = Q.defer(); // will be resolved when all others are done + user confirms OK
@@ -90,11 +103,13 @@ define([
         },
 
         fly: function() {
+
             var flightCompletedDeferred = Q.defer();
             var platform = this.platform; // to juggle context references
             var mission = new Mission({
                 platform: this.platform,
-                connection: this.connection
+                connection: this.connection,
+                planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
             });
 
             var flyView = new FreeFlightFlyView({
