@@ -55,6 +55,13 @@ function UavConnection(configObject, protocolParser, logObject) {
     // Time elapsed since last heartbeat
     this.timeSinceLastHeartbeat = undefined;
 
+    // If true, then this connection has previously been established.
+    // Used to convey if the connection has been temporarily lost.
+    this.hasConnected = false;
+
+    // Set to true if the connection is in a lost state.
+    this.lostConnection = true;
+
     log = logObject;
 
 };
@@ -132,7 +139,7 @@ UavConnection.prototype.disconnected = function() {
 
     try {
 
-        switch (this.config.get('connection')) {
+        switch (this.config.get('connection:type')) {
             case 'serial':
                 this.dataEventName = 'data';
                 this.connection = new SerialPort(
@@ -175,7 +182,7 @@ UavConnection.prototype.disconnected = function() {
                 break;
 
             default:
-                log.error('Connection type not understood (%s)', this.config.get('connection'));
+                log.error('Connection type not understood (%s)', this.config.get('connection:type'));
         }
     } catch (e) {
         log.error('error', e);
@@ -191,6 +198,11 @@ UavConnection.prototype.connecting = function() {
 
         log.silly('establishing MAVLink connection...');
 
+        // Are we in a hard lost-link condition and need to re-establish the port?
+        if (this.timeSinceLastHeartbeat > this.config.get('connection:timeout:soft')) {
+            this.changeState('disconnected');
+        }
+
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
         // to avoid attaching too many callbacks.
@@ -201,10 +213,12 @@ UavConnection.prototype.connecting = function() {
             }, this));
 
             this.protocol.on('HEARTBEAT', _.bind(this.updateHeartbeat, this));
+            this.hasConnected = true;
             this.emit('connecting:attached');
 
         }
 
+        // Don't do this twice.
         this.attachDataEventListener = false;
 
     } catch (e) {
@@ -226,18 +240,31 @@ UavConnection.prototype.connected = function() {
             seq: 1
         });
         p = new Buffer(request.pack());
-        this.connection.write(p);
+        this.write(p);
     }, this));
     request_data_stream();
 
-    if (this.timeSinceLastHeartbeat > 5000 || true === _.isNaN(this.timeSinceLastHeartbeat)) {
+    // If connection has been regained, signal the client.
+    if(true === this.lostConnection) {
+        log.info('Connection re-established from lost state.');
+        this.lostConnection = false;
+        this.emit('connection:regained');
+    }        
+
+    // Have we lost link?
+    if (this.timeSinceLastHeartbeat > this.config.get('connection:timeout:soft') || true === _.isNaN(this.timeSinceLastHeartbeat)) {
         this.changeState('connecting');
+        if(true === this.hasConnected) {
+            log.warn('Connection lost.');
+            this.lostConnection = true;
+            this.emit('connection:lost');
+        }
     }
 
 };
 
 UavConnection.prototype.write = function(data) {
-    switch (this.config.get('connection')) {
+    switch (this.config.get('connection:type')) {
         case 'tcp': // fallthrough
         case 'serial':
             this.connection.write(data);

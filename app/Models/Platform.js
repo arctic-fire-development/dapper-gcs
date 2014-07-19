@@ -59,12 +59,18 @@ the MAVLink messages that set them.
 
         },
 
+        // TODO future refactor: this code depends specifcally on APM-flavored MAVLink messages
+        // being interpreted to produce client-side events.  Need to abstract this out in the same way
+        // the server-side UDL stuff is done.
         initialize: function() {
             _.bindAll(this, 'set');
             this.on('change:fix_type', function() {
                 if(this.hasGpsFix()) {
                     this.trigger('gps:fix_established');
                 }
+            }, this);
+            this.on('change:custom_mode', function() {
+                this.trigger('custom_mode');
             }, this);
         },
 
