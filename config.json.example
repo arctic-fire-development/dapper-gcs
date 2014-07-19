@@ -1,6 +1,12 @@
 {
 
-  "connection" : "tcp",
+  "connection" : {
+    "type": "tcp",
+    "timeout": {
+        "soft": 5000,
+        "hard": 20000
+      }
+    },
 
   "tcp" : {
     "host" : "127.0.0.1",
