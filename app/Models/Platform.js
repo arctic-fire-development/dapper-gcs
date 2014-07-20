@@ -72,6 +72,9 @@ the MAVLink messages that set them.
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
             }, this);
+            this.on('change:voltage_battery', function() {
+                this.trigger('battery:low battery:quarter battery:half')
+            });
         },
 
         // We override the set function in order to manipulate values as required when they are set.
