@@ -12,6 +12,7 @@ var mavlink = require("mavlink_ardupilotmega_v1.0"),
     requirejs = require("requirejs"),
     winston = require("winston"),
     Q = require('q'),
+    fs = require('fs'),
     MavFlightMode = require("./assets/js/libs/mavFlightMode.js"),
     MavMission = require('./assets/js/libs/mavMission.js'),
     quadUdl = require("./assets/js/libs/udlImplementations/ArduCopter.js"),
@@ -39,6 +40,23 @@ logger.setLevels(winston.config.npm.levels);
 nconf.argv().env().file({
     file: 'config.json'
 });
+
+// The logging path is created here if not already present;
+// do this synchronously to ensure creation before opening log streams.
+try {
+    fs.statSync(nconf.get("logging:root"));
+} catch(err) {
+  logger.verbose('Creating logfile directory %s', nconf.get('logging:root'));
+  try {
+      if('ENOENT' == err.code) {
+          fs.mkdirSync(err.path);
+      }
+  } catch(e) {
+      // Genuine unknown error occurred.
+      log.error(e);
+      throw(e);
+  }
+}
 
 app.configure(function() {
     app.set('port', process.env.PORT || 3000);
@@ -320,3 +338,35 @@ app.get('/drone/changeAltitude', function(req, res) {
 app.get('/platforms', function(req, res) {
   res.json(platforms);
 });
+
+// Set up exit handlers so we can clean up as best as possible upon server process shutdown
+process.stdin.resume();//so the program will not close instantly
+
+function exitHandler(options, err) {
+
+    if (options.cleanup) {
+      logger.debug('Closing logfiles...');
+      uavConnectionManager.stopLogging();
+    }
+    
+    if (err) console.log(err.stack);
+    
+    if (options.exit) process.exit();
+
+    // For restarting with Nodemon
+    if(options.killProcess) {
+      process.kill(process.pid, 'SIGUSR2');
+    }
+}
+
+// Handle when the script is being managed by nodemon
+process.once('SIGUSR2', exitHandler.bind(null, {cleanup: true, killProcess: true}));
+
+//do something when app is closing
+process.on('exit', exitHandler.bind(null,{cleanup:true}));
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
