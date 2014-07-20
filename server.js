@@ -234,6 +234,20 @@ everyone.now.startConnection = function() {
           });
           everyone.now.updateConnection(connection);
       });
+
+      uavConnectionManager.on('connection:lost', function() {
+        connection=_.extend(connection, {
+          notification: 'lost'
+        });
+        everyone.now.updateConnection(connection);
+      });
+
+      uavConnectionManager.on('connection:regained', function() {
+        connection = _.extend(connection, {
+          notification: 'regained'
+        });
+        everyone.now.updateConnection(connection);
+      });
   
 }
 
