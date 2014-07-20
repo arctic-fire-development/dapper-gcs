@@ -256,6 +256,20 @@ app.get('/connection/start', function(req, res) {
     res.send(204);
 });
 
+/***************
+Start of code to handle droneUDL REST API and plugin-specific hacked-starting code.
+***************/
+
+var quad = new quadUdl(logger, nconf);
+quad.setProtocol(mavlinkParser);
+
+// Very hacky code below, the point of which is to get a "current routine" hacked in place on the server side,
+// which the client will be configuring as part of new-routine/planning/preflight stuff.
+// This should evolve into a single strong session-based model of some kind, with DB persistence.
+// See GH#119.
+// Anything referencing "routine" falls into this bucket.
+var routine = {};
+
 // TODO move this to MavParams module.
 function loadParameters(parameters) {
     
@@ -275,10 +289,17 @@ function loadParameters(parameters) {
 }
 
 app.get('/drone/params/load', function(req, res) {
+    
     logger.info('loading parameters for SITL Copter...');
+    
     // TODO hardcoded platform D:
     logger.debug(platforms[0].parameters);
     promises = loadParameters(platforms[0].parameters);
+
+    // Hack/hardcoding interactive parameter setting
+    promises.push(
+      mavParams.set('WPNAV_SPEED', routine.maxSpeed)
+    );
 
     Q.allSettled(promises).then(
       function(results) {
@@ -301,9 +322,6 @@ app.get('/drone/mission/load', function(req, res) {
         res.send(200);
     });
 });
-
-var quad = new quadUdl(logger, nconf);
-quad.setProtocol(mavlinkParser);
 
 app.get('/drone/launch', function(req, res) {
 
@@ -343,6 +361,13 @@ app.get('/drone/loiter', function(req, res) {
 app.get('/drone/changeAltitude', function(req, res) {
 
   var alt = parseInt(req.query.alt);
+
+  // TODO unsafe prototype code below; idea being, protect from sending messages that are outside
+  // a GCS/GUI enforced ceiling.
+  if(alt > routine.maxAltitude) {
+    alt = routine.maxAltitude;
+  }
+
   logger.info('Changing altitude to %d', alt);
   quad.changeAltitude(alt, platform);
   res.send(200);
@@ -351,6 +376,11 @@ app.get('/drone/changeAltitude', function(req, res) {
 
 app.get('/platforms', function(req, res) {
   res.json(platforms);
+});
+
+app.post('/routines/freeFlight/planning', function(req, res) {
+  routine.maxSpeed = req.body.maxSpeed * 100; // translate km/h to cm/s
+  routine.maxAltitude = req.body.maxAltitude;
 });
 
 // Set up exit handlers so we can clean up as best as possible upon server process shutdown
