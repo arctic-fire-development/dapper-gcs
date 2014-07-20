@@ -122,7 +122,8 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     model: this.model.get('platform')
                 });
                 this.altitudeWidget = new AltitudeWidget({
-                    model: this.model.get('platform')
+                    model: this.model.get('platform'),
+                    maxAltitude: this.model.get('planning').get('maxAltitude')
                 });
                 this.mapWidget = new MapWidget({
                     model: this.model.get('platform')

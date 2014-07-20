@@ -13,8 +13,12 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         // from the UAV are received by the client.
         suspendSliderRender: false,
 
-        initialize: function() {
+        initialize: function(options) {
             _.bindAll(this, 'render', 'enable', 'disable');
+
+            this.maxAltitude = parseInt(options.maxAltitude, 10);
+
+            //TODO remove reference to MAVLink
             this.model.on("change:relative_alt", this.render, this);
         },
         enable: function() {
@@ -34,6 +38,8 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 this.slider.slider({
                     reversed:true,
                     enabled: false,
+                    max: this.maxAltitude,
+                    min: 0,
                     tooltip: 'always',
                     formater: function(v) {
                         return v + ' meters'

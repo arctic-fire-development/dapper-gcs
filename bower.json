@@ -4,6 +4,7 @@
   "dependencies": {
     "jquery": "~2.1",
     "bootstrap": "~3.1",
+    "bootstrapValidator": "<0.5.0",
     "leaflet-dist": "~0.7.2",
     "backbone": "~1.1.0",
     "underscore": "",

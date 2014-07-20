@@ -6,14 +6,10 @@
       .panel-body
         p Set these required flight options.
         form(role="form")
-          div.form-group
-            label(for="maxSpeed") Maximum speed (mph)
-              span.fake not implemented
-            input(type="text", class="form-control", id="maxSpeed", value="10")
-          div.form-group
-            label(for="maxAltitude") Maximum altitude (feet)
-              span.fake not implemented
-            input(type="text", class="form-control", id="maxAltitude", value="400")
+          div.form-group.has-feedback
+            label(for="maxAltitude") Maximum altitude (meters)
+            input(type="text", class="form-control", id="maxAltitude", name="maxAltitude", value="#{maxAltitude}")
+            span.toFeet.form-control-feedback
           div.form-group
             label(for="rtlBehavior") Loss of link behavior
               span.fake not implemented
@@ -27,4 +23,4 @@
       .panel-footer
         form(role="form")
           div.form-group
-            a.btn.btn-primary.btn-lg(href="/mission/preflight") Continue to preflight
+            a.continue.btn.btn-primary.btn-lg Continue to preflight
