@@ -22,6 +22,12 @@
     "baudrate" : 57600
   },
 
+  "logging": {
+    "root": "./logs/",
+    "receivedBinary": "received",
+    "sentBinary": "sent"
+  },
+
   "testing" : {
     "serial" : {
       "master" : "/var/lib/jenkins/dev/master",
