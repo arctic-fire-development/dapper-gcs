@@ -1,0 +1,32 @@
+.container-fluid
+  .row.opaque
+    .col-md-6
+      h2 General state
+      #modeSummary
+      table.table
+        tr
+          th(scope="row") Custom mode
+          td #{custom_mode}
+        tr
+          th(scope="row") Base Mode (bitmask)
+          td #{base_mode}
+        tr
+          th(scope="row") System Status
+          td #{system_status}
+
+    .col-md-6
+      h2 Hardware indicators
+      table.table
+        tr
+          th(scope="row") Voltage
+          td #{voltage_battery}
+        tr
+          th(scope="row") Current
+          td #{current_battery}
+        tr
+          th(scope="row") Battery Remaining
+          td #{battery_remaining}%
+        tr
+          th(scope="row") GPS Fix Type
+          td #{fix_type}
+        

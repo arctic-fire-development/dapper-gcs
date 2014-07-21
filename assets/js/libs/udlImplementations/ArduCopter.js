@@ -11,7 +11,8 @@ const APM = {
         AUTO: 3,
         GUIDED: 4,
         LOITER: 5,
-        RTL: 6
+        RTL: 6,
+        LAND: 9
     }
 };
 
