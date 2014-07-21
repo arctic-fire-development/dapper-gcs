@@ -72,6 +72,21 @@ the MAVLink messages that set them.
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
             }, this);
+            this.on('change:system_status', function() {
+                var status;
+                // TODO: See GH#122 and MAV_STATE enum.
+                switch(this.get('system_status')) {
+                    case 1: status = 'booting'; break;
+                    case 2: status = 'calibrating'; break;
+                    case 3: status = 'standby'; break;
+                    case 4: status = 'active'; break;
+                    case 5: status = 'critical'; break;
+                    case 6: status = 'emergency'; break;
+                    case 7: status = 'shutdown'; break;
+                    default: status = 'unknown'; break;
+                }
+                this.trigger('status:'+status);
+            }, this);
         },
 
         // We override the set function in order to manipulate values as required when they are set.
@@ -121,6 +136,12 @@ the MAVLink messages that set them.
                 && _.isNumber(this.get('lat'))
                 && _.isNumber(this.get('lon'))
             );
+        },
+
+        // The system is flying if it's active and relative altitude is greater than zero.
+        // The second assumption -- that relative alt > 0 -- is problematic.  GH#134
+        isFlying: function() {
+            return this.get('system_status') == 4 && this.get('relative_alt') > 0;
         }
 
     });

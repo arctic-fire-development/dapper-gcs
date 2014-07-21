@@ -43,8 +43,11 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 this.$el.find('button.launch').hide();
                 this.$el.find('button.home').show();
 
-                // Enable altitude control
+                // Enable altitude control & fly to point.
+                // TODO GH#134, these should only really be enabled when we know
+                // that the system is in flight.
                 this.altitudeWidget.enable();
+                this.bindFlyToPoint();
 
             }, this));
         },
@@ -60,31 +63,35 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             }
         },
 
+        flyToPoint: function(e) {
+            this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.mapWidget.map);
+            $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+            this.targetLine = L.polyline(
+                [
+                    L.latLng(e.latlng.lat, e.latlng.lng),
+                    L.latLng(
+                        this.model.get('platform').get('lat'),
+                        this.model.get('platform').get('lon')
+                    )
+                ],
+                {
+                    color: 'red'
+                }
+            ).addTo(this.mapWidget.map);
+        },
+
+        hoverAtPoint: function(e) {  
+            $.get('/drone/loiter', { lat: e.latlng.lat, lng: e.latlng.lng });
+            this.mapWidget.map.removeLayer(this.targetMarker);
+            this.mapWidget.map.removeLayer(this.targetLine);
+        },
+
+        bindFlyToPoint: function() {
+            this.mapWidget.map.on('mousedown', this.flyToPoint, this);
+            this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+        },
+
         bindMapClickEvents: function() {
-
-            this.mapWidget.map.on('mousedown', function(e) {
-                this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.mapWidget.map);
-                $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
-                this.targetLine = L.polyline(
-                    [
-                        L.latLng(e.latlng.lat, e.latlng.lng),
-                        L.latLng(
-                            this.model.get('platform').get('lat'),
-                            this.model.get('platform').get('lon')
-                        )
-                    ],
-                    {
-                        color: 'red'
-                    }
-                ).addTo(this.mapWidget.map);
-            }, this);
-
-            this.mapWidget.map.on('mouseup', function(e) {
-                // Switch mode to Loiter?
-                $.get('/drone/loiter', { lat: e.latlng.lat, lng: e.latlng.lng });
-                this.mapWidget.map.removeLayer(this.targetMarker);
-                this.mapWidget.map.removeLayer(this.targetLine);
-            }, this);
 
             // When the slider is being dragged, prevent the slider from
             // being updated while the user has the mouse down,
@@ -144,8 +151,9 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 
                 // If we're in flight, change the GUI as needed.
                 // TODO: more needs to be done here, manage Fly button, etc.
-                if(this.model.get('platform').get('relative_alt') > 0) {
+                if(this.model.get('platform').isFlying()) {
                     this.altitudeWidget.enable();
+                    this.bindFlyToPoint();
                 }
 
             }, this);
