@@ -13,6 +13,7 @@
     "requirejs": "~2.1.10",
     "q": "~1.0",
     "3l": "~1.4.4",
-    "bootstrap-growl": "~1.1.0"
+    "bootstrap-growl": "~1.1.0",
+    "routefilter": "~0.2.1"
   }
 }
