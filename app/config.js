@@ -19,7 +19,8 @@ require.config({
         q: "assets/bower/q/q",
         "bootstrap-slider": "../assets/js/libs/bootstrap-slider/js/bootstrap-slider",
         bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
-        "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl"
+        "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl",
+        routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min"
     },
     shim: {
         backbone: {
