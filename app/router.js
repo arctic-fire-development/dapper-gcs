@@ -6,27 +6,30 @@ define([
     "underscore",
     "jquery",
     "require",
+    "routefilter",
 
     "routines/freeFlight/Routine",
 
     // Models
     "Models/Mission",
     "Models/Platform",
-    "Models/Connection",
 
     // Dependent views
     "Views/Home",
-    "Views/Plan"
-], function(app, now, _, $, require,
+    "Views/Plan",
+    "Views/Engineering"
+], function(app, now, _, $, require, rf,
     
     RoutineFreeFlight,
 
     Mission,
     Platform,
-    Connection,
     
     HomeView,
-    PlanView) {
+    PlanView,
+    EngineeringView
+
+    ) {
 
     var Router = Backbone.Router.extend({
 
@@ -36,8 +39,11 @@ define([
             "mission" : "mission",
             "mission/planning" : "planning",
             "mission/preflight" : "preflight",
-            "mission/fly" : "fly"
+            "mission/fly" : "fly",
+            "engineering" : "engineering",
+            "resumeCurrentMissionStep" : "resumeCurrentMissionStep"
         },
+        currentMission: undefined,
 
         initialize: function() {
             this.homeView = new HomeView();
@@ -48,11 +54,31 @@ define([
             });
         },
 
+        // Works for 2 menu items!  Hacky!  =)
+        before: function(route, params) {
+            var menu = (route == 'engineering') ? 'engineering' : 'mission';
+            this.setActiveMenu(menu);
+        },
+
         // Pass the name of the div to show, others are hidden for "navigation" :)
         showOnly: function(name) {
-            var panes = ['home', 'plan', 'mission', 'preflight', 'planning', 'fly'];
+            var panes = ['home', 'plan', 'mission', 'preflight', 'planning', 'fly', 'engineering'];
             _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
             $('#'+name).show();
+        },
+        // Set the active top-level bootstrap item.
+        setActiveMenu: function(menu) {
+            $('#navbar ul.navbar-nav li').each(function(i, el) {
+                (menu == $(this).data('name')) ? $(this).addClass('active') : $(this).removeClass('active');
+            });
+        },
+
+        resumeCurrentMissionStep: function() {
+            if(this.currentMission) {
+                this.navigate('mission/'+this.currentMission, { trigger: true });
+            } else {
+                this.navigate('plan', { trigger: true });
+            }
         },
 
         home: function() {
@@ -66,6 +92,7 @@ define([
         },
 
         planning: function() {
+            this.currentMission = 'planning';
             this.showOnly('planning');
             this.routine.planning().then(_.bind(function() {
                 this.navigate('mission/preflight', { trigger: true });
@@ -73,6 +100,7 @@ define([
         },
 
         preflight: function() {
+            this.currentMission = 'preflight';
             this.showOnly('preflight');
             this.routine.preflight().then(_.bind(function() {
                 this.navigate('mission/fly', { trigger: true });
@@ -80,11 +108,9 @@ define([
         },
 
         fly: function() {
+            this.currentMission = 'fly';
             this.showOnly('fly');
             this.routine.fly();
-            /*.then(_.bind(function() {
-                this.navigate('mission/postflight', { trigger: true });
-            }, this));*/
         },
 
         mission: function() {
@@ -94,6 +120,13 @@ define([
                 mission: this.mission
             });
             this.navigate('mission/planning', { trigger: true });
+        },
+
+        engineering: function() {
+            this.showOnly('engineering');
+            this.engineeringView = new EngineeringView({
+                model: new Platform()
+            }).render();
         },
 
         // TODO GH#96
