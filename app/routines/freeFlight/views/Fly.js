@@ -28,11 +28,41 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         hasRendered: false,
 
         events: {
-            'click button.launch' : 'launch'
+            'click button.launch' : 'launch',
+            'click button.home' : 'home',
+            'click button.stop' : 'stop'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch');
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop');
+        },
+
+        home: function() {
+            Q($.get('/drone/rtl')).then(_.bind(function() {
+                
+                this.$el.find('button.home').hide();
+                this.$el.find('button.stop').show();
+
+                this.unbindFlyToPoint();
+                this.altitudeWidget.disable();
+
+                // Detect when system has landed, then instruct disarm.
+                this.model.get('platform').on('status:standby', function() {
+                    Q($.get('/drone/disarm')).then(_.bind(function() {
+                        this.$el.find('button.stop').hide();
+                        this.$el.find('button.launch').show()
+                    }, this));
+                }, this);
+            }, this));
+        },
+
+        stop: function() {
+            Q($.get('/drone/loiter')).then(_.bind(function() {
+                
+                this.$el.find('button.stop').hide();
+                this.$el.find('button.home').show();
+
+            }, this));
         },
 
         launch: function() {
@@ -41,7 +71,12 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
                 // Swap buttons out
                 this.$el.find('button.launch').hide();
-                this.$el.find('button.home').show();
+                this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
+
+                // Enable RTL when craft is hovering.
+                this.model.get('platform').on('mode:hover', function() {
+                    this.$el.find('button.home').attr('disabled', false);
+                }, this);
 
                 // Enable altitude control & fly to point.
                 // TODO GH#134, these should only really be enabled when we know
@@ -81,7 +116,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         },
 
         hoverAtPoint: function(e) {  
-            $.get('/drone/loiter', { lat: e.latlng.lat, lng: e.latlng.lng });
+            $.get('/drone/loiter');
             this.mapWidget.map.removeLayer(this.targetMarker);
             this.mapWidget.map.removeLayer(this.targetLine);
         },
@@ -89,6 +124,11 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         bindFlyToPoint: function() {
             this.mapWidget.map.on('mousedown', this.flyToPoint, this);
             this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+        },
+
+        unbindFlyToPoint: function() {
+            this.mapWidget.map.off('mousedown', this.flyToPoint);
+            this.mapWidget.map.off('mouseup', this.hoverAtPoint);
         },
 
         bindMapClickEvents: function() {
@@ -158,6 +198,36 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             }, this);
 
+            this.model.get('platform').on('status:standby', function() {
+
+                $.bootstrapGrowl('System is in standby mode.', {
+                    ele: 'body', // which element to append to
+                    type: 'success', // (null, 'info', 'danger', 'success')
+                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
+                    align: 'right', // ('left', 'right', or 'center')
+                    width: 250, // (integer, or 'auto')
+                    delay: 10000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
+                    allow_dismiss: true, // If true then will display a cross to close the popup.
+                    stackup_spacing: 10 // spacing between consecutively stacked growls.
+                });
+            
+            });
+
+            this.model.get('platform').on('disarmed', function() {
+
+                $.bootstrapGrowl('System is now disarmed.', {
+                    ele: 'body', // which element to append to
+                    type: 'success', // (null, 'info', 'danger', 'success')
+                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
+                    align: 'right', // ('left', 'right', or 'center')
+                    width: 250, // (integer, or 'auto')
+                    delay: 10000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
+                    allow_dismiss: true, // If true then will display a cross to close the popup.
+                    stackup_spacing: 10 // spacing between consecutively stacked growls.
+                });
+            
+            });
+
             this.model.get('connection').on('change:notification', function() {
                 var message, type;
                 switch(this.get('notification')) {
@@ -185,8 +255,9 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
                 switch(mode) {
                     case 3: message = "Performing takeoff&hellip;"; break;
-                    case 5: message = "Hovering until further notice."; break;
                     case 4: message = "Flying to location&hellip;"; break;
+                    case 5: message = "Hovering until further notice."; break;
+                    case 6: message = "Flying home and landing&hellip;", delay=10000, type='warning'; break;
                     default: message = "Switching to custom_mode " + mode, delay=10000, type='danger';
                 }
 

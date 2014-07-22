@@ -342,6 +342,13 @@ app.get('/drone/launch', function(req, res) {
   }
 });
 
+app.get('/drone/disarm', function(req, res) {
+  Q.fcall(quad.disarm)
+    .then(function() {
+      res.send(200);
+    });
+});
+
 app.get('/drone/flyToPoint', function(req, res) {
 
   var lat = parseFloat(req.query.lat);
@@ -372,6 +379,11 @@ app.get('/drone/changeAltitude', function(req, res) {
   quad.changeAltitude(alt, platform);
   res.send(200);
 
+});
+
+app.get('/drone/rtl', function(req, res) {
+  logger.info('Setting RTL mode...');
+  Q.fcall(quad.rtl).then(function() { res.send(200) });
 });
 
 app.get('/platforms', function(req, res) {
