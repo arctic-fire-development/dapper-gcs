@@ -52,6 +52,22 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
 
             this.resizeMap();
 
+            // When home position is established, mark it on the map.
+            this.model.on('armed', function() {
+
+                var homeIcon = L.icon({
+                    iconUrl: '/images/home.min.svg',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
+                });
+
+                this.marker = L.marker([this.model.get('homeLat'), this.model.get('homeLon')], {
+                    icon: homeIcon,
+                    iconAngle: 0
+                }).addTo(this.map);
+
+            }, this);
+
         },
 
         resizeMap: function() {
