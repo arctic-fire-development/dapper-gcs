@@ -18,5 +18,6 @@ udlInterface.prototype.setLoiterMode = function() {};
 udlInterface.prototype.setGuidedMode = function() {};
 udlInterface.prototype.flyToPoint = function() {};
 udlInterface.prototype.changeAltitude = function() {};
+udlInterface.prototype.rtl = function() {};
 
 module.exports = udlInterface;
