@@ -251,9 +251,8 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             this.model.get('platform').on('change:custom_mode', function() {
                 var message, type='info', delay = 6000, mode = this.get('custom_mode');
                 
-                if(0 == mode) return; // ignore whatever this means.
-
                 switch(mode) {
+                    case 0: message = "System is in stabilize mode."; break;
                     case 3: message = "Performing takeoff&hellip;"; break;
                     case 4: message = "Flying to location&hellip;"; break;
                     case 5: message = "Hovering until further notice."; break;
