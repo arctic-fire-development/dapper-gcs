@@ -216,20 +216,6 @@ everyone.now.startConnection = function() {
           });
           everyone.now.updateConnection(connection);
       });
-
-      uavConnectionManager.on('connection:lost', function() {
-        connection=_.extend(connection, {
-          notification: 'lost'
-        });
-        everyone.now.updateConnection(connection);
-      });
-
-      uavConnectionManager.on('connection:regained', function() {
-        connection = _.extend(connection, {
-          notification: 'regained'
-        });
-        everyone.now.updateConnection(connection);
-      });
   
 }
 
@@ -311,7 +297,11 @@ app.get('/drone/flyToPoint', function(req, res) {
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
-  quad.flyToPoint(lat,lng,platform);
+  Q.fcall(quad.flyToPoint, lat, lng, platform).then(function(){
+    res.send(200);
+    }
+  );
+
 });
 
 app.get('/drone/loiter', function(req, res) {

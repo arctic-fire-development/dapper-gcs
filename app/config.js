@@ -17,9 +17,7 @@ require.config({
         "leaflet-bing-plugin": "assets/bower/leaflet-plugins/layer/tile/Bing",
         requirejs: "assets/bower/requirejs/require",
         q: "assets/bower/q/q",
-        "bootstrap-slider": "../assets/js/libs/bootstrap-slider/js/bootstrap-slider",
-        bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
-        "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl"
+        "bootstrap-slider": "../assets/js/libs/bootstrap-slider/js/bootstrap-slider"
     },
     shim: {
         backbone: {

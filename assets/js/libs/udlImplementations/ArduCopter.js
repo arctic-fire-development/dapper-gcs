@@ -254,7 +254,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
 
     log.verbose('Flying to %d %d %d', lat, lon, platform.relative_alt);
 
-    if(platform.custom_mode != APM.custom_modes.GUIDED) {
+    if(platform.custom_mode != APM.custom_modes.GUIDED) { // todo: remove magic number: 4 == guided mode
         // Need to set guided mode first.
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         try {
@@ -269,6 +269,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         } else {
             protocol.send(guided_mission_item);    
         }
+
 };
 
 module.exports = ArduCopterUdl;
