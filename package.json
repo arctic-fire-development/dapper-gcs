@@ -43,7 +43,7 @@
     "sinon": "",
     "grunt": "",
     "grunt-svgmin": "",
-    "grunt-bower-task": "",
+    "grunt-bower-task": "<0.4.0",
     "bower": "",
     "grunt-bower-requirejs": "",
     "grunt-develop": "",
