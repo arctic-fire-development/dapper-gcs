@@ -35,6 +35,8 @@ You need ```git```, ```node```, ```npm``` (distributed with node, usually), ```b
 brew install git
 sudo npm install -g grunt-cli
 sudo npm install -g bower
+sudo npm install -g forever
+sudo npm install -g nodemon
 ```
 
 #### Running
@@ -125,7 +127,7 @@ tree -L 3 -I "node_modules|bower|*.svg|*.less|*."
 ### Adding content or widgets
 
 (sketch)  TODO make a boilerplate for these
- 
+
  * create the template
  * create the view
  * find the appropriate router and add your view renderer there
