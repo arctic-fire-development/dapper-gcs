@@ -17,23 +17,12 @@ the MAVLink messages that set them.
             lon: undefined,
             alt: undefined,
             relative_alt: undefined,
-            vx: undefined,
-            vy: undefined,
-            vz: undefined,
-            hdg: undefined,
 
             // Set by mavlink.gps_raw_int packets
             fix_type: undefined,
             satellites_visible: undefined,
 
-            // set by mavlink.attitude packets
-            pitch: undefined,
-            roll: undefined,
-            yaw: undefined,
-            pitchspeed: undefined, // acceleration
-            rollspeed: undefined, // acceleration
-            yawspeed: undefined, // acceleration
-
+            // TODO GH#147
             // Set by mavFlightMode interpreting a variety of packets
             stateMode: undefined,
             stateAuto: undefined,
@@ -45,16 +34,11 @@ the MAVLink messages that set them.
             // Set by mavlink.SYS_STATUS packets
             voltage_battery: undefined,
             current_battery: undefined,
-            battery_remaining: undefined,
-            drop_rate_comm: undefined,
-            errors_comm: undefined,
+            battery_remaining: undefined, // %remaining
 
             // Set by mavlink.vfr_hud packets
-            airspeed: undefined,
             groundspeed: 0,
             heading: undefined,
-            throttle: undefined,
-            climb: undefined
 */
 
         },
@@ -108,6 +92,15 @@ the MAVLink messages that set them.
                     default: status = 'unknown'; break;
                 }
                 this.trigger('status:'+status);
+            }, this);
+            this.on('change:battery_remaining', function() {
+                if(this.get('battery_remaining') <= 10) {
+                    this.trigger('battery:low');
+                } else if(this.get('battery_remaining') <= 25) {
+                    this.trigger('battery:quarter');
+                } else if(this.get('battery_remaining') <= 50) {
+                    this.trigger('battery:half');
+                }
             }, this);
         },
 
