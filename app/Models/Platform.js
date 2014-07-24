@@ -59,9 +59,11 @@ the MAVLink messages that set them.
 
         },
 
-        // TODO future refactor: this code depends specifcally on APM-flavored MAVLink messages
+        // TODO GH#122 future refactor: this code depends specifcally on APM-flavored MAVLink messages
         // being interpreted to produce client-side events.  Need to abstract this out in the same way
         // the server-side UDL stuff is done.
+        // Also note the volume of event handlers being bound here, that's an emergent pattern, should
+        // be considered with #122.
         initialize: function() {
             _.bindAll(this, 'set');
             this.on('change:fix_type', function() {
@@ -69,9 +71,29 @@ the MAVLink messages that set them.
                     this.trigger('gps:fix_established');
                 }
             }, this);
+
+            // Managed armed/disarmed, and set home location too.
+            this.on('change:base_mode', function() {
+                // GH#122.  Replace 128 with an abstraction to the appropriate mavlink mapping.
+                if(128 & this.get('base_mode')) {
+                    this.set({
+                        homeLat: this.get('lat'),
+                        homeLon: this.get('lon')
+                    });
+                    this.trigger('armed');
+                } else {
+                    this.trigger('disarmed');
+                }
+            }, this);
+
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
+                // Again GH#122.
+                if(5 == this.get('custom_mode')) {
+                    this.trigger('mode:hover');
+                }
             }, this);
+
             this.on('change:system_status', function() {
                 var status;
                 // TODO: See GH#122 and MAV_STATE enum.

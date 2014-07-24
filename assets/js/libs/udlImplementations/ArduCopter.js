@@ -121,6 +121,59 @@ ArduCopterUdl.prototype.arm = function() {
 
 };
 
+// TODO GH#139, lots of code dupe here for the moment.
+ArduCopterUdl.prototype.disarm = function() {
+    var deferred = Q.defer();
+    log.info('ArduCopter UDL: disarming ArduCopter...');
+
+    var command_long = new mavlink.messages.command_long(
+        1, // target system
+        mavlink.MAV_COMP_ID_SYSTEM_CONTROL, // target_component
+        mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
+        1, // don't request ack, we'll listen for the mode change directly
+        0, // param1 (1 to indicate arm)
+        0, 0, 0, 0, 0, 0 // all other parameters meaningless
+    );
+
+    // Quite a bit of troubleshooting needs to happen here.
+    // The APM returns a command result of '3' when some pre-arm checks continue to fail.
+    // So we need to examine the command ack relative to this arming request and be prepared
+    // to handle edge cases around it.
+    protocol.on('COMMAND_ACK', function verifyDisarmingAck(msg) {
+        if( msg.result != 0 ) {
+            log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
+            throw new Error('Result of COMMAND_ACK for disarming failed');
+        }
+    });
+
+    // More troubleshooting.  Some messages that come back from the APM
+    // as status text, rather than direct failures.  TODO see if this is always true / research.
+    protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
+        if( msg.severity == mavlink.MAV_SEVERITY_ERROR ) {
+            log.debug('Arming rejected: %s', msg.text);
+            throw new Error('Arming rejected due to status text message error');
+        }
+    });
+
+    protocol.on('HEARTBEAT', function verifyDisarmed(msg) {
+        log.verbose('heartbeat.base_mode: %d', msg.base_mode)
+        try {
+            if (false === msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+                protocol.removeListener('HEARTBEAT', verifyDisarmed);
+                deferred.resolve();
+            } else {
+                log.verbose('Waiting on ack for disarming, currently mode is %d', msg.base_mode);
+                protocol.send(command_long);
+            }
+        } catch (e) {
+            log.error('Uncaught error in ArduCopterUdl.disarm()', e);
+        }
+    });
+
+    return deferred.promise;
+
+};
+
 ArduCopterUdl.prototype.setAutoMode = function() {
     log.info('ArduCopter UDL: setting auto mode...');
 
@@ -208,6 +261,40 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
             }
         } catch (e) {
             log.error('Uncaught exception in ArduCopterUdl.setGuidedMode', e);
+        }
+    });
+
+    protocol.send(set_mode);
+    return deferred.promise;
+
+};
+
+ArduCopterUdl.prototype.rtl = function() {
+
+    log.info('ArduCopter UDL: setting RTL mode...');
+
+    var deferred = Q.defer();
+
+    // Create message to request mode be set to Loiter
+    var set_mode = new mavlink.messages.set_mode(
+        1, // target system,
+        mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
+        APM.custom_modes.RTL // magic number for guided mode!  APM-specific.
+    );
+
+    // Attach listener to confirm that mode has been set to guided.
+    protocol.on('HEARTBEAT', function confirmRtlMode(msg) {
+        
+        try {
+            if (msg.custom_mode == apm.custom_modes.RTL) {
+                log.info('ArduCopter UDL: mode confirmed set to RTL mode!');
+                protocol.removeListener('HEARTBEAT', confirmRtlMode);
+                deferred.resolve();
+            } else {
+                log.debug('Switching to RTL, command sent, current custom mode: %d', msg.custom_mode);
+            }
+        } catch (e) {
+            log.error('Uncaught exception in ArduCopterUdl.setRTLMode', e);
         }
     });
 
