@@ -10,6 +10,7 @@ config.json
 *.sublime-workspace
 *.DS_Store
 .monitor
+logs/
 
 # These files and/or directory contents are always rebuilt during build processes.
 public/
