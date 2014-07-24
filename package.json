@@ -45,7 +45,7 @@
     "grunt-svgmin": "",
     "grunt-bower-task": "<0.4.0",
     "bower": "",
-    "grunt-bower-requirejs": "",
+    "grunt-bower-requirejs": "<0.11",
     "grunt-develop": "",
     "grunt-contrib-clean": "",
     "grunt-contrib-watch": "",
