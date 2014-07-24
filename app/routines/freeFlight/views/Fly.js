@@ -197,60 +197,37 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 }
 
             }, this);
+        
+            this.bindGrowlNotifications();
+
+        },
+
+        // Hook up various growl notifications.
+        bindGrowlNotifications: function() {
 
             this.model.get('platform').on('status:standby', function() {
-
-                $.bootstrapGrowl('System is in standby mode.', {
-                    ele: 'body', // which element to append to
-                    type: 'success', // (null, 'info', 'danger', 'success')
-                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
-                    align: 'right', // ('left', 'right', or 'center')
-                    width: 250, // (integer, or 'auto')
-                    delay: 10000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                    allow_dismiss: true, // If true then will display a cross to close the popup.
-                    stackup_spacing: 10 // spacing between consecutively stacked growls.
-                });
-            
+                this.growl('System is in standby mode.', 'success', 10000);
             });
 
             this.model.get('platform').on('disarmed', function() {
-
-                $.bootstrapGrowl('System is now disarmed.', {
-                    ele: 'body', // which element to append to
-                    type: 'success', // (null, 'info', 'danger', 'success')
-                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
-                    align: 'right', // ('left', 'right', or 'center')
-                    width: 250, // (integer, or 'auto')
-                    delay: 10000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                    allow_dismiss: true, // If true then will display a cross to close the popup.
-                    stackup_spacing: 10 // spacing between consecutively stacked growls.
-                });
-            
+                this.growl('System is now disarmed.', 'success', 10000);
             });
 
             this.model.get('connection').on('change:notification', function() {
+
                 var message, type;
                 switch(this.get('notification')) {
                     case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
                     case 'regained': message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type='success'; break;
                 }
                 
-                $.bootstrapGrowl(message, {
-                    ele: 'body', // which element to append to
-                    type: type, // (null, 'info', 'danger', 'success')
-                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
-                    align: 'right', // ('left', 'right', or 'center')
-                    width: 250, // (integer, or 'auto')
-                    delay: 10000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                    allow_dismiss: true, // If true then will display a cross to close the popup.
-                    stackup_spacing: 10 // spacing between consecutively stacked growls.
-                }, this);
-            });
+                this.growl(message);
+
+            }, this);
 
             // Bind notifications to change events on the platform
             this.model.get('platform').on('change:custom_mode', function() {
-                var message, type='info', delay = 6000, mode = this.get('custom_mode');
-                
+                var message, type='info', delay = 6000, mode = this.model.get('platform').get('custom_mode');
                 switch(mode) {
                     case 0: message = "System is in stabilize mode."; break;
                     case 3: message = "Performing takeoff&hellip;"; break;
@@ -260,18 +237,46 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     default: message = "Switching to custom_mode " + mode, delay=10000, type='danger';
                 }
 
-                // Context here is the platform model.
-                $.bootstrapGrowl(message, {
-                    ele: 'body', // which element to append to
-                    type: type, // (null, 'info', 'danger', 'success')
-                    offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
-                    align: 'right', // ('left', 'right', or 'center')
-                    width: 250, // (integer, or 'auto')
-                    delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                    allow_dismiss: true, // If true then will display a cross to close the popup.
-                    stackup_spacing: 10 // spacing between consecutively stacked growls.
-                }, this);
-        });
+                this.growl(message, type, delay);
+
+            }, this);
+
+            // Battery notifications
+            var batteryIcon = '<span class="glyphicon glyphicon-flash"></span>';
+            this.model.get('platform').once('battery:half', function() {
+                this.growl(batteryIcon + ' Battery is at half power.');
+            }, this);
+            this.model.get('platform').once('battery:quarter', function() {
+                this.growl(
+                    batteryIcon + ' Battery is at quarter power.',
+                    'warning',
+                    1000000000 // persistent
+                );
+            }, this);
+            this.model.get('platform').once('battery:low', function() {
+                this.growl(
+                    batteryIcon + ' Battery is very low, land safely immediately.',
+                    'danger',
+                    1000000000
+                );
+            }, this);
+        },
+
+        growl: function(message, type, delay) {
+            
+            type = type || 'info';
+            delay = delay || 6000; // ms
+
+            $.bootstrapGrowl(message, {
+                ele: 'body', // which element to append to
+                type: type, // (null, 'info', 'danger', 'success')
+                offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
+                align: 'right', // ('left', 'right', or 'center')
+                width: 250, // (integer, or 'auto')
+                delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
+                allow_dismiss: true, // If true then will display a cross to close the popup.
+                stackup_spacing: 10 // spacing between consecutively stacked growls.
+            });
 
         }
 
