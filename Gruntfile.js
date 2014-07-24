@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         clean: ["build", "public/images", "public/javascripts", "public/stylesheets"],
-        
+
         // The Jade task must be run prior to this task, because the Backbone views
         // reference templates via require().
         requirejs: {
@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                     mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "uglify2",
+                    optimize: "none",
                     findNestedDependencies: true, // for dynamic local includes
                     generateSourceMaps: true,
                     preserveLicenseComments: false, // so we can use source maps
@@ -44,9 +44,9 @@ module.exports = function(grunt) {
 
         // Used to copy some specific assets from various packages to public directories.
         //
-        // Most Bower-managed javascript gets vacuumed in through the RequireJS process, look in app/config.js 
+        // Most Bower-managed javascript gets vacuumed in through the RequireJS process, look in app/config.js
         // for those inclusions.
-        // 
+        //
         // Most Bower-managed CSS and LESS gets pulled in through the ```less``` and ```cssmin``` steps below.
         //
         // Oddballs and/or image assets belong here.
@@ -87,7 +87,7 @@ module.exports = function(grunt) {
                 options: {
                     interrupt: false,
                     nospawn: true
-                }  
+                }
             },
 
             styles: {
