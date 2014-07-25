@@ -39,7 +39,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         home: function() {
             Q($.get('/drone/rtl')).then(_.bind(function() {
-                
+
                 this.$el.find('button.home').hide();
                 this.$el.find('button.stop').show();
 
@@ -50,7 +50,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 this.model.get('platform').on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
                         this.$el.find('button.stop').hide();
-                        this.$el.find('button.launch').show()
+                        this.$el.find('button.launch').show();
                     }, this));
                 }, this);
             }, this));
@@ -58,7 +58,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         stop: function() {
             Q($.get('/drone/loiter')).then(_.bind(function() {
-                
+
                 this.$el.find('button.stop').hide();
                 this.$el.find('button.home').show();
 
@@ -115,7 +115,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             ).addTo(this.mapWidget.map);
         },
 
-        hoverAtPoint: function(e) {  
+        hoverAtPoint: function(e) {
             $.get('/drone/loiter');
             this.mapWidget.map.removeLayer(this.targetMarker);
             this.mapWidget.map.removeLayer(this.targetLine);
@@ -172,6 +172,9 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     model: this.model.get('platform'),
                     maxAltitude: this.model.get('planning').get('maxAltitude')
                 });
+                this.batteryWidget = new BatteryWidget({
+                    model: this.model.get('platform')
+                });
                 this.mapWidget = new MapWidget({
                     model: this.model.get('platform')
                 });
@@ -182,13 +185,14 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 // Render party
                 this.speedWidget.render();
                 this.altitudeWidget.render();
+                this.batteryWidget.render();
                 this.mapWidget.render();
                 this.bindMapClickEvents();
 
                 // Must configure/render this only after the map has been rendered.
                 this.platformWidget.map = this.mapWidget.map;
                 this.platformWidget.render();
-                
+
                 // If we're in flight, change the GUI as needed.
                 // TODO: more needs to be done here, manage Fly button, etc.
                 if(this.model.get('platform').isFlying()) {
@@ -197,7 +201,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 }
 
             }, this);
-        
+
             this.bindGrowlNotifications();
 
         },
@@ -220,7 +224,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
                     case 'regained': message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type='success'; break;
                 }
-                
+
                 this.growl(message);
 
             }, this);
@@ -263,7 +267,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         },
 
         growl: function(message, type, delay) {
-            
+
             type = type || 'info';
             delay = delay || 6000; // ms
 
