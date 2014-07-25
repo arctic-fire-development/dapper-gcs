@@ -367,7 +367,7 @@ app.get('/drone/changeAltitude', function(req, res) {
 
   var alt = parseInt(req.query.alt);
 
-  // TODO unsafe prototype code below; idea being, protect from sending messages that are outside
+  // TODO GH#154 unsafe prototype code below; idea being, protect from sending messages that are outside
   // a GCS/GUI enforced ceiling.
   if(alt > routine.maxAltitude) {
     alt = routine.maxAltitude;
