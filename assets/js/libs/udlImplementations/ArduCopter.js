@@ -286,7 +286,7 @@ ArduCopterUdl.prototype.rtl = function() {
     protocol.on('HEARTBEAT', function confirmRtlMode(msg) {
         
         try {
-            if (msg.custom_mode == apm.custom_modes.RTL) {
+            if (msg.custom_mode == APM.custom_modes.RTL) {
                 log.info('ArduCopter UDL: mode confirmed set to RTL mode!');
                 protocol.removeListener('HEARTBEAT', confirmRtlMode);
                 deferred.resolve();
