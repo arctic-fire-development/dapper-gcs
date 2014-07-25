@@ -7,6 +7,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
     'Views/Widgets/Speed',
     'Views/Widgets/Map',
     'Views/Widgets/Altitude',
+    'Views/Widgets/Battery',
     'Views/Widgets/Platform',
 
 ], function(Backbone, templates, Q, L, BS, BG,
@@ -17,6 +18,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
     SpeedWidget,
     MapWidget,
     AltitudeWidget,
+    BatteryWidget,
     PlatformWidget
 ) {
 
