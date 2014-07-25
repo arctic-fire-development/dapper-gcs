@@ -207,11 +207,11 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             this.model.get('platform').on('status:standby', function() {
                 this.growl('System is in standby mode.', 'success', 10000);
-            });
+            }, this);
 
             this.model.get('platform').on('disarmed', function() {
                 this.growl('System is now disarmed.', 'success', 10000);
-            });
+            }, this);
 
             this.model.get('connection').on('change:notification', function() {
 
