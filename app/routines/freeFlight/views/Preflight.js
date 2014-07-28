@@ -12,7 +12,8 @@ define(['backbone', 'JST',
         template: templates['app/routines/freeFlight/Templates/preflight'],
 
         initialize : function (options) {
-          this.options = options || {};
+            _.bindAll(this, 'render');
+            this.options = options || {};
         },
 
         events: {
@@ -25,8 +26,9 @@ define(['backbone', 'JST',
         },
 
         render: function() {
-
-            this.$el.html(this.template);
+            this.$el.html(this.template({
+                parameters: this.options.parameters
+            }));
 
             this.connectionView = new ConnectionWidget({
                 model: this.model,
