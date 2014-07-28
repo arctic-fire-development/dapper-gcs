@@ -368,10 +368,9 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
 ArduCopterUdl.prototype.getLatLon = function() {
     var deferred = Q.defer();
     protocol.once('GLOBAL_POSITION_INT', function getLatLon(msg) {
-        var latLon = _.map([msg.lat, msg.lon], function(e) {
-                return e / 1e7;
-            });
-        deferred.resolve(latLon);
+        deferred.resolve([
+            msg.lat / 1e7, msg.lon / 1e7
+        ]);
     });
     return deferred.promise;
 };
