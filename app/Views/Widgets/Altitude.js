@@ -18,7 +18,9 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
             this.maxAltitude = parseInt(options.maxAltitude, 10);
 
-            //TODO remove reference to MAVLink
+            //TODO remove reference to MAVLink-specific altitude message,
+            // instead replace with the platform abstraction layer.
+            // GH#122
             this.model.on("change:relative_alt", this.render, this);
         },
         enable: function() {
