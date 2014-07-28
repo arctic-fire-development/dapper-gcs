@@ -178,7 +178,7 @@ MavMission.prototype.loadMission = function(mission) {
             this.sendToPlatform();
 
         }, this))
-        .done();
+        .done(); // rethrow errors
 
     this.on('mission:loaded', function() {
         log.info('Mission loaded successfully!');
@@ -203,7 +203,7 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
         0, // sequence number, see GH#159
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_WAYPOINT, // 0th waypoint at "home"
-        APM.mission_current.inactive,
+        APM.mission_current.active, // we're active at the 0th waypoint!  :) beers for me soon
         1, // autocontinue to next waypoint,
         0, // 4 params, unused for this message type
         0,

@@ -186,7 +186,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
     try {
         protocol.on('HEARTBEAT', function confirmAutoMode(msg) {
             if (msg.custom_mode == APM.custom_modes.AUTO) {
-                debug('Custom mode confirmed set OK.');
+                log.debug('Custom mode AUTO confirmed set OK.');
                 protocol.removeListener('HEARTBEAT', confirmAutoMode);
                 deferred.resolve();
             }
@@ -200,7 +200,6 @@ ArduCopterUdl.prototype.setAutoMode = function() {
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         APM.custom_modes.AUTO // magic number for guided mode!  APM-specific.
     );
-    log.debug('Mode packet being sent now: ', util.inspect(set_mode));
     protocol.send(set_mode);
 
     return deferred.promise;
