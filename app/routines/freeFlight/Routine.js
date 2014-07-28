@@ -56,7 +56,10 @@ define([
             // Saving this code for a refactoring swamp.  TODO GH#164
             // Upload specific parameters if SITL.
             // We need this ONLY if we're flying SITL.
-            this.on('change:connected', _.bind(function(model) {
+            // Upload specific parameters if defined in parameters file
+            if( false !== appConfig.platforms[this.get('mission').get('platformId')].parameters ) {
+
+               this.on('change:connected', _.bind(function(model) {
 
                 var parametersLoaded = _.bind(function() {
                         this.set( { 'paramsLoaded':true });
@@ -65,18 +68,18 @@ define([
                         $('#loadParameters .connected').show();
                 }, this);
 
-                    Q($.get('/drone/params/load')).then(_.bind(function(data) {
-                        parametersLoaded();
-                    }, function(xhr) {
-                        // on failure
-                        console.log(xhr);
-                    }, this));
-                    
-                    $('#loadParameters .disconnected').hide();
-                    $('#loadParameters .connecting').show();
+                Q($.get('/drone/params/load')).then(_.bind(function(data) {
+                    parametersLoaded();
+                }, function(xhr) {
+                    // on failure
+                    console.log(xhr);
+                }, this));
+
+                $('#loadParameters .disconnected').hide();
+                $('#loadParameters .connecting').show();
                 
             }, this));
-
+        }
 
         // // Upload mission plan
         // KEEPING IN as refactoring swamp for near-term changes to support correct workflow.

@@ -9,8 +9,8 @@ html(lang='en')
 		link(rel='icon', type='image/png', href='/images/afdc.png')
 		script(type="text/javascript", data-main="/javascripts/required", charset="utf-8", src="/javascripts/require.js")
 		script.
-			var app = app || {};
-			app.platforms = !{JSON.stringify(platforms)}
+			var appConfig = appConfig || {};
+			appConfig.platforms = !{JSON.stringify(platforms)}
 	body
 		nav#main-navbar.navbar.navbar-default(role="navigation")
 			.container-fluid

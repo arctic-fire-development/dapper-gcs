@@ -10,6 +10,13 @@
             li.list-group-item
               #preflightSitlConnectionManager.statusWidget
 
+            if parameters
+              li.list-group-item
+                #loadParameters.statusWidget
+                  .disconnected <span class="glyphicon glyphicon-tasks"></span> Flight parameters not loaded.
+                  .connecting(style="display:none") <span class="glyphicon glyphicon-tasks"></span> Loading flight parameters&hellip;
+                  .connected(style="display:none") <span class="glyphicon glyphicon-ok"></span> Flight parameters loaded.
+
             li.list-group-item.manual
               .btn-group(data-toggle="buttons")
                 label.btn.btn-danger.btn-sm.
