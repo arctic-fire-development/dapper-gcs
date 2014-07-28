@@ -53,7 +53,9 @@ define([
 
             BaseRoutine.prototype.preflight.apply(this, [preflightCompletedDeferred]); // call parent code
 
-            // Upload specific parameters
+            // Saving this code for a refactoring swamp.  TODO GH#164
+            // Upload specific parameters if SITL.
+            // We need this ONLY if we're flying SITL.
             this.on('change:connected', _.bind(function(model) {
 
                 var parametersLoaded = _.bind(function() {
@@ -76,29 +78,30 @@ define([
             }, this));
 
 
-        // Upload mission plan
-        this.on('change:paramsLoaded', _.bind(function() {
+        // // Upload mission plan
+        // KEEPING IN as refactoring swamp for near-term changes to support correct workflow.
+        // this.on('change:paramsLoaded', _.bind(function() {
 
-            var missionLoaded = _.bind(function() {
-                    $('#loadMission .connecting').hide();
-                    $('#loadMission .connected').show();
-                    this.set( { 'missionLoaded':true });
-                    missionUploadedDeferred.resolve();
-            }, this);
+        //     var missionLoaded = _.bind(function() {
+        //             $('#loadMission .connecting').hide();
+        //             $('#loadMission .connected').show();
+        //             this.set( { 'missionLoaded':true });
+        //             missionUploadedDeferred.resolve();
+        //     }, this);
 
-                Q($.get('/drone/mission/load')).then(_.bind(function(data) {
-                    missionLoaded();
-                }, function(xhr) {
-                    // on failure
-                    console.log(xhr);
-                }, this));
+        //         Q($.get('/drone/mission/load')).then(_.bind(function(data) {
+        //             missionLoaded();
+        //         }, function(xhr) {
+        //             // on failure
+        //             console.log(xhr);
+        //         }, this));
                 
-                $('#loadMission .disconnected').hide();
-                $('#loadMission .connecting').show();
+        //         $('#loadMission .disconnected').hide();
+        //         $('#loadMission .connecting').show();
             
-        }, this));
+        // }, this));
 
-            return preflightCompletedDeferred.promise;
+        return preflightCompletedDeferred.promise;
 
         },
 
