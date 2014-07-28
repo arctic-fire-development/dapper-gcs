@@ -139,7 +139,17 @@ the MAVLink messages that set them.
 
         // Force altitude to be an integer.  Used for both alt and relative_alt.
         parseAltitude: function(alt) {
-            alt = parseInt(Number(alt).toFixed(0));
+            alt = parseFloat(alt);
+
+            // If we don't have a real value, keep it undefined instead of getting stuck with NaN.
+            if(_.isNaN(alt)) { return undefined; }
+
+            if(alt < 0) {
+                alt = Math.ceil(alt);
+            } else {
+                alt = Math.floor(alt);
+            }
+
             return alt;
         },
 
