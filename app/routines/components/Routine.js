@@ -59,12 +59,19 @@ define([
 
         // A few promises for keeping track of various async processes.
         var connectionEstablishedDeferred = Q.defer(); // After connection is confirmed with UAV
-
-        var preflightView = new PreflightView( {
-            deferred: preflightCompletedDeferred,
-            model: this.connection
-        }).render();
         
+        try { // catch exceptions hidden by Q
+            var preflightView = new PreflightView( {
+                deferred: preflightCompletedDeferred,
+                model: this.connection,
+                mission: this.get('mission'),
+                parameters: appConfig.platforms[this.get('mission').get('platformId')].parameters
+            }).render();
+        } catch(e) {
+            console.log(e);
+            throw(e);
+        }
+
         // Initalize connection.
         now.ready(_.bind(function() {
 

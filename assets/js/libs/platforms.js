@@ -53,21 +53,17 @@ var sitlCopterParams = [
 // Some below are commented out to demonstrate structure, but they shouldn't
 // be in the GUI at this point.
 var platforms = [
-  // {
-  //   name: 'ArduPlane (Generic)',
-  //   type: 'plane',
-  //   payloads: [],
-  //   missions: ['SITL'],
-  //   id: 0
-  // },
-  // {
-  //   name: 'ArduCopter (Generic)',
-  //   type: 'copter',
-  //   payloads: [],
-  //   missions: ['SITL', 'Free Flight'],
-  //   id: 1,
-  //   parameters: sitlCopterParams
-  // },
+  {
+    name: 'ArduCopter (SITL)',
+    type: 'quadcopter',
+    payloads: [],
+    missions: ['Free Flight'],
+    id: 0,
+    parameters: sitlCopterParams,
+    defaults: {
+      topSpeed: 15 // kph
+    }
+  },
   {
     name: '3DR Iris',
     type: 'quadcopter',
@@ -79,8 +75,8 @@ var platforms = [
       'High-resolution mapping',
       'Digital elevation model'
     ],
-    id: 2,
-    parameters: sitlCopterParams,
+    id: 1,
+    parameters: false,
     defaults: {
       topSpeed: 10 // kph
     }
