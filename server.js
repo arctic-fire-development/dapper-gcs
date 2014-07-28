@@ -353,6 +353,8 @@ app.get('/drone/flyToPoint', function(req, res) {
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
   quad.flyToPoint(lat,lng,platform);
+  res.send(200);
+
 });
 
 app.get('/drone/loiter', function(req, res) {
@@ -392,6 +394,7 @@ app.get('/platforms', function(req, res) {
 app.post('/routines/freeFlight/planning', function(req, res) {
   routine.maxSpeed = req.body.maxSpeed * 100; // translate km/h to cm/s
   routine.maxAltitude = req.body.maxAltitude;
+  res.send(200);
 });
 
 // Set up exit handlers so we can clean up as best as possible upon server process shutdown
