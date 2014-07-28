@@ -1,5 +1,47 @@
+'use strict';
+/*global require, util, events, module */
+
 /*
-Waypoint state manager.
+Waypoint manager, loads/clears mission items with UAV via MAVLink.
+
+Sending parameters is done via MAVLink mission_item messages, here's a copy/paste of some docs:
+
+Message encoding a mission item. This message is emitted to announce
+the presence of a mission item and to set a mission item on the
+system. The mission item can be either in x, y, z meters (type: LOCAL)
+or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed
+(NED), global frame is Z-up, right handed (ENU). See also
+http://qgroundcontrol.org/mavlink/waypoint_protocol.
+
+                target_system             : System ID (uint8_t)
+                target_component          : Component ID (uint8_t)
+                seq                       : Sequence (uint16_t)
+                frame                     : The coordinate system of the MISSION. see MAV_FRAME in mavlink_types.h (uint8_t)
+                command                   : The scheduled action for the MISSION. see MAV_CMD in common.xml MAVLink specs (uint16_t)
+                current                   : false:0, true:1 (uint8_t)
+                autocontinue              : autocontinue to next wp (uint8_t)
+                param1                    : PARAM1 / For NAV command MISSIONs: Radius in which the MISSION is accepted as reached, in meters (float)
+                param2                    : PARAM2 / For NAV command MISSIONs: Time that the MAV should stay inside the PARAM1 radius before advancing, in milliseconds (float)
+                param3                    : PARAM3 / For LOITER command MISSIONs: Orbit to circle around the MISSION, in meters. If positive the orbit direction should be clockwise, if negative the orbit direction should be counter-clockwise. (float)
+                param4                    : PARAM4 / For NAV and LOITER command MISSIONs: Yaw orientation in degrees, [0..360] 0 = NORTH (float)
+                x                         : PARAM5 / local: x position, global: latitude (float)
+                y                         : PARAM6 / y position: global: longitude (float)
+                z                         : PARAM7 / z position: global: altitude (float)
+
+Note that when we deal with QGC-formatted "waypoint file format", the order of the fields is slightly different.
+http://qgroundcontrol.org/mavlink/waypoint_protocol#waypoint_file_format
+
+QGC WPL <VERSION>
+<INDEX> <CURRENT WP> <COORD FRAME> <COMMAND> <PARAM1> <PARAM2> <PARAM3> <PARAM4> <PARAM5/X/LONGITUDE> <PARAM6/Y/LATITUDE> <PARAM7/Z/ALTITUDE> <AUTOCONTINUE>
+
+Another note to consider is how exactly these messages are interpreted by the APM.
+A good spot in the source code to examine is in ardupilot/libraries/GCS_MAVLink/GCS_common.cpp, in
+
+void GCS_MAVLINK::handle_mission_item(mavlink_message_t *msg, AP_Mission &mission)
+
+There, we learn that the 'current' field has special meaning for APM.  See
+the APM.mission_current enum below.
+
 */
 var _ = require('underscore'),
     Q = require('q');
@@ -15,7 +57,24 @@ var mavlinkParser;
 
 // This really needs to not be here.
 // TODO really?
+// GH#159
 var uavConnection;
+
+// See comments in header for where this comes from.
+// TODO refactor into global APM translation object GH#161.
+// 0 / 1 means indicates if the item is currently being executed, so when we are _sending_ these items,
+// it should always be 0; when we are requesting the item, it may be 0 or 1 depending on if it's being
+// currently executed.
+// 2 means it's a "guided mode" waypoint, to be executed immediately, and
+// 3 means it's a "change altitude only" waypoint for "guided mode."
+var APM = {
+    mission_current: {
+        inactive: 0,
+        active: 1,
+        guided: 2,
+        altitude: 3
+    }
+};
 
 // Handler when the ArduPilot requests individual waypoints: upon receiving a request,
 // Send the next one.
@@ -26,20 +85,17 @@ function missionRequestHandler(missionItemRequest) {
     // If the requested mission item isn't present, bail
     if( _.isUndefined(missionItems[missionItemRequest.seq])) {
         log.error('APM asked to send undefined mission packet [#%d]', missionItemRequest.seq, missionItems);
-        throw new Error("APM asked to send undefined mission packet");
+        throw new Error('APM asked to send undefined mission packet');
     }
 
     mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
 }
 
-// Mapping from numbers (as those stored in waypoint files) to MAVLink commands.
-var commandMap;
-
 // Waypoints, an ordered array of waypoint MAVLink objects
 var missionItems = [];
 
 // Mission object constructor
-MavMission = function(mavlinkProtocol, mavlinkProtocolInstance, uavConnectionObject, logger) {
+var MavMission = function(mavlinkProtocol, mavlinkProtocolInstance, uavConnectionObject, logger) {
 
     log = logger;
     mavlink = mavlinkProtocol;
@@ -55,6 +111,7 @@ MavMission.prototype.sendToPlatform = function() {
     log.silly('Sending mission to platform...');
 
     // send mission_count
+    // TODO see GH#95
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
     mavlinkParser.send(missionCount, uavConnection);
 
@@ -84,73 +141,90 @@ MavMission.prototype.addMissionItem = function(missionItemMessage) {
     missionItems[missionItemMessage.seq] = missionItemMessage;
 };
 
-MavMission.prototype.clearMission = function(first_argument) {
+MavMission.prototype.clearMission = function() {
     log.info('Clearing all mission items...');
+
+    var deferred = Q.defer();
+    mavlinkParser.once('MISSION_ACK', function verifyClearMission(msg) {
+        if(msg.type == mavlink.MAV_MISSION_ACCEPTED) {
+            log.verbose('Mission items confirmed cleared by APM.');
+            deferred.resolve();
+        } else {
+            log.warn('Request to clear mission items failed. ', util.inspect(msg));
+            deferred.reject(msg);
+        }
+    });
+
     missionItems = [];
     var missionClearAll = new mavlink.messages.mission_clear_all(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
     mavlinkParser.send(missionClearAll);
 };
 
-MavMission.prototype.loadMission = function() {
+// Expects an array of mission_item mavlink messages.
+MavMission.prototype.loadMission = function(mission) {
     var deferred = Q.defer();
+
+    // deal with this properly, add promises etc.
+    // TODO GH#159
+    this.clearMission();
 
     this.on('mission:loaded', function() {
         log.info('Mission loaded successfully!');
         deferred.resolve();
     });
 
-    loadMission(this, deferred);
+    _.each(mission, function(missionItem) {
+        this.addMissionItem(missionItem);
+    }, this);
 
+    this.sendToPlatform();
     return deferred.promise;
+
 };
 
 MavMission.prototype.getMissionItems = function() {
     return missionItems;
 };
 
-// Stub for initial development/testing
-loadMission = function(mission) {
+// Given lat/lon, build a two-item mission that takes off and hovers.
+// Returns an array of mission items.
+MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
 
-    mission.clearMission();
+    var takeoff = new mavlink.messages.mission_item(
+        mavlinkParser.srcSystem,
+        mavlinkParser.srcComponent,
+        0, // sequence number, see GH#159
+        mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+        mavlink.MAV_CMD_NAV_WAYPOINT, // 0th waypoint at "home"
+        APM.mission_current.inactive,
+        1, // autocontinue to next waypoint,
+        0, // 4 params, unused for this message type
+        0,
+        0,
+        0,
+        lat,
+        lon,
+        0 // relative alt; takeoff point = 0
+    );
 
-    _.each(takeoffAndThenLand, function(e, i, l) {
-        // target_system, target_component, seq, frame, command, current, autocontinue, param1, param2, param3, param4, x, y, z
-        mi = new mavlink.messages.mission_item(
-            mavlinkParser.srcSystem,
-            mavlinkParser.srcComponent,
-            e[0], // seq
-            e[2], // frame
-            e[3], // command
-            e[1], // current
-            e[11], // autocontinue
-            e[4], // param1,
-            e[5], // param2,
-            e[6], // param3
-            e[7], // param4
-            e[8], // x (latitude
-            e[9], // y (longitude
-            e[10] // z (altitude
-        );
-        mission.addMissionItem(mi);
-    });
+    var hover = new mavlink.messages.mission_item(
+        mavlinkParser.srcSystem,
+        mavlinkParser.srcComponent,
+        1, // sequence number,
+        mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+        mavlink.MAV_CMD_NAV_TAKEOFF,
+        APM.mission_current.inactive,
+        0, // end of mission, platform should hover after this.
+        0, // 4 params, unused for this message type
+        0,
+        0,
+        0,
+        lat,
+        lon,
+        20 // hover at 20 meters.  TODO GH#162
+    );
 
-    mission.sendToPlatform();
-
+    return [takeoff, hover];
 };
-
-// This mission simply takes off and hovers at 20 meters.
-var takeoffAndThenLand = [
-    //QGC,WPL,110
-    // ref frame 3 = Global coordinate frame, WGS84 coordinate system, relative altitude
-
-    //s,fr,ac,cmd,p1,p2,p3,p4,lat,lon,alt,continue
-    // the 0th waypoint.  what's this good for?
-    [0, 1, 3, 16, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 0, 1],
-
-    //,takeoff, do not continue to next waypoint
-    [1, 0, 3, 22, 0.000000, 0.000000, 0.000000, 0.000000, -35.362881, 149.165222, 20, 0]
-
-];
-
 
 module.exports = MavMission;

@@ -313,15 +313,47 @@ app.get('/drone/params/load', function(req, res) {
 
 });
 
+// TODO GH#164
+// This code is a prototype for when we properly bind this into the client GUI.
 app.get('/drone/mission/load', function(req, res) {
 
-    var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
-    var promise = mm.loadMission();
-    
-    Q.when(promise, function() {
-        res.send(200);
-    });
+  var lat = parseFloat(req.query.lat);
+  var lng = parseFloat(req.query.lng);
+  var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+  var mission = mm.buildTakeoffThenHoverMission(lat, lng);
+  var promise = mm.loadMission(mission);
+
+  Q.when(promise, function() {
+    res.send(200);
+  });
 });
+
+// TODO GH#164
+// This is just a stub to handle getting the home/armed location to the
+// mission-build-takeoff section.
+function loadTakeoffMission() {
+
+  var deferred = Q.defer();
+  var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+
+  quad.getLatLon().then(function(location) {
+    logger.info('Building auto/hover mission from home point: ', location);
+    var mission = mm.buildTakeoffThenHoverMission(location[0], location[1]);
+    mm.loadMission(mission)
+      .then(function() {
+        logger.info('Auto/hover mission loaded into APM.');
+        deferred.resolve();
+      })
+      .fail(function(error) {
+        logger.error(error.toString());
+      });
+  })
+  .fail(function(error) {
+    logger.error(error.toString());
+  });
+  
+  return deferred.promise;
+};
 
 app.get('/drone/launch', function(req, res) {
 
@@ -330,12 +362,13 @@ app.get('/drone/launch', function(req, res) {
   try {
 
   Q.fcall(quad.arm)
+    .then(loadTakeoffMission)
     .then(quad.setAutoMode)
     .then(quad.takeoff)
     .then(function() {
       res.send(200);
     })
-    .done();
+    .done(); // calling 'done' should rethrow any uncaught errors in the promise chain.
 
   } catch(e) {
     logger.error('error caught in server:freeglight:launch:trycatch', e)

@@ -1,12 +1,16 @@
+'use strict';
+/*global require, util, Buffer, module */
+
 var udlInterface = require('../udlInterface.js'),
     mavlink = require('mavlink_ardupilotmega_v1.0'),
     Q = require('q'),
     jspack = require('jspack').jspack,
-    dgram = require('dgram');
+    dgram = require('dgram'),
+    _ = require('underscore');
 
 // Enum of custom modes from ArduPilot/ArduCopter/defines.h, used in flightmode.pde etc.
 // Only the modes that we use are defined here; add others as required.
-const APM = {
+var APM = {
     custom_modes: {
         AUTO: 3,
         GUIDED: 4,
@@ -22,7 +26,7 @@ var config; // set when object is instantiated, nconf instance
 function ArduCopterUdl(logger, configObject) {
     log = logger;
     config = configObject;
-};
+}
 
 util.inherits(ArduCopterUdl, udlInterface);
 
@@ -87,7 +91,7 @@ ArduCopterUdl.prototype.arm = function() {
     // So we need to examine the command ack relative to this arming request and be prepared
     // to handle edge cases around it.
     protocol.on('COMMAND_ACK', function verifyArmingAck(msg) {
-        if( msg.result != 0 ) {
+        if( msg.result !== 0 ) {
             log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
             throw new Error('Result of COMMAND_ACK for arming failed');
         }
@@ -103,7 +107,7 @@ ArduCopterUdl.prototype.arm = function() {
     });
 
     protocol.on('HEARTBEAT', function verifyArmed(msg) {
-        log.verbose('heartbeat.base_mode: %d', msg.base_mode)
+        log.verbose('heartbeat.base_mode: %d', msg.base_mode);
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
                 protocol.removeListener('HEARTBEAT', verifyArmed);
@@ -156,7 +160,7 @@ ArduCopterUdl.prototype.disarm = function() {
     });
 
     protocol.on('HEARTBEAT', function verifyDisarmed(msg) {
-        log.verbose('heartbeat.base_mode: %d', msg.base_mode)
+        log.verbose('heartbeat.base_mode: %d', msg.base_mode);
         try {
             if (false === msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
                 protocol.removeListener('HEARTBEAT', verifyDisarmed);
@@ -182,6 +186,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
     try {
         protocol.on('HEARTBEAT', function confirmAutoMode(msg) {
             if (msg.custom_mode == APM.custom_modes.AUTO) {
+                debug('Custom mode confirmed set OK.');
                 protocol.removeListener('HEARTBEAT', confirmAutoMode);
                 deferred.resolve();
             }
@@ -193,8 +198,9 @@ ArduCopterUdl.prototype.setAutoMode = function() {
     var set_mode = new mavlink.messages.set_mode(
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        3 // magic number for guided mode!  APM-specific.
+        APM.custom_modes.AUTO // magic number for guided mode!  APM-specific.
     );
+    log.debug('Mode packet being sent now: ', util.inspect(set_mode));
     protocol.send(set_mode);
 
     return deferred.promise;
@@ -245,7 +251,7 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
     var set_mode = new mavlink.messages.set_mode(
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        APM.custom_modes.GUIDED // magic number for guided mode!  APM-specific.
+        APM.custom_modes.GUIDED
     );
 
     // Attach listener to confirm that mode has been set to guided.
@@ -279,7 +285,7 @@ ArduCopterUdl.prototype.rtl = function() {
     var set_mode = new mavlink.messages.set_mode(
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        APM.custom_modes.RTL // magic number for guided mode!  APM-specific.
+        APM.custom_modes.RTL
     );
 
     // Attach listener to confirm that mode has been set to guided.
@@ -311,7 +317,8 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         0, // ?
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_WAYPOINT,
-        2, 0, 0, 0, 0, 0, // 3 is the magic number meaning change altitude.  See apm source code.
+        // TODO See GH#94, improving this message here.
+        2, 0, 0, 0, 0, 0, // 3 is the magic number meaning change altitude; should we use that??
         platform.lat, platform.lon, alt
     );
 
@@ -336,7 +343,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         0, // seq#
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_WAYPOINT,
-        2, 0, 0, 0, 0, 0, // ? is 2 the magic number here?
+        2, 0, 0, 0, 0, 0, // 2 = guided nav waypoint.
         lat, lon, platform.relative_alt // use current altitude
     );
 
@@ -348,7 +355,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         try {
             Q.fcall(this.setGuidedMode)
                 .then(function() {
-                    log.verbose('Switched to GUIDED, now transmitting mission item.')
+                    log.verbose('Switched to GUIDED, now transmitting mission item.');
                     protocol.send(guided_mission_item);       
                 });
              } catch(e) {
@@ -357,6 +364,17 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         } else {
             protocol.send(guided_mission_item);    
         }
+};
+
+ArduCopterUdl.prototype.getLatLon = function() {
+    var deferred = Q.defer();
+    protocol.once('GLOBAL_POSITION_INT', function getLatLon(msg) {
+        var latLon = _.map([msg.lat, msg.lon], function(e) {
+                return e / 1e7;
+            });
+        deferred.resolve(latLon);
+    });
+    return deferred.promise;
 };
 
 module.exports = ArduCopterUdl;
