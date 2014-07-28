@@ -206,15 +206,16 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         bindGrowlNotifications: function() {
 
             this.model.get('platform').on('status:standby', function() {
-             //DO NOT MERGE   this.growl('System is in standby mode.', 'success', 10000);
+                this.growl('System is in standby mode.', 'success', 10000);
             });
 
             this.model.get('platform').on('disarmed', function() {
-                //DO NOT MERGE  this.growl('System is now disarmed.', 'success', 10000);
+                this.growl('System is now disarmed.', 'success', 10000);
             });
 
             this.model.get('connection').on('change:notification', function() {
 
+                // TODO GH#126
                 var message, type;
                 switch(this.model.get('notification')) {
                     case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
