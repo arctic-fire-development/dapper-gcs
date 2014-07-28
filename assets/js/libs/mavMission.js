@@ -158,6 +158,8 @@ MavMission.prototype.clearMission = function() {
     missionItems = [];
     var missionClearAll = new mavlink.messages.mission_clear_all(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
     mavlinkParser.send(missionClearAll);
+
+    return deferred.promise;
 };
 
 // Expects an array of mission_item mavlink messages.
@@ -166,18 +168,23 @@ MavMission.prototype.loadMission = function(mission) {
 
     // deal with this properly, add promises etc.
     // TODO GH#159
-    this.clearMission();
+    this.clearMission()
+        .then(_.bind(function() {
+
+            _.each(mission, function(missionItem) {
+                this.addMissionItem(missionItem);
+            }, this);
+
+            this.sendToPlatform();
+
+        }, this))
+        .done();
 
     this.on('mission:loaded', function() {
         log.info('Mission loaded successfully!');
         deferred.resolve();
     });
 
-    _.each(mission, function(missionItem) {
-        this.addMissionItem(missionItem);
-    }, this);
-
-    this.sendToPlatform();
     return deferred.promise;
 
 };
