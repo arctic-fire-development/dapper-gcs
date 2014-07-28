@@ -17,7 +17,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             
             // Render scaffolding, filling in the gaps as provided
             this.$el.html(this.template({
-                platforms: app.platforms,
+                platforms: appConfig.platforms,
                 currentPlatform: this.model.get('platformId'),
                 currentPayload: this.model.get('payload'),
                 currentMission: this.model.get('mission')

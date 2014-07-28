@@ -53,8 +53,10 @@ define([
 
             BaseRoutine.prototype.preflight.apply(this, [preflightCompletedDeferred]); // call parent code
 
-            // Upload specific parameters
-            this.on('change:connected', _.bind(function(model) {
+            // Upload specific parameters if defined in parameters file
+            if( false !== appConfig.platforms[this.get('mission').get('platformId')].parameters ) {
+
+               this.on('change:connected', _.bind(function(model) {
 
                 var parametersLoaded = _.bind(function() {
                         this.set( { 'paramsLoaded':true });
@@ -63,18 +65,18 @@ define([
                         $('#loadParameters .connected').show();
                 }, this);
 
-                    Q($.get('/drone/params/load')).then(_.bind(function(data) {
-                        parametersLoaded();
-                    }, function(xhr) {
-                        // on failure
-                        console.log(xhr);
-                    }, this));
-                    
-                    $('#loadParameters .disconnected').hide();
-                    $('#loadParameters .connecting').show();
+                Q($.get('/drone/params/load')).then(_.bind(function(data) {
+                    parametersLoaded();
+                }, function(xhr) {
+                    // on failure
+                    console.log(xhr);
+                }, this));
+
+                $('#loadParameters .disconnected').hide();
+                $('#loadParameters .connecting').show();
                 
             }, this));
-
+        }
 
         // Upload mission plan
         this.on('change:paramsLoaded', _.bind(function() {
