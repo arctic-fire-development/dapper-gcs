@@ -276,7 +276,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             $.bootstrapGrowl(message, {
                 ele: 'body', // which element to append to
                 type: type, // (null, 'info', 'danger', 'success')
-                offset: {from: 'top', amount: 20}, // 'top', or 'bottom'
+                offset: {from: 'bottom', amount: 20}, // 'top', or 'bottom'
                 align: 'right', // ('left', 'right', or 'center')
                 width: 250, // (integer, or 'auto')
                 delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
