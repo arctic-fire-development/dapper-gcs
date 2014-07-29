@@ -8,22 +8,19 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
         initialize: function() {
 
-            _.bindAll(this, 'render');
+            _.bindAll(this, 'render', 'render_gps_health');
             this.model.on('change:lat', this.render);
             this.model.on('change:lon', this.render);
-            this.model.on('change:fix_type', this.render);
-            this.model.on('change:satellites_visible', this.render);
+            this.model.on('change:fix_type', this.render_gps_health);
+            this.model.on('change:satellites_visible', this.render_gps_health);
 
         },
 
         render: function() {
 
             this.$el.html(this.template({
-                icon: this.getIcon(),
                 lat: this.model.get('lat'),
-                lon: this.model.get('lon'),
-                fix_type: this.model.get('fix_type'),
-                satellites_visible: this.model.get('satellites_visible')
+                lon: this.model.get('lon')
             }));
 
             this.$('.gps_values a').on('click', function(event) {
@@ -39,6 +36,14 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             });
 */
 
+        },
+
+        render_gps_health: function(){
+            this.$el.html(this.template({
+                icon: this.getIcon(),
+                fix_type: this.model.get('fix_type'),
+                satellites_visible: this.model.get('satellites_visible')
+            }));
         },
 
         getIcon: function() {
