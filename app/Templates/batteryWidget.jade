@@ -1,15 +1,3 @@
-h3 Battery
-
-div#battery_image
-    img.svg(src=icon)
-
-div#battery_toolbar_display.battery_values
-    a.percentage
-        span.value !{battery_remaining}
-        span.units &nbsp;%
-    a.voltage
-        span.value !{voltage_battery}
-        span.units &nbsp;V
-    a.current
-        span.value !{current_battery}
-        span.units &nbsp;A
+div#battery_widget
+    div#battery_image Battery
+        span.value !{battery_remaining}%
