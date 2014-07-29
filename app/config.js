@@ -7,7 +7,7 @@ require.config({
     ],
     paths: {
         jade: "assets/bower/jade/runtime",
-        JST: "Templates/templates",
+        JST: "../assets/js/libs/templates",
         backbone: "assets/bower/backbone/backbone",
         now: "../assets/js/libs/now",
         bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
