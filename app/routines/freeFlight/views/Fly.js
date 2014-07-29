@@ -221,9 +221,8 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             this.model.get('connection').on('change:notification', function() {
 
-                // TODO GH#126
                 var message, type;
-                switch(this.model.get('notification')) {
+                switch(this.model.get('connection').get('notification')) {
                     case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
                     case 'regained': message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type='success'; break;
                     default: message = 'Connection notification not understood: ' + this.model.get('notification'), type='danger'; break;
