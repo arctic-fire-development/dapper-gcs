@@ -116,7 +116,7 @@ module.exports = function(grunt) {
             files: {
                 expand: false,
                 src: ['app/Templates/**/*.jade', 'app/routines/**/*.jade'],
-                dest: 'assets/js/libs/templates.js'
+                dest: 'build/templates.js'
             }
         },
 
