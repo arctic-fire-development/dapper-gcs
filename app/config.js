@@ -9,7 +9,7 @@ require.config({
         jade: "assets/bower/jade/runtime",
         JST: "../build/templates",
         backbone: "assets/bower/backbone/backbone",
-        now: "../assets/js/libs/now",
+        io: "assets/bower/socket.io-client/socket.io",
         bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
         jquery: "assets/bower/jquery/dist/jquery",
         underscore: "assets/bower/underscore/underscore",

@@ -1,24 +1,26 @@
+'use strict';
+/*global define, console, alert */
 define([
 
     // Application + dependencies
-    "app",
-    "now",
-    "underscore",
-    "jquery",
-    "q",
-    "backbone",
+    'app',
+    'underscore',
+    'jquery',
+    'q',
+    'io',
+    'backbone',
 
     // Models
-    "Models/Mission",
-    "Models/Platform",
-    "Models/Connection",
+    'Models/Mission',
+    'Models/Platform',
+    'Models/Connection',
 
     // Dependent views
-    "routines/freeFlight/views/Planning",
-    "routines/freeFlight/views/Preflight",
-    "routines/freeFlight/views/Fly"
+    'routines/freeFlight/views/Planning',
+    'routines/freeFlight/views/Preflight',
+    'routines/freeFlight/views/Fly'
 
-], function(app, now, _, $, Q, Backbone,
+], function(app, _, $, Q, io, Backbone,
     Mission,
     Platform,
     Connection,
@@ -72,45 +74,21 @@ define([
             throw(e);
         }
 
-        // Initalize connection.
-        now.ready(_.bind(function() {
-
-            // Hook up GUI to connection states.
-            now.updateConnection = _.bind(function(connectionJson) {
-                this.connection.set(connectionJson);
-            }, this);
-
-            // Start connection.
-            now.startConnection(true);
-
-        }, this));
+        try {
+            // Initalize connection.
+            this.socket = io();
+            this.socket.emit('startConnection');
+            this.socket.on('linkStatus', _.bind(function(linkStatus) {
+                this.connection.set(linkStatus);
+            }, this));
+        } catch(e) {
+            console.log(e);
+        }
 
     },
 
-    fly: function() {
-        var flightCompletedDeferred = Q.defer();
-        var platform = this.platform; // to juggle context references
-        var mission = new Mission({
-            platform: this.platform,
-            connection: this.connection
-        });
-
-        var flyView = new FlyView({
-            model: mission
-        });
-
-        // Handle message events as they are provided from the server
-        // This won't scale =P
-        now.ready(function() {
-            flyView.render();
-            now.updatePlatform = function(platformJson) {
-               platform.set(platformJson);
-           };
-        });
-
-        //return flightCompletedDeferred.promise;
-        
-    },
+    // For children to implement.
+    fly: function() {},
 
     postflight: function() {
         alert('postflight');

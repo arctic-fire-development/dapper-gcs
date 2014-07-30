@@ -2,7 +2,6 @@ define([
 
     // Application + dependencies
     "app",
-    "now",
     "underscore",
     "jquery",
     "q",
@@ -22,7 +21,7 @@ define([
     "routines/freeFlight/views/Preflight",
     "routines/freeFlight/views/Fly"
 
-], function(app, now, _, $, Q, Backbone,
+], function(app, _, $, Q, Backbone,
     Mission,
     Platform,
     Connection,
@@ -109,27 +108,26 @@ define([
         },
 
         fly: function() {
+            try{
+                var flightCompletedDeferred = Q.defer();
+                var platform = this.platform; // to juggle context references
+                var mission = new Mission({
+                    platform: this.platform,
+                    connection: this.connection,
+                    planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
+                });
 
-            var flightCompletedDeferred = Q.defer();
-            var platform = this.platform; // to juggle context references
-            var mission = new Mission({
-                platform: this.platform,
-                connection: this.connection,
-                planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
-            });
+                var flyView = new FreeFlightFlyView({
+                    model: mission
+                }).render();
 
-            var flyView = new FreeFlightFlyView({
-                model: mission
-            });
+                this.socket.on('platform', function(platformJson) {
+                    platform.set(platformJson);
+                }, this);
 
-            // Handle message events as they are provided from the server
-            // This won't scale =P
-            now.ready(function() {
-                flyView.render();
-                now.updatePlatform = function(platformJson) {
-                   platform.set(platformJson);
-               };
-            });
+            } catch(e) {
+                console.log(e);
+            }
 
             //return flightCompletedDeferred.promise;
         }
