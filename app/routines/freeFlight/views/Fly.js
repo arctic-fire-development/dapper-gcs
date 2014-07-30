@@ -267,6 +267,16 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     1000000000
                 );
             }, this);
+
+            // GPS notifications
+            var gpsIcon = '<span class="glyphicon glyphicon-map-marker"></span>';
+            this.model.get('platform').on('gps:fix_established', function(){
+                this.growl(gpsIcon + ' GPS fix established', 'info');
+            }, this);
+            this.model.get('platform').on('gps:fix_lost', function(){
+                this.growl(gpsIcon + ' GPS fix lost', 'warning');
+            }, this);
+
         },
 
         growl: function(message, type, delay) {
