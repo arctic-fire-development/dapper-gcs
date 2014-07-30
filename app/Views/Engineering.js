@@ -1,4 +1,4 @@
-define(['backbone', 'JST', 'now'], function(Backbone, templates, now) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};

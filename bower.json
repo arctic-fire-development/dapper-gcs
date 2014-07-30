@@ -14,6 +14,8 @@
     "q": "~1.0",
     "3l": "~1.4.4",
     "bootstrap-growl": "~1.1.0",
-    "routefilter": "~0.2.1"
+    "routefilter": "~0.2.1",
+    "primus": "~2.4.0",
+    "socket.io-client": "~1.0.6"
   }
 }

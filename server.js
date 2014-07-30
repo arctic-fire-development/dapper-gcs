@@ -1,22 +1,26 @@
-var mavlink = require("mavlink_ardupilotmega_v1.0"),
-    UavConnection = require("./assets/js/libs/uavConnection.js"),
-    MavParams = require("./assets/js/libs/mavParam.js"),
+'use strict';
+/*global require, module, process, __dirname, console */
+var mavlink = require('mavlink_ardupilotmega_v1.0'),
+    UavConnection = require('./assets/js/libs/uavConnection.js'),
+    MavParams = require('./assets/js/libs/mavParam.js'),
     express = require('express'),
-    csv = require('csv'),
+    Primus = require('primus'),
     routes = require('./routes'),
     app = express(),
     http = require('http'),
-    nowjs = require("now"),
     path = require('path'),
-    nconf = require("nconf"),
-    requirejs = require("requirejs"),
-    winston = require("winston"),
+    nconf = require('nconf'),
+    requirejs = require('requirejs'),
+    winston = require('winston'),
     Q = require('q'),
+    server = http.createServer(app),
+    io = require('socket.io')(server),
     fs = require('fs'),
-    MavFlightMode = require("./assets/js/libs/mavFlightMode.js"),
+    MavFlightMode = require('./assets/js/libs/mavFlightMode.js'),
     MavMission = require('./assets/js/libs/mavMission.js'),
-    quadUdl = require("./assets/js/libs/udlImplementations/ArduCopter.js"),
-    platforms = require("./assets/js/libs/platforms.js");
+    quadUdl = require('./assets/js/libs/udlImplementations/ArduCopter.js'),
+    platforms = require('./assets/js/libs/platforms.js'),
+    _ = require('underscore');
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -44,7 +48,7 @@ nconf.argv().env().file({
 // The logging path is created here if not already present;
 // do this synchronously to ensure creation before opening log streams.
 try {
-    fs.statSync(nconf.get("logging:root"));
+    fs.statSync(nconf.get('logging:root'));
 } catch(err) {
   logger.verbose('Creating logfile directory %s', nconf.get('logging:root'));
   try {
@@ -53,7 +57,7 @@ try {
       }
   } catch(e) {
       // Genuine unknown error occurred.
-      log.error(e);
+      logger.error(e);
       throw(e);
   }
 }
@@ -86,14 +90,9 @@ app.use(function(req, res){
     res.redirect('/');
 });
 
-// We need to take care with syntax when using Express 3.x and Socket.io.
-// https://github.com/Flotype/now/issues/200
-var server = http.createServer(app).listen(app.get('port'), function() {
+server .listen(app.get('port'), function() {
     logger.info('Express server listening on port ' + app.get('port'));
 });
-
-// Set up connections between clients/server
-var everyone = nowjs.initialize(server);
 
 // Establish parser
 var mavlinkParser = new mavlink(logger);
@@ -108,47 +107,27 @@ var mavFlightMode = new MavFlightMode(mavlink, mavlinkParser, uavConnectionManag
 var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
 
-var platform = {};
+var platform = {}, connection = {};
 
-// Client integration code, TODO refactor away to elsewhere
-requirejs(["Models/Platform", "now"], function(Platform, now) {
+io.on('connection', function(socket) {
+  console.log('WOAH CONNECTED');
+  socket.on('startConnection', function() {
+    uavConnectionManager.start();
+  });
+  
+try {
 
-    mavFlightMode.on('change', function() {
-        platform = _.extend(platform, mavFlightMode.getState());
-        //everyone.now.updatePlatform(platform);
-    });
+  mavlinkParser.on('message', function(m) { console.log(m.name) });
 
-    // This won't scale =P still
-    // But it's closer to what we want to do.
-    mavlinkParser.on('HEARTBEAT', function(message) {
-        platform = _.extend(platform, {
-            type: message.type,
-            autopilot: message.autopilot,
-            base_mode: message.base_mode,
-            custom_mode: message.custom_mode,
-            system_status: message.system_status,
-            mavlink_version: message.mavlink_version
-        });
-   
-        //everyone.now.updatePlatform(platform);
-
-        // Also update the connection status, just so it stays current on page navigations.
-        //everyone.now.updateConnection(connection);
-
-   });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
             lat: message.lat / 10000000,
             lon: message.lon / 10000000,
             alt: message.alt / 1000,
-            relative_alt: message.relative_alt / 1000,
-            vx: message.vx / 100,
-            vy: message.vy / 100,
-            vz: message.vz / 100,
-            hdg: message.hdg / 100
+            relative_alt: message.relative_alt / 1000
         });
-        everyone.now.updatePlatform(platform);
+        io.emit('platform', platform);
     });
 
     mavlinkParser.on('SYS_STATUS', function(message) {
@@ -159,97 +138,70 @@ requirejs(["Models/Platform", "now"], function(Platform, now) {
             drop_rate_comm: message.drop_rate_comm,
             errors_comm: message.errors_comm
         });
-        everyone.now.updatePlatform(platform);
-    });
-
-    mavlinkParser.on('ATTITUDE', function(message) {
-        platform = _.extend(platform, {
-            pitch: message.pitch,
-            roll: message.roll,
-            yaw: message.yaw,
-            pitchspeed: message.pitchspeed,
-            rollspeed: message.rollspeed,
-            yawspeed: message.yawspeed
-        });
-        everyone.now.updatePlatform(platform);
+        io.emit('platform', platform);
     });
 
     mavlinkParser.on('VFR_HUD', function(message) {
         platform = _.extend(platform, {
             airspeed: message.airspeed,
             groundspeed: message.groundspeed,
-            heading: message.heading,
-            throttle: message.throttle,
-            climb: message.climb
+            heading: message.heading
         });
-        everyone.now.updatePlatform(platform);
-
+        io.emit('platform', platform);
     });
 
     mavlinkParser.on('GPS_RAW_INT', function(message) {
         platform = _.extend(platform, {
             fix_type: message.fix_type,
-            satellites_visible: message.satellites_visible,
-            lat: message.lat / 10000000,
-            lon: message.lon / 10000000,
-            alt: message.alt / 1000,
-            eph: message.eph,
-            epv: message.epv,
-            vel: message.vel,
-            cog: message.cog
+            satellites_visible: message.satellites_visible
         });
-        everyone.now.updatePlatform(platform);
+        console.log(message);
+        io.emit('platform', platform);
     });
 
-}); // end scope of requirejs
-
-// Start connection management.
-everyone.now.startConnection = function() {
-
-      uavConnectionManager.start();
-
-      // eat error for the moment, remove this soon!
-      var connection = {};
-
-      uavConnectionManager.on('disconnected', function() {
-          connection = _.extend(connection, {
-              status: uavConnectionManager.getState(),
-              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-          });
-          everyone.now.updateConnection(connection);
-      });
-
-      uavConnectionManager.on('connecting', function() {
-          connection = _.extend(connection, {
-              status: uavConnectionManager.getState(),
-              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-          });
-          everyone.now.updateConnection(connection);
-      });
-
-      uavConnectionManager.on('connected', function() {
-          connection = _.extend(connection, {
-              status: uavConnectionManager.getState(),
-              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-          });
-          everyone.now.updateConnection(connection);
-      });
-
-      uavConnectionManager.on('connection:lost', function() {
-        connection=_.extend(connection, {
-          notification: 'lost'
-        });
-        everyone.now.updateConnection(connection);
-      });
-
-      uavConnectionManager.on('connection:regained', function() {
+    uavConnectionManager.on('disconnected', function() {
         connection = _.extend(connection, {
-          notification: 'regained'
+            status: uavConnectionManager.getState(),
+            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
         });
-        everyone.now.updateConnection(connection);
+        io.emit('linkStatus', connection);
+        // everyone.now.updateConnection(connection);
+    });
+
+    uavConnectionManager.on('connecting', function() {
+        connection = _.extend(connection, {
+            status: uavConnectionManager.getState(),
+            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+        });
+        io.emit('linkStatus', connection);
+    });
+
+    uavConnectionManager.on('connected', function() {
+        connection = _.extend(connection, {
+            status: uavConnectionManager.getState(),
+            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+        });
+        io.emit('linkStatus', connection);
+    });
+
+    uavConnectionManager.on('connection:lost', function() {
+      connection=_.extend(connection, {
+        notification: 'lost'
       });
-  
+      io.emit('linkStatus', connection);
+    });
+
+    uavConnectionManager.on('connection:regained', function() {
+      connection = _.extend(connection, {
+        notification: 'regained'
+      });
+      io.emit('linkStatus', connection);
+    });
+} catch(e) {
+  console.log(e);
 }
+
+});
 
 app.get('/connection/start', function(req, res) {
     uavConnectionManager.start();
@@ -263,11 +215,11 @@ Start of code to handle droneUDL REST API and plugin-specific hacked-starting co
 var quad = new quadUdl(logger, nconf);
 quad.setProtocol(mavlinkParser);
 
-// Very hacky code below, the point of which is to get a "current routine" hacked in place on the server side,
+// Very hacky code below, the point of which is to get a 'current routine' hacked in place on the server side,
 // which the client will be configuring as part of new-routine/planning/preflight stuff.
 // This should evolve into a single strong session-based model of some kind, with DB persistence.
 // See GH#119.
-// Anything referencing "routine" falls into this bucket.
+// Anything referencing 'routine' falls into this bucket.
 var routine = {};
 
 // TODO move this to MavParams module.
@@ -294,7 +246,7 @@ app.get('/drone/params/load', function(req, res) {
     
     // TODO hardcoded platform D:
     logger.debug(platforms[0].parameters);
-    promises = loadParameters(platforms[0].parameters);
+    var promises = loadParameters(platforms[0].parameters);
 
     // Hack/hardcoding interactive parameter setting
     promises.push(
@@ -302,7 +254,7 @@ app.get('/drone/params/load', function(req, res) {
     );
 
     Q.allSettled(promises).then(
-      function(results) {
+      function() {
         res.send(200);
       },
       function(failed) {
@@ -353,7 +305,7 @@ function loadTakeoffMission() {
   });
   
   return deferred.promise;
-};
+}
 
 app.get('/drone/launch', function(req, res) {
 
@@ -371,7 +323,7 @@ app.get('/drone/launch', function(req, res) {
     .done(); // calling 'done' should rethrow any uncaught errors in the promise chain.
 
   } catch(e) {
-    logger.error('error caught in server:freeglight:launch:trycatch', e)
+    logger.error('error caught in server:freeglight:launch:trycatch', e);
   }
 });
 
@@ -393,7 +345,7 @@ app.get('/drone/flyToPoint', function(req, res) {
 app.get('/drone/loiter', function(req, res) {
   logger.verbose('Setting LOITER mode...');
   Q.fcall(quad.setLoiterMode).then(function() {
-      res.send(200)
+      res.send(200);
     }
   );
 });
@@ -440,7 +392,9 @@ function exitHandler(options, err) {
       uavConnectionManager.stopLogging();
     }
     
-    if (err) console.log(err.stack);
+    if (err) {
+      console.log(err.stack);
+    }
     
     if (options.exit) process.exit();
 
