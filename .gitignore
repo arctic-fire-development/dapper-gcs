@@ -14,7 +14,6 @@ logs/
 
 # These files and/or directory contents are always rebuilt during build processes.
 public/
-assets/js/libs/templates.js
 build/
 
 # Random junk that sometimes crops up in development
