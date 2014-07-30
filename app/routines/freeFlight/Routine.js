@@ -108,26 +108,26 @@ define([
         },
 
         fly: function() {
-try{
-            var flightCompletedDeferred = Q.defer();
-            var platform = this.platform; // to juggle context references
-            var mission = new Mission({
-                platform: this.platform,
-                connection: this.connection,
-                planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
-            });
+            try{
+                var flightCompletedDeferred = Q.defer();
+                var platform = this.platform; // to juggle context references
+                var mission = new Mission({
+                    platform: this.platform,
+                    connection: this.connection,
+                    planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
+                });
 
-            var flyView = new FreeFlightFlyView({
-                model: mission
-            }).render();
+                var flyView = new FreeFlightFlyView({
+                    model: mission
+                }).render();
 
-            this.socket.on('platform', function(platformJson) {
-                console.log(platformJson);
-                platform.set(platformJson);
-            }, this);
-} catch(e) {
-    console.log(e);
-}
+                this.socket.on('platform', function(platformJson) {
+                    platform.set(platformJson);
+                }, this);
+
+            } catch(e) {
+                console.log(e);
+            }
 
             //return flightCompletedDeferred.promise;
         }
