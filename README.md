@@ -31,7 +31,7 @@ auto
 
 You need ```git```, ```node```, ```npm``` (distributed with node, usually), ```bower``` and ```grunt```.  On OSX, [install Node.js from an installer](http://nodejs.org/#download), then the rest with brew and npm:
 
-```
+```bash
 brew install git
 sudo npm install -g grunt-cli
 sudo npm install -g bower
@@ -43,7 +43,7 @@ sudo npm install -g nodemon
 
 After installing prerequisites, clone this project and install dependencies, then build runtime files with ```grunt```:
 
-```
+```bash
 git clone git@github.com:arctic-fire-development/dapper-gcs.git
 cd dapper-gcs/
 git submodule init
