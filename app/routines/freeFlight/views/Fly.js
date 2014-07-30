@@ -271,11 +271,12 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             // GPS notifications
             var gpsIcon = '<span class="glyphicon glyphicon-map-marker"></span>';
             this.model.get('platform').on('gps:fix_established', function(){
-                this.growl(gpsIcon + 'GPS fix established', 'info');
+                this.growl(gpsIcon + ' GPS fix established', 'info');
             }, this);
             this.model.get('platform').on('gps:fix_lost', function(){
-                this.growl(gpsIcon + 'GPS fix lost', 'info');
+                this.growl(gpsIcon + ' GPS fix lost', 'warning');
             }, this);
+
         },
 
         growl: function(message, type, delay) {
