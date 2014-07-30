@@ -53,6 +53,8 @@ the MAVLink messages that set them.
             this.on('change:fix_type', function() {
                 if(this.hasGpsFix()) {
                     this.trigger('gps:fix_established');
+                } else{
+                    this.trigger('gps:fix_lost');
                 }
             }, this);
 
@@ -120,7 +122,7 @@ the MAVLink messages that set them.
             // Clean up properties.   attrs is passed by reference since it's an object,
             // so properties are changed in-place by the cleanup function.
             this.cleanup(attrs);
-    
+
             // Call Backbone's core set() method.
             return Backbone.Model.prototype.set.call(this, attrs, options);
         },
