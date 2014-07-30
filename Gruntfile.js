@@ -56,7 +56,8 @@ module.exports = function(grunt) {
                     {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
                     {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg', '**/*.gif'], dest: 'public/images/'},
                     {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
-                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'}
+                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'},
+                    {expand: true, cwd: 'assets/fonts/', src: '**/*.woff', dest: 'public/fonts/'}
                 ]
             }
         },
