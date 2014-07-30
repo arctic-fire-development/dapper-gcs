@@ -4,7 +4,6 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
     UavConnection = require('./assets/js/libs/uavConnection.js'),
     MavParams = require('./assets/js/libs/mavParam.js'),
     express = require('express'),
-    Primus = require('primus'),
     routes = require('./routes'),
     app = express(),
     http = require('http'),
@@ -16,7 +15,6 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
     server = http.createServer(app),
     io = require('socket.io')(server),
     fs = require('fs'),
-    MavFlightMode = require('./assets/js/libs/mavFlightMode.js'),
     MavMission = require('./assets/js/libs/mavMission.js'),
     quadUdl = require('./assets/js/libs/udlImplementations/ArduCopter.js'),
     platforms = require('./assets/js/libs/platforms.js'),
@@ -101,8 +99,6 @@ var mavlinkParser = new mavlink(logger);
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
 mavlinkParser.setConnection(uavConnectionManager);
 
-var mavFlightMode = new MavFlightMode(mavlink, mavlinkParser, uavConnectionManager, logger);
-
 // MavParams are for handling loading parameters
 var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
@@ -110,15 +106,23 @@ app.set('mavParams', mavParams);
 var platform = {}, connection = {};
 
 io.on('connection', function(socket) {
-  console.log('WOAH CONNECTED');
+
   socket.on('startConnection', function() {
     uavConnectionManager.start();
   });
-  
-try {
 
-  mavlinkParser.on('message', function(m) { console.log(m.name) });
+  // Only bind connections once per client.
+  // TODO this isn't quite right yet.   We need to probably
+  // attach things differently, and NOT directly to MAVLink messages.
+  _.once(function() {
 
+    // For performance reasons, let's hide these types of "silly" loggings behind environmental dev flags
+    // TODO GH#180
+    // Bind this in the same scope as the other client/server connections so we can be sure we're not
+    // flooding event handlers.
+    mavlinkParser.on('message', function(m) { 
+      logger.silly('Got MAVLink message %s', m.name);
+    });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
@@ -126,6 +130,18 @@ try {
             lon: message.lon / 10000000,
             alt: message.alt / 1000,
             relative_alt: message.relative_alt / 1000
+        });
+        io.emit('platform', platform);
+    });
+
+    // This won't scale =P still
+    // But it's closer to what we want to do.
+    mavlinkParser.on('HEARTBEAT', function(message) {
+        platform = _.extend(platform, {
+            type: message.type,
+            base_mode: message.base_mode,
+            custom_mode: message.custom_mode,
+            system_status: message.system_status
         });
         io.emit('platform', platform);
     });
@@ -155,7 +171,6 @@ try {
             fix_type: message.fix_type,
             satellites_visible: message.satellites_visible
         });
-        console.log(message);
         io.emit('platform', platform);
     });
 
@@ -165,7 +180,6 @@ try {
             time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
         });
         io.emit('linkStatus', connection);
-        // everyone.now.updateConnection(connection);
     });
 
     uavConnectionManager.on('connecting', function() {
@@ -197,9 +211,8 @@ try {
       });
       io.emit('linkStatus', connection);
     });
-} catch(e) {
-  console.log(e);
-}
+
+})(); // call the _once invocation here.
 
 });
 

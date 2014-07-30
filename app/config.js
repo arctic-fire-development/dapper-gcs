@@ -10,7 +10,6 @@ require.config({
         JST: "../build/templates",
         backbone: "assets/bower/backbone/backbone",
         io: "assets/bower/socket.io-client/socket.io",
-        primus: "assets/bower/primus/primus",
         bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
         jquery: "assets/bower/jquery/dist/jquery",
         underscore: "assets/bower/underscore/underscore",
