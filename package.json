@@ -20,9 +20,8 @@
   "dependencies": {
     "express": "~3.5.1",
     "serialport": "~1.4.2",
-    "now": "",
     "backbone": "~1.1.2",
-    "nconf": "0.6.9",
+    "nconf": "~0.6.9",
     "underscore": "~1.6.0",
     "winston": "~0.7.3",
     "jspack": "~0.0.3",
@@ -32,7 +31,10 @@
     "mavlink_ardupilotmega_v1.0": "",
     "jade": "~1.5.0",
     "qretry": "^0.2.1",
-    "moment":"~2.7.0"
+    "requirejs": "~2.1.14",
+    "serialport": "~1.4.2",
+    "socket.io": "^1.0.6",
+    "winston": "~0.7.3"
   },
   "devDependencies": {
     "mocha": "",

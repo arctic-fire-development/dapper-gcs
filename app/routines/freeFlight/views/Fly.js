@@ -210,7 +210,6 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         // Hook up various growl notifications.
         bindGrowlNotifications: function() {
-
             this.model.get('platform').on('status:standby', function() {
                 this.growl('System is in standby mode.', 'success', 10000);
             }, this);

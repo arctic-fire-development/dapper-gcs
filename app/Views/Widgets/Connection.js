@@ -1,4 +1,4 @@
-define(['backbone', 'now', 'JST'], function(Backbone, now, templates) {
+define(['backbone', 'JST'], function(Backbone, templates) {
 
     var ConnectionWidget = Backbone.View.extend({
 
