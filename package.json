@@ -29,6 +29,7 @@
     "requirejs": "~2.1.14",
     "q": "~1.0.1",
     "mavlink_ardupilotmega_v1.0": "",
+    "moment": "~2.7.0",
     "jade": "~1.5.0",
     "qretry": "^0.2.1",
     "requirejs": "~2.1.14",
