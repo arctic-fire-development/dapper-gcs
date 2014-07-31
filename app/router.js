@@ -1,24 +1,27 @@
+'use strict';
+/*global define */
 define([
 
     // Application + dependencies
-    "app",
-    "now",
-    "underscore",
-    "jquery",
-    "require",
-    "routefilter",
+    'app',
+    'io',
+    'underscore',
+    'backbone',
+    'jquery',
+    'require',
+    'routefilter',
 
-    "routines/freeFlight/Routine",
+    'routines/freeFlight/Routine',
 
     // Models
-    "Models/Mission",
-    "Models/Platform",
+    'Models/Mission',
+    'Models/Platform',
 
     // Dependent views
-    "Views/Home",
-    "Views/Plan",
-    "Views/Engineering"
-], function(app, now, _, $, require, rf,
+    'Views/Home',
+    'Views/Plan',
+    'Views/Engineering'
+], function(app, io, _, Backbone, $, require, rf,
     
     RoutineFreeFlight,
 
@@ -34,18 +37,19 @@ define([
     var Router = Backbone.Router.extend({
 
         routes: {
-            "": "home",
-            "plan" : "plan",
-            "mission" : "mission",
-            "mission/planning" : "planning",
-            "mission/preflight" : "preflight",
-            "mission/fly" : "fly",
-            "engineering" : "engineering",
-            "resumeCurrentMissionStep" : "resumeCurrentMissionStep"
+            '': 'home',
+            'plan' : 'plan',
+            'mission' : 'mission',
+            'mission/planning' : 'planning',
+            'mission/preflight' : 'preflight',
+            'mission/fly' : 'fly',
+            'engineering' : 'engineering',
+            'resumeCurrentMissionStep' : 'resumeCurrentMissionStep'
         },
         currentMission: undefined,
 
         initialize: function() {
+
             this.homeView = new HomeView();
             this.mission = new Mission();
 
@@ -55,12 +59,12 @@ define([
         },
 
         // Works for 2 menu items!  Hacky!  =)
-        before: function(route, params) {
+        before: function(route) {
             var menu = (route == 'engineering') ? 'engineering' : 'mission';
             this.setActiveMenu(menu);
         },
 
-        // Pass the name of the div to show, others are hidden for "navigation" :)
+        // Pass the name of the div to show, others are hidden for 'navigation' :)
         showOnly: function(name) {
             var panes = ['home', 'plan', 'mission', 'preflight', 'planning', 'fly', 'engineering'];
             _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
@@ -68,7 +72,7 @@ define([
         },
         // Set the active top-level bootstrap item.
         setActiveMenu: function(menu) {
-            $('#navbar ul.navbar-nav li').each(function(i, el) {
+            $('#navbar ul.navbar-nav li').each(function() {
                 (menu == $(this).data('name')) ? $(this).addClass('active') : $(this).removeClass('active');
             });
         },
