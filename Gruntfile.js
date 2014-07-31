@@ -83,7 +83,7 @@ module.exports = function(grunt) {
             },
 
             server_js: {
-              files: ['assets/js/libs/**/*.js'],
+              files: ['config.json', 'assets/js/libs/**/*.js'],
                 tasks: [ 'develop'],
                 options: {
                     interrupt: false,

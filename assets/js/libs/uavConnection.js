@@ -49,6 +49,9 @@ var protocol;
 // the connection itself was lost
 var attachDataEventListener = true;
 
+// handler for the Heartbeat setInterval() invocation
+var heartbeatMonitor = false;
+
 // Time of the last heartbeat packet was received (timestamp)
 var lastHeartbeat = undefined;
 
@@ -84,6 +87,11 @@ function UavConnection(configObject, protocolParser, logObject) {
 
 util.inherits(UavConnection, events.EventEmitter);
 
+UavConnection.prototype.hasStarted = function() {
+    log.silly('Status of UavConnection.hasStarted: %s', started);
+    return started;
+};
+
 // Establish the binary receive/send logs.
 UavConnection.prototype.startLogging = function() {
 
@@ -112,17 +120,17 @@ UavConnection.prototype.changeState = function(newState) {
     this.invokeState(this.state);
 };
 
-// The heartbeat function is invoked once per second and is kicked off by the start() function.
+// The heartbeat function is invoked per configuration (connection:updateIntervals:heartbeatMs)
+// and is kicked off when the system enters the 'connected' state.
 // The point is to update some timing information and re-invoke whatever current state
 // the system is in to see if we need to change state/status.
 UavConnection.prototype.heartbeat = function() {
 
-    this.timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
+    timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
     this.emit(this.state);
-    this.emit('heartbeat');
 
     this.invokeState(this.state);
-    log.silly('time since last heartbeat: '+this.timeSinceLastHeartbeat);
+    log.silly('time since last heartbeat: %d', timeSinceLastHeartbeat);
 };
 
 // Convenience function to make the meaning of the awkward syntax more clear.
@@ -140,7 +148,6 @@ UavConnection.prototype.start = function() {
     log.info('Starting connection manager...');
     started = true;
 
-    setInterval(_.bind(this.heartbeat, this), 1000);
     this.changeState('disconnected');
 };
 
@@ -153,7 +160,6 @@ UavConnection.prototype.getState = function() {
 UavConnection.prototype.updateHeartbeat = function() {
     
     try {
-        this.emit('heartbeat:packet');
         log.silly('Heartbeat updated: ' + Date.now());
         lastHeartbeat = Date.now();
 
@@ -173,6 +179,7 @@ UavConnection.prototype.disconnected = function() {
     // Reset this because we've lost (or never had) the physical connection
     lastHeartbeat = undefined;
     isConnected = false;
+    clearInterval(heartbeatMonitor);
 
     // Request the protocol be reattached.
     attachDataEventListener = true;
@@ -263,6 +270,10 @@ UavConnection.prototype.connecting = function() {
             hasConnected = true;
             this.emit('connecting:attached');
 
+            // (re)start the heartbeat monitor
+            clearInterval(heartbeatMonitor); // harmless if false
+            heartbeatMonitor = setInterval(this.heartbeat, config.get('connection:updateIntervals:heartbeatMs'));
+
         }
 
         // Don't do this twice.
@@ -279,8 +290,15 @@ UavConnection.prototype.connecting = function() {
 UavConnection.prototype.connected = function() {
 
     // Only do this once upon obtaining connection.
+    // The rate parameter of the data stream seems to be in Hz.
     var request_data_stream = _.once(_.bind(function() {
-        var request = new mavlink.messages.request_data_stream(1, 1, mavlink.MAV_DATA_STREAM_ALL, 1, 1);
+        var request = new mavlink.messages.request_data_stream(
+            1, // target system
+            1, // target component
+            mavlink.MAV_DATA_STREAM_ALL, // get all data streams
+            config.get('connection:updateIntervals:streamHz'), // rate, Hz
+            1 // start sending this stream (0=stop)
+        );
         _.extend(request, {
             srcSystem: 255,
             srcComponent: 0,
