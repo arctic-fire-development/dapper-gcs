@@ -3,17 +3,17 @@
   "version": "0.0.1",
   "dependencies": {
     "jquery": "~2.1",
-    "bootstrap": "~3.1",
-    "bootstrapValidator": "<0.5.0",
+    "bootstrap": "~3.2",
     "leaflet-dist": "~0.7.2",
-    "backbone": "~1.1.0",
-    "underscore": "",
-    "jade": "",
-    "leaflet-plugins": "~1.0.1",
-    "requirejs": "~2.1.10",
-    "q": "~1.0",
+    "backbone": "~1.1.2",
+    "underscore": "~1.6.0",
+    "jade": "~1.5.0",
+    "leaflet-plugins": "~1.1.2",
+    "requirejs": "~2.1.14",
+    "q": "~1.0.1",
     "3l": "~1.4.4",
     "bootstrap-growl": "~1.1.0",
-    "routefilter": "~0.2.1"
+    "routefilter": "~0.2.1",
+    "socket.io-client": "~1.0.6"
   }
 }
