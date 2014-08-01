@@ -63,14 +63,14 @@ var timeSinceLastHeartbeat = undefined;
 var hasConnected = false;
 
 // Set to true if the connection is in a lost state.
-var lostConnection = true;
+var lostConnection = false;
 
 // Incoming config is an nconf instance, already read in the server code.
 // Protocol Parser is a mavlink instance
 // log is a Winston logger, already configured + ready to use
 function UavConnection(configObject, protocolParser, logObject) {
 
-    _.bindAll(this, 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'write');
+    _.bindAll(this, 'closeConnection', 'handleDataEvent', 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'write');
 
     log = logObject;
     config = configObject;
@@ -128,6 +128,7 @@ UavConnection.prototype.heartbeat = function() {
 
     timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
     this.emit(this.state);
+    log.silly('UavConnection heartbeat monitor count: %d', EventEmitter.listenerCount(protocol, 'HEARTBEAT'));
 
     this.invokeState(this.state);
     log.silly('time since last heartbeat: %d', timeSinceLastHeartbeat);
@@ -166,6 +167,7 @@ UavConnection.prototype.updateHeartbeat = function() {
         // When we get a heartbeat, switch back to connected state.
         if(false === isConnected) {
             isConnected = true;
+            timeSinceLastHeartbeat = 0; // fake this so we don't flicker between connected/connecting
             this.changeState('connected');
         }
     } catch(e) {
@@ -176,13 +178,13 @@ UavConnection.prototype.updateHeartbeat = function() {
 
 UavConnection.prototype.disconnected = function() {
 
-    // Reset this because we've lost (or never had) the physical connection
+    // Reset this because we've lost (or never had) the physical connection;
+    // clear/restart heartbeats + other connection information.
     lastHeartbeat = undefined;
+    timeSinceLastHeartbeat = undefined;
     isConnected = false;
     clearInterval(heartbeatMonitor);
-
-    // Request the protocol be reattached.
-    attachDataEventListener = true;
+    heartbeatMonitor = setInterval(this.heartbeat, config.get('connection:updateIntervals:heartbeatMs'));
 
     log.silly('[UavConnection] Trying to connect from disconnected state...');
 
@@ -248,41 +250,72 @@ UavConnection.prototype.connecting = function() {
 
         log.silly('establishing MAVLink connection...');
 
-        // Are we in a hard lost-link condition and need to re-establish the port?
-        if (timeSinceLastHeartbeat > config.get('connection:timeout:soft')) {
-            this.changeState('disconnected');
-        }
-
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
         // to avoid attaching too many callbacks.
-        if (attachDataEventListener === true) {
+        if (true === attachDataEventListener) {
+
+            // TODO GH#124, remove specific MAVLink protocol commands from this object
+            log.silly('*** Binding heartbeat, %s', attachDataEventListener);
+            protocol.on('HEARTBEAT', this.updateHeartbeat);
 
             // When binary data is received, write it to the binary received log and then pass it to the protocol
             // handler for decoding.
-            connection.on(dataEventName, _.bind(function(msg) {
-                receivedBinaryLog.write(msg);
-                protocol.parseBuffer(msg);
-            }, this));
-
-            // TODO GH#124, remove specific MAVLink protocol commands from this object
-            protocol.on('HEARTBEAT', _.bind(this.updateHeartbeat, this));
-            hasConnected = true;
-            this.emit('connecting:attached');
-
-            // (re)start the heartbeat monitor
-            clearInterval(heartbeatMonitor); // harmless if false
-            heartbeatMonitor = setInterval(this.heartbeat, config.get('connection:updateIntervals:heartbeatMs'));
+            connection.on(dataEventName, this.handleDataEvent);
 
         }
 
         // Don't do this twice.
         attachDataEventListener = false;
 
+        // Are we in a hard lost-link condition and need to re-establish the port?
+        if (
+            timeSinceLastHeartbeat > config.get('connection:timeout:hard')
+            ) {
+
+            log.warn('Hard loss of link, returning to Disconnected state in UavConnection');
+            attachDataEventListener = true;
+            protocol.removeListener('HEARTBEAT', this.updateHeartbeat);
+            connection.removeListener(dataEventName, this.handleDataEvent);
+            this.closeConnection();
+
+        }
+
     } catch (e) {
         log.error(e);
         throw (e);
     }
+};
+
+// Close the connection, switching back to disconnected state when done.
+// Some transports can do this after a callback, others not.
+UavConnection.prototype.closeConnection = function() {
+    log.debug('Closing connection in UavConnection');
+    var callback = _.bind(function() {
+        this.changeState('disconnected');
+    }, this);
+
+    switch (config.get('connection:type')) {
+        case 'tcp':
+            connection.end();
+            this.changeState('disconnected');
+            break;
+        case 'udp':
+            connection.close();
+            this.changeState('disconnected');
+            break;
+        case 'serial':
+            connection.close(callback);
+            break;
+        default:
+            log.error('Unknown connection type attempted in UavConnection.closeConnection()');
+            this.changeState('disconnected');
+    }
+};
+
+UavConnection.prototype.handleDataEvent = function(message) {
+    receivedBinaryLog.write(message);
+    protocol.parseBuffer(message);
 };
 
 // Upon connection for the first time, request all MAVLink data streams available.
@@ -316,16 +349,20 @@ UavConnection.prototype.connected = function() {
         this.emit('connection:regained');
     }        
 
-    // Have we lost link?
-    if (timeSinceLastHeartbeat > config.get('connection:timeout:soft') || true === _.isNaN(timeSinceLastHeartbeat)) {
+    // Have we lost link?  True if we're timing out and have connected previously.
+    if (
+        (
+            timeSinceLastHeartbeat > config.get('connection:timeout:soft')
+            || true === _.isNaN(timeSinceLastHeartbeat)
+        ) && true === hasConnected
+    ) {
+        this.emit('connection:lost');
+        log.warn('Connection lost.');
+        lostConnection = true;
         this.changeState('connecting');
-        if(true === hasConnected) {
-            log.warn('Connection lost.');
-            lostConnection = true;
-            this.emit('connection:lost');
-        }
     }
 
+    hasConnected = true;
 };
 
 // Log and write to binary log/transport layer.
