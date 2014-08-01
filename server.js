@@ -334,9 +334,9 @@ function bindClientEventBridge() {
       // TODO GH#180
       // Bind this in the same scope as the other client/server connections so we can be sure we're not
       // flooding event handlers.
-      mavlinkParser.on('message', function(m) { 
-        logger.silly('Got MAVLink message %s', m.name);
-      });
+      // mavlinkParser.on('message', function(m) { 
+      //   logger.silly('Got MAVLink message %s', m.name);
+      // });
 
       mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
           platform = _.extend(platform, {
