@@ -16,7 +16,7 @@ var SerialPort = require('serialport').SerialPort,
     fs = require('fs'),
     moment = require('moment'),
     mavlink = require('mavlink_ardupilotmega_v1.0'),
-    EventEmitter = require('events').EventEmitter;
+    MavParams = require('./mavParam');
 
 // log is expected to be a winston instance; keep it in the shared global namespace for convenience.
 var log;
@@ -38,6 +38,19 @@ var isConnected = false;
 
 // connection represents the socket-level connection through which MAVLink arrives
 var connection = undefined;
+
+// SYSID of the attached UAV -- probably 1, but is set when the connection is established.
+// Will be aligned/set along with protocol.srcSystem (MAVlink implementation).
+var uavSysId = undefined;
+
+// Component target for protocol messages.  For MAVLink, this is almost always going to be
+// equal to 1 unless we're specifically targeting other devices onboard.  OK to set to 1 for now.
+// Will be aligned with protocol.srcComponent (MAVLink implementation).
+var uavComponentId = 1;
+
+// SYSID of what the UAV expects the messages from the GCS to be.  Probably 255, but
+// set when connection is established.
+var gcsSysId = undefined;
 
 // name of the message the connection uses to signal that new data is ready to consume
 var dataEventName = undefined;
@@ -128,7 +141,6 @@ UavConnection.prototype.heartbeat = function() {
 
     timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
     this.emit(this.state);
-    log.silly('UavConnection heartbeat monitor count: %d', EventEmitter.listenerCount(protocol, 'HEARTBEAT'));
 
     this.invokeState(this.state);
     log.silly('time since last heartbeat: %d', timeSinceLastHeartbeat);
@@ -159,7 +171,7 @@ UavConnection.prototype.getState = function() {
 
 // Update the remote heartbeat's last timestamp
 UavConnection.prototype.updateHeartbeat = function() {
-    
+
     try {
         log.silly('Heartbeat updated: ' + Date.now());
         lastHeartbeat = Date.now();
@@ -255,14 +267,50 @@ UavConnection.prototype.connecting = function() {
         // to avoid attaching too many callbacks.
         if (true === attachDataEventListener) {
 
+            // One time, wait for a heartbeat then set the srcSystem / srcComponent
+            // Possible loose ends here.  TODO GH#195.
+            protocol.once('HEARTBEAT', function(msg) {
+
+                uavSysId = msg.header.srcSystem;
+                uavComponentId = msg.header.srcComponent;
+                protocol.srcSystem = uavSysId;
+                protocol.srcComponent = uavComponentId;
+
+                // This code is mainly to warn if there's misalignment
+                // with the parameter vs. the heartbeat.  TODO GH#195.
+                // We issue this request here because the heartbeats are slower
+                // than issuing the request for the parameter (lower frequency),
+                // so we wnat to get a heartbeat before checking if there's parameter
+                // misalignment.
+                mavParam.get('SYSID_THISMAV')
+                    .then(_.bind(function(sysid_thismav) {
+                        if(sysid_thismav !== uavSysId) {
+                            log.warn('UAV parameter SYSID_THISMAV does not match heartbeat srcSystem! %d %d', sysid_thismav, uavSysId);
+                        } else {
+                            log.debug('Confirmed, SYSID_THISMAV matches heartbeat.srcSystem OK');
+                        }
+                    }, this))
+                    .fail(function(e) { log.error(util.inspect(e)); });
+
+            });
+
             // TODO GH#124, remove specific MAVLink protocol commands from this object
-            log.silly('*** Binding heartbeat, %s', attachDataEventListener);
             protocol.on('HEARTBEAT', this.updateHeartbeat);
 
             // When binary data is received, write it to the binary received log and then pass it to the protocol
             // handler for decoding.
             connection.on(dataEventName, this.handleDataEvent);
 
+            var mavParam = new MavParams(protocol, log);
+
+            // With the connection established, fetch and set the GCS SysID and UAV SysIDs,
+            // both here and on the protocol itself.
+            mavParam.get('SYSID_MYGCS')
+                .then(_.bind(function(sysid_mygcs) {
+                    gcsSysId = sysid_mygcs;
+                    log.debug('Got GCS sysid %d', sysid_mygcs);
+                }, this))
+                .fail(function(e) { log.error(util.inspect(e)); });
         }
 
         // Don't do this twice.
@@ -326,17 +374,12 @@ UavConnection.prototype.connected = function() {
     // The rate parameter of the data stream seems to be in Hz.
     var request_data_stream = _.once(_.bind(function() {
         var request = new mavlink.messages.request_data_stream(
-            1, // target system
-            1, // target component
+            uavSysId, // target system
+            uavComponentId, // target component
             mavlink.MAV_DATA_STREAM_ALL, // get all data streams
             config.get('connection:updateIntervals:streamHz'), // rate, Hz
             1 // start sending this stream (0=stop)
         );
-        _.extend(request, {
-            srcSystem: 255,
-            srcComponent: 0,
-            seq: 1
-        });
         var p = new Buffer(request.pack());
         this.write(p);
     }, this));
