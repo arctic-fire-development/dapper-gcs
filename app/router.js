@@ -54,8 +54,8 @@ define([
             this.mission = new Mission({}, { socket: this.socket });
             this.mission.fetch();
 
-            var routine = require(this.getRoutineName());
-            this.routine = new routine().set({
+            var Routine = require(this.getRoutineName());
+            this.routine = new Routine({
                 mission: this.mission
             });
 
