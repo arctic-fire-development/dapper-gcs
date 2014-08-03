@@ -44,18 +44,29 @@ define([
             'mission/preflight' : 'preflight',
             'mission/fly' : 'fly',
             'engineering' : 'engineering',
-            'resumeCurrentMissionStep' : 'resumeCurrentMissionStep'
+            'mission/current' : 'resumeCurrentMissionStep'
         },
-        currentMission: undefined,
 
         initialize: function() {
 
-            this.homeView = new HomeView();
-            this.mission = new Mission();
+            this.socket = window.socket = io();
+
+            this.mission = new Mission({}, { socket: this.socket });
+            this.mission.fetch();
+
+            var routine = require(this.getRoutineName());
+            this.routine = new routine().set({
+                mission: this.mission
+            });
+
+            this.homeView = new HomeView({
+                model: this.mission
+            });
 
             this.planView = new PlanView({
                 model: this.mission
             });
+
         },
 
         // Works for 2 menu items!  Hacky!  =)
@@ -78,8 +89,8 @@ define([
         },
 
         resumeCurrentMissionStep: function() {
-            if(this.currentMission) {
-                this.navigate('mission/'+this.currentMission, { trigger: true });
+            if('not started' !== this.mission.get('status')) {
+                this.navigate('mission/'+this.mission.get('status'), { trigger: true });
             } else {
                 this.navigate('plan', { trigger: true });
             }
@@ -96,7 +107,6 @@ define([
         },
 
         planning: function() {
-            this.currentMission = 'planning';
             this.showOnly('planning');
             this.routine.planning().then(_.bind(function() {
                 this.navigate('mission/preflight', { trigger: true });
@@ -104,25 +114,22 @@ define([
         },
 
         preflight: function() {
-            this.currentMission = 'preflight';
             this.showOnly('preflight');
+            this.mission.set({status:'preflight'});
             this.routine.preflight().then(_.bind(function() {
                 this.navigate('mission/fly', { trigger: true });
             }, this));
         },
 
         fly: function() {
-            this.currentMission = 'fly';
             this.showOnly('fly');
+            // TODO this can't be right/here, otherwise any observer will also trigger this action.
+            this.mission.set({status:'fly', active: true});
             this.routine.fly();
         },
 
         mission: function() {
             this.showOnly('mission');
-            var routine = require(this.getRoutineName());
-            this.routine = new routine().set({
-                mission: this.mission
-            });
             this.navigate('mission/planning', { trigger: true });
         },
 
