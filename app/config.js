@@ -20,7 +20,8 @@ require.config({
         "bootstrap-slider": "../assets/js/libs/bootstrap-slider/js/bootstrap-slider",
         bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
         "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl",
-        routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min"
+        routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min",
+        "backbone.iobind": "assets/bower/backbone.iobind/dist/backbone.iobind"
     },
     shim: {
         backbone: {

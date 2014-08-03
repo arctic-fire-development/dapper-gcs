@@ -1,4 +1,4 @@
-define(['backbone', 'JST'], function(Backbone, templates) {
+define(['backbone', 'JST', 'q'], function(Backbone, templates, Q) {
 
     var HomeView = Backbone.View.extend({
 
@@ -6,11 +6,11 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         template: templates['app/Templates/home'],
 
         render: function() {
-
-            // Render scaffolding
-            this.$el.html(this.template);
-            return this;
-
+            
+            Q($.get('/routine')).then(_.bind(function(data) {
+                this.$el.html(this.template(this.model.toJSON()));    
+            }, this));
+            
         }
 
     });
