@@ -2,7 +2,7 @@
 
 // Set up this module to be used both on the client & server, so we need
 // both AMD and CommonJS style module loaders.
-// TODO GH#xxx
+// TODO GH#196
 // http://esa-matti.suuronen.org/blog/2013/03/22/journey-from-requirejs-to-browserify/
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -16,9 +16,9 @@
         factory((root.commonJsStrict = {}), root.Backbone);
     }
 }(this, function (exports, Backbone) {
-    
+
     var Mission = Backbone.Model.extend({
-      
+
       url: 'routine',
 
       defaults: {
@@ -34,6 +34,10 @@
       constructor: function(attr, options) {
 
         // Fake out the socket?  Is this OK?
+        // Let's let this stay while we figure out good patterns for this kind of shared code
+        // plus realtime distributed sync.  Other libraries are capable of replacing the
+        // Backbone.sync with socket.io stuff, but that's slightly _not_ what we want,
+        // and some of the documentation/currency of those libraries is suspicious.
         if( options && options.socket ) {
           this.socket = options.socket;
         } else {
@@ -53,19 +57,15 @@
       },
 
       syncToServer: function() {
-        console.log('synchronizing to server');
-        console.log(this.socket);
         this.socket.emit('routine:update', this.toJSON());
       },
 
       syncFromServer: function(json) {
-        console.log('got info from server syncing')
-        console.log(json);
         this.set(json);
       }
 
     });
-    
+
     // attach properties to the exports object to define
     // the exported module properties.
     if(typeof module === 'object') {

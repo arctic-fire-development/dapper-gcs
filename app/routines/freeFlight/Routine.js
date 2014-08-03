@@ -11,7 +11,6 @@ define([
     "Models/Mission",
     "Models/Platform",
     "Models/Connection",
-    "routines/freeFlight/models/Planning",
 
     // Parent objects
     "routines/components/Routine",
@@ -25,7 +24,6 @@ define([
     Mission,
     Platform,
     Connection,
-    PlanningModel,
     BaseRoutine,
     PlanningView,
     PreflightView,
@@ -36,7 +34,6 @@ define([
 
         planning: function() {
             var deferred = Q.defer();
-            this.planningModel = new PlanningModel();
             var planningView = new PlanningView({
                 model: this.planningModel,
                 deferred: deferred,
@@ -109,22 +106,29 @@ define([
 
         fly: function() {
             try{
+
                 var flightCompletedDeferred = Q.defer();
                 var platform = this.platform; // to juggle context references
-                var mission = new Mission({
-                    platform: this.platform,
-                    connection: this.connection,
-                    planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
-                });
 
+                // We keep some structures separate from the Backbone-managed attributes because
+                // we don't want to sync or persist them.
+                this.get('mission').platform = this.platform;
+                this.get('mission').connection = this.connection;
+                this.get('mission').planning = this.planningModel;
+console.log('********')
+console.log(this.planningModel);
                 var flyView = new FreeFlightFlyView({
-                    model: mission
+                    model: this.get('mission')
                 }).render();
 
-                this.socket.on('platform', function(platformJson) {
-                    platform.set(platformJson);
-                }, this);
-
+                try {
+                    this.socket.on('platform', function(platformJson) {
+                        platform.set(platformJson);
+                    }, this);
+                } catch(e) {
+                    console.log('error in setting socket connection');
+                    console.log(e);
+                }
             } catch(e) {
                 console.log(e);
             }

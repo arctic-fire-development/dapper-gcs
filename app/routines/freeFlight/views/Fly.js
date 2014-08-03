@@ -49,7 +49,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 this.altitudeWidget.disable();
 
                 // Detect when system has landed, then instruct disarm.
-                this.model.get('platform').on('status:standby', function() {
+                this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
                         this.$el.find('button.stop').hide();
                         this.$el.find('button.launch').show();
@@ -76,7 +76,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
 
                 // Enable RTL when craft is hovering.
-                this.model.get('platform').on('mode:hover', function() {
+                this.model.platform.on('mode:hover', function() {
                     this.$el.find('button.home').attr('disabled', false);
                 }, this);
 
@@ -91,8 +91,10 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         render: function() {
             try {
+                console.log('rendering!');
                 if (false === this.hasRendered) {
                     this.renderLayout();
+                    console.log('rendering layout');
                     this.hasRendered = true;
                 }
             } catch(e) {
@@ -107,8 +109,8 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 [
                     L.latLng(e.latlng.lat, e.latlng.lng),
                     L.latLng(
-                        this.model.get('platform').get('lat'),
-                        this.model.get('platform').get('lon')
+                        this.model.platform.get('lat'),
+                        this.model.platform.get('lon')
                     )
                 ],
                 {
@@ -147,7 +149,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             // and do an immediate refresh.
             // Send a final alt adjustment to the current altitude.
             this.altitudeWidget.slider.on('slideStop', _.bind(function(slideEvt) {
-                $.get('/drone/changeAltitude', { alt: this.model.get('platform').get('relative_alt') });
+                $.get('/drone/changeAltitude', { alt: this.model.platform.get('relative_alt') });
                 this.altitudeWidget.suspendSliderRender = false;
                 this.altitudeWidget.render();
             }, this));
@@ -159,36 +161,50 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             // Render scaffolding
             this.$el.html(this.template);
-
+            
             // Only render actual fly view once we've got GPS fix.
-            this.model.get('platform').once('gps:fix_established', function() {
+            this.model.platform.once('gps:fix_established', function() {
 
                 this.$el.find('#waitForGps').hide();
                 this.$el.find('#widgets').show();
-
+console.log('a')
                 // Instantiate subviews, now that their elements are present on the page
                 this.speedWidget = new SpeedWidget({
-                    model: this.model.get('platform')
+                    model: this.model.platform
                 });
+                console.log('b')
+                try {
+                    console.log(this.model);
                 this.altitudeWidget = new AltitudeWidget({
-                    model: this.model.get('platform'),
-                    maxAltitude: this.model.get('planning').get('maxAltitude')
+                    model: this.model.platform,
+                    maxAltitude: this.model.planning.get('maxAltitude')
                 });
+            } catch(e) {
+                console.log(e);
+                console.log(e.stack);
+            }
+                console.log('c')
                 this.batteryWidget = new BatteryWidget({
-                    model: this.model.get('platform')
+                    model: this.model.platform
                 });
+                console.log('z')
                 this.mapWidget = new MapWidget({
-                    model: this.model.get('platform')
+                    model: this.model.platform
                 });
+                console.log('e')
                 this.platformWidget = new PlatformWidget({
-                    model: this.model.get('platform')
+                    model: this.model.platform
                 });
+                console.log('doggggg');
 
                 // Render party
                 this.speedWidget.render();
+                console.log('rend speedWidget')
                 this.altitudeWidget.render();
+                console.log('rend alt');
                 this.batteryWidget.render();
                 this.mapWidget.render();
+                console.log('just rendered map');
                 this.bindMapClickEvents();
 
                 // Must configure/render this only after the map has been rendered.
@@ -197,7 +213,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
                 // If we're in flight, change the GUI as needed.
                 // TODO: more needs to be done here, manage Fly button, etc.
-                if(this.model.get('platform').isFlying()) {
+                if(this.model.platform.isFlying()) {
                     this.altitudeWidget.enable();
                     this.bindFlyToPoint();
                 }
@@ -210,21 +226,21 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         // Hook up various growl notifications.
         bindGrowlNotifications: function() {
-            this.model.get('platform').on('status:standby', function() {
+            this.model.platform.on('status:standby', function() {
                 this.growl('System is in standby mode.', 'success', 10000);
             }, this);
 
-            this.model.get('platform').on('disarmed', function() {
+            this.model.platform.on('disarmed', function() {
                 this.growl('System is now disarmed.', 'success', 10000);
             }, this);
 
-            this.model.get('connection').on('change:notification', function() {
+            this.model.connection.on('change:notification', function() {
 
                 var message, type;
-                switch(this.model.get('connection').get('notification')) {
+                switch(this.model.connection.get('notification')) {
                     case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
                     case 'regained': message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type='success'; break;
-                    default: message = 'Connection notification not understood: ' + this.model.get('notification'), type='danger'; break;
+                    default: message = 'Connection notification not understood: ' + this.model.connection.get('notification'), type='danger'; break;
                 }
 
                 this.growl(message);
@@ -232,8 +248,8 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             }, this);
 
             // Bind notifications to change events on the platform
-            this.model.get('platform').on('change:custom_mode', function() {
-                var message, type='info', delay = 6000, mode = this.model.get('platform').get('custom_mode');
+            this.model.platform.on('change:custom_mode', function() {
+                var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
                 switch(mode) {
                     case 0: message = "System is in stabilize mode."; break;
                     case 3: message = "Performing takeoff&hellip;"; break;
@@ -249,17 +265,17 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             // Battery notifications
             var batteryIcon = '<span class="glyphicon glyphicon-flash"></span>';
-            this.model.get('platform').once('battery:half', function() {
+            this.model.platform.once('battery:half', function() {
                 this.growl(batteryIcon + ' Battery is at half power.');
             }, this);
-            this.model.get('platform').once('battery:quarter', function() {
+            this.model.platform.once('battery:quarter', function() {
                 this.growl(
                     batteryIcon + ' Battery is at quarter power.',
                     'warning',
                     1000000000 // persistent
                 );
             }, this);
-            this.model.get('platform').once('battery:low', function() {
+            this.model.platform.once('battery:low', function() {
                 this.growl(
                     batteryIcon + ' Battery is very low, land safely immediately.',
                     'danger',
@@ -269,10 +285,10 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             // GPS notifications
             var gpsIcon = '<span class="glyphicon glyphicon-map-marker"></span>';
-            this.model.get('platform').on('gps:fix_established', function(){
+            this.model.platform.on('gps:fix_established', function(){
                 this.growl(gpsIcon + ' GPS fix established', 'info');
             }, this);
-            this.model.get('platform').on('gps:fix_lost', function(){
+            this.model.platform.on('gps:fix_lost', function(){
                 this.growl(gpsIcon + ' GPS fix lost', 'warning');
             }, this);
 

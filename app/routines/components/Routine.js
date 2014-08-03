@@ -14,6 +14,7 @@ define([
     'Models/Mission',
     'Models/Platform',
     'Models/Connection',
+    'routines/freeFlight/models/Planning',
 
     // Dependent views
     'routines/freeFlight/views/Planning',
@@ -24,6 +25,7 @@ define([
     Mission,
     Platform,
     Connection,
+    PlanningModel,
     PlanningView,
     PreflightView,
     FlyView
@@ -39,8 +41,10 @@ define([
 
         initialize: function() {
             _.bindAll(this, 'planning', 'preflight', 'fly');
+            this.socket = io();
             this.connection = new Connection();
             this.platform = new Platform();
+            this.planningModel = new PlanningModel();
             this.connection.on('change:status', _.bind(function(model) {
                 if(model.get('status') === 'connected') {
                     this.set({ 'connected' : true});
@@ -76,7 +80,6 @@ define([
 
         try {
             // Initalize connection.
-            this.socket = io();
             this.socket.emit('startConnection');
             this.socket.on('linkStatus', _.bind(function(linkStatus) {
                 this.connection.set(linkStatus);
