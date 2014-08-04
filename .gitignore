@@ -5,6 +5,10 @@ app/assets/bower/*
 # No config files!
 config.json
 
+# No upstart generated fiels
+dapper-gcs.log
+dapper-gcs.pid
+
 # App or OS specific junk
 *.sublime-project
 *.sublime-workspace
