@@ -106,114 +106,13 @@ app.set('mavParams', mavParams);
 var platform = {}, connection = {};
 
 io.on('connection', function(socket) {
-
   socket.on('startConnection', function() {
-    uavConnectionManager.start();
+    
+    if(false === uavConnectionManager.hasStarted()) {
+      uavConnectionManager.start();
+      bindClientEventBridge();
+    } // end if-connection-manager-has-started
   });
-
-  // Only bind connections once per client.
-  // TODO this isn't quite right yet.   We need to probably
-  // attach things differently, and NOT directly to MAVLink messages.
-  _.once(function() {
-
-    // For performance reasons, let's hide these types of "silly" loggings behind environmental dev flags
-    // TODO GH#180
-    // Bind this in the same scope as the other client/server connections so we can be sure we're not
-    // flooding event handlers.
-    mavlinkParser.on('message', function(m) { 
-      logger.silly('Got MAVLink message %s', m.name);
-    });
-
-    mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
-        platform = _.extend(platform, {
-            lat: message.lat / 10000000,
-            lon: message.lon / 10000000,
-            alt: message.alt / 1000,
-            relative_alt: message.relative_alt / 1000
-        });
-        io.emit('platform', platform);
-    });
-
-    // This won't scale =P still
-    // But it's closer to what we want to do.
-    mavlinkParser.on('HEARTBEAT', function(message) {
-        platform = _.extend(platform, {
-            type: message.type,
-            base_mode: message.base_mode,
-            custom_mode: message.custom_mode,
-            system_status: message.system_status
-        });
-        io.emit('platform', platform);
-    });
-
-    mavlinkParser.on('SYS_STATUS', function(message) {
-        platform = _.extend(platform, {
-            voltage_battery: message.voltage_battery,
-            current_battery: message.current_battery,
-            battery_remaining: message.battery_remaining,
-            drop_rate_comm: message.drop_rate_comm,
-            errors_comm: message.errors_comm
-        });
-        io.emit('platform', platform);
-    });
-
-    mavlinkParser.on('VFR_HUD', function(message) {
-        platform = _.extend(platform, {
-            airspeed: message.airspeed,
-            groundspeed: message.groundspeed,
-            heading: message.heading
-        });
-        io.emit('platform', platform);
-    });
-
-    mavlinkParser.on('GPS_RAW_INT', function(message) {
-        platform = _.extend(platform, {
-            fix_type: message.fix_type,
-            satellites_visible: message.satellites_visible
-        });
-        io.emit('platform', platform);
-    });
-
-    uavConnectionManager.on('disconnected', function() {
-        connection = _.extend(connection, {
-            status: uavConnectionManager.getState(),
-            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-        });
-        io.emit('linkStatus', connection);
-    });
-
-    uavConnectionManager.on('connecting', function() {
-        connection = _.extend(connection, {
-            status: uavConnectionManager.getState(),
-            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-        });
-        io.emit('linkStatus', connection);
-    });
-
-    uavConnectionManager.on('connected', function() {
-        connection = _.extend(connection, {
-            status: uavConnectionManager.getState(),
-            time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
-        });
-        io.emit('linkStatus', connection);
-    });
-
-    uavConnectionManager.on('connection:lost', function() {
-      connection=_.extend(connection, {
-        notification: 'lost'
-      });
-      io.emit('linkStatus', connection);
-    });
-
-    uavConnectionManager.on('connection:regained', function() {
-      connection = _.extend(connection, {
-        notification: 'regained'
-      });
-      io.emit('linkStatus', connection);
-    });
-
-})(); // call the _once invocation here.
-
 });
 
 app.get('/connection/start', function(req, res) {
@@ -428,3 +327,102 @@ process.on('SIGINT', exitHandler.bind(null, {exit:true}));
 
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+
+// TODO: move this function elsewhere
+function bindClientEventBridge() {
+  // For performance reasons, let's hide these types of "silly" loggings behind environmental dev flags
+      // TODO GH#180
+      // Bind this in the same scope as the other client/server connections so we can be sure we're not
+      // flooding event handlers.
+      // mavlinkParser.on('message', function(m) { 
+      //   logger.silly('Got MAVLink message %s', m.name);
+      // });
+
+      mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
+          platform = _.extend(platform, {
+              lat: message.lat / 10000000,
+              lon: message.lon / 10000000,
+              alt: message.alt / 1000,
+              relative_alt: message.relative_alt / 1000
+          });
+          io.emit('platform', platform);
+      });
+
+      // This won't scale =P still
+      // But it's closer to what we want to do.
+      mavlinkParser.on('HEARTBEAT', function(message) {
+          platform = _.extend(platform, {
+              type: message.type,
+              base_mode: message.base_mode,
+              custom_mode: message.custom_mode,
+              system_status: message.system_status
+          });
+          io.emit('platform', platform);
+      });
+
+      mavlinkParser.on('SYS_STATUS', function(message) {
+          platform = _.extend(platform, {
+              voltage_battery: message.voltage_battery,
+              current_battery: message.current_battery,
+              battery_remaining: message.battery_remaining,
+              drop_rate_comm: message.drop_rate_comm,
+              errors_comm: message.errors_comm
+          });
+          io.emit('platform', platform);
+      });
+
+      mavlinkParser.on('VFR_HUD', function(message) {
+          platform = _.extend(platform, {
+              airspeed: message.airspeed,
+              groundspeed: message.groundspeed,
+              heading: message.heading
+          });
+          io.emit('platform', platform);
+      });
+
+      mavlinkParser.on('GPS_RAW_INT', function(message) {
+          platform = _.extend(platform, {
+              fix_type: message.fix_type,
+              satellites_visible: message.satellites_visible
+          });
+          io.emit('platform', platform);
+      });
+
+      uavConnectionManager.on('disconnected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          io.emit('linkStatus', connection);
+      });
+
+      uavConnectionManager.on('connecting', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          io.emit('linkStatus', connection);
+      });
+
+      uavConnectionManager.on('connected', function() {
+          connection = _.extend(connection, {
+              status: uavConnectionManager.getState(),
+              time_since_last_heartbeat: uavConnectionManager.timeSinceLastHeartbeat
+          });
+          io.emit('linkStatus', connection);
+      });
+
+      uavConnectionManager.on('connection:lost', function() {
+        connection=_.extend(connection, {
+          notification: 'lost'
+        });
+        io.emit('linkStatus', connection);
+      });
+
+      uavConnectionManager.on('connection:regained', function() {
+        connection = _.extend(connection, {
+          notification: 'regained'
+        });
+        io.emit('linkStatus', connection);
+      });
+}

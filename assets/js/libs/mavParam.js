@@ -15,6 +15,8 @@ var _ = require('underscore'),
     Q = require('q'),
     Qretry = require('qretry'),
     mavlink = require("mavlink_ardupilotmega_v1.0");
+    //    EventEmitter = require('events').EventEmitter,  TODO GH#194
+
 
 // Logger, passed in object constructor for common logging
 var log;
@@ -76,15 +78,28 @@ MavParam.prototype.set = function(name, value) {
         intervalMultiplicator: 1.1
     });
 
-    mavlinkParser.on('PARAM_VALUE', _.bind(paramVerifier, this));
+    mavlinkParser.on('PARAM_VALUE', paramVerifier);
     return promises[name].promise;
 
 };
 
 MavParam.prototype.get = function(name) {
+    var deferred = Q.defer();
+    
+    var parameterVerifier = _.bind(function(msg) {
+        if(name === msg.param_id) {
+            mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
+            deferred.resolve(msg.param_value);
+        }
+    }, this);
+
+    mavlinkParser.on('PARAM_VALUE', parameterVerifier);
+
     var index = -1; // this will use the name as the lookup method
     var param_request_read = new mavlink.messages.param_request_read(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, index);
     mavlinkParser.send(param_request_read);
+
+    return deferred.promise;
 };
 
 MavParam.prototype.getAll = function() {

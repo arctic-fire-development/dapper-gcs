@@ -121,6 +121,8 @@ define([
                     model: mission
                 }).render();
 
+                // Hook up platform-based updates.
+                // The socket connection is established in the BaseRoutine/preflight code.
                 this.socket.on('platform', function(platformJson) {
                     platform.set(platformJson);
                 }, this);
