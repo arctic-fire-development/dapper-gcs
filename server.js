@@ -19,6 +19,7 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
     quadUdl = require('./assets/js/libs/udlImplementations/ArduCopter.js'),
     platforms = require('./assets/js/libs/platforms.js'),
     _ = require('underscore'),
+    Users = require('./assets/js/libs/Users.js'),
     RoutineObj = require('./assets/js/libs/Routine.js');
 
 requirejs.config({
@@ -107,6 +108,7 @@ app.set('mavParams', mavParams);
 var platform = {}, connection = {};
 
 var routineObj = new RoutineObj(logger, app, io);
+var users = new Users(logger, io);
 
 io.on('connection', function(socket) {
 

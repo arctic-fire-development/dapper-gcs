@@ -26,7 +26,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         model: Mission,
         el: '#fly',
-        template: templates['app/routines/freeFlight/Templates/missionLayout'],
+        template: templates['app/routines/freeFlight/Templates/fly'],
         hasRendered: false,
 
         events: {
@@ -36,7 +36,31 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop');
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint');
+        },
+
+        showControls: function() {
+            if(true === this.model.isOperator) {
+                this.$el.find('#controls').show();
+            } else {
+                this.$el.find('#controls').hide();
+            }
+        },
+
+        enableAltitudeSlider: function() {
+            if(true === this.model.isOperator) {
+                this.altitudeWidget.enable();
+            } else {
+                this.altitudeWidget.disable();
+            }
+        },
+
+        enableFlyToPoint: function() {
+            if(true === this.model.isOperator) {
+                this.bindFlyToPoint();
+            } else {
+                // no-op, or, this.unbindFlyToPoint();
+            }
         },
 
         home: function() {
@@ -83,18 +107,16 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 // Enable altitude control & fly to point.
                 // TODO GH#134, these should only really be enabled when we know
                 // that the system is in flight.
-                this.altitudeWidget.enable();
-                this.bindFlyToPoint();
+                this.enableAltitudeSlider();
+                this.enableFlyToPoint();
 
             }, this));
         },
 
         render: function() {
             try {
-                console.log('rendering!');
                 if (false === this.hasRendered) {
                     this.renderLayout();
-                    console.log('rendering layout');
                     this.hasRendered = true;
                 }
             } catch(e) {
@@ -167,44 +189,34 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
                 this.$el.find('#waitForGps').hide();
                 this.$el.find('#widgets').show();
-console.log('a')
+
                 // Instantiate subviews, now that their elements are present on the page
                 this.speedWidget = new SpeedWidget({
                     model: this.model.platform
                 });
-                console.log('b')
-                try {
-                    console.log(this.model);
+
                 this.altitudeWidget = new AltitudeWidget({
                     model: this.model.platform,
                     maxAltitude: this.model.planning.get('maxAltitude')
                 });
-            } catch(e) {
-                console.log(e);
-                console.log(e.stack);
-            }
-                console.log('c')
+
                 this.batteryWidget = new BatteryWidget({
                     model: this.model.platform
                 });
-                console.log('z')
+
                 this.mapWidget = new MapWidget({
                     model: this.model.platform
                 });
-                console.log('e')
+
                 this.platformWidget = new PlatformWidget({
                     model: this.model.platform
                 });
-                console.log('doggggg');
 
                 // Render party
                 this.speedWidget.render();
-                console.log('rend speedWidget')
                 this.altitudeWidget.render();
-                console.log('rend alt');
                 this.batteryWidget.render();
                 this.mapWidget.render();
-                console.log('just rendered map');
                 this.bindMapClickEvents();
 
                 // Must configure/render this only after the map has been rendered.
@@ -214,12 +226,13 @@ console.log('a')
                 // If we're in flight, change the GUI as needed.
                 // TODO: more needs to be done here, manage Fly button, etc.
                 if(this.model.platform.isFlying()) {
-                    this.altitudeWidget.enable();
-                    this.bindFlyToPoint();
+                    this.enableAltitudeSlider();
+                    this.enableFlyToPoint();
                 }
 
             }, this);
 
+            this.showControls(); // show or hide button depending on user role
             this.bindGrowlNotifications();
 
         },

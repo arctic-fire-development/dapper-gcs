@@ -115,8 +115,7 @@ define([
                 this.get('mission').platform = this.platform;
                 this.get('mission').connection = this.connection;
                 this.get('mission').planning = this.planningModel;
-console.log('********')
-console.log(this.planningModel);
+
                 var flyView = new FreeFlightFlyView({
                     model: this.get('mission')
                 }).render();

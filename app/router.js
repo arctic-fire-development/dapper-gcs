@@ -4,12 +4,12 @@ define([
 
     // Application + dependencies
     'app',
-    'io',
     'underscore',
     'backbone',
     'jquery',
     'require',
     'routefilter',
+    'bootstrap-growl',
 
     'routines/freeFlight/Routine',
 
@@ -21,7 +21,7 @@ define([
     'Views/Home',
     'Views/Plan',
     'Views/Engineering'
-], function(app, io, _, Backbone, $, require, rf,
+], function(app, _, Backbone, $, require, rf, BG,
     
     RoutineFreeFlight,
 
@@ -49,7 +49,9 @@ define([
 
         initialize: function() {
 
-            this.socket = window.socket = io();
+            _.bindAll(this, 'handleOperatorPromotion', 'handleOperatorDemotion')
+
+            this.socket = app.socket;
 
             this.mission = new Mission({}, { socket: this.socket });
             this.mission.fetch();
@@ -60,13 +62,46 @@ define([
             });
 
             this.homeView = new HomeView({
-                model: this.mission
+                model: this.mission,
+                socket: app.socket
             });
 
             this.planView = new PlanView({
                 model: this.mission
             });
 
+            // TODO GH#xxx refactor to more sensible place...?
+            this.socket.on('operator:promoted', this.handleOperatorPromotion);
+            this.socket.on('operator:demoted', this.handleOperatorDemotion);
+
+        },
+
+        handleOperatorPromotion: function() {
+
+            this.mission.isOperator = true;
+
+            $('#indicators li.isOperator').show();
+            $('#indicators li.isObserver').hide();
+
+            $.bootstrapGrowl("<span class='glyphicon glyphicon-cloud-upload'></span> You've been promoted to operator for this mission.", {
+                ele: 'body', // which element to append to
+                type: 'success', // (null, 'info', 'danger', 'success')
+                offset: {from: 'bottom', amount: 20}, // 'top', or 'bottom'
+                align: 'right', // ('left', 'right', or 'center')
+                width: 250, // (integer, or 'auto')
+                delay: 8000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
+                allow_dismiss: true, // If true then will display a cross to close the popup.
+                stackup_spacing: 10 // spacing between consecutively stacked growls.
+            });
+
+        },
+
+        handleOperatorDemotion: function() {
+
+            this.mission.isOperator = false;
+
+            $('#indicators.isOperator').hide();
+            $('#indicators.isObserver').show();
         },
 
         // Works for 2 menu items!  Hacky!  =)
@@ -114,6 +149,12 @@ define([
         },
 
         preflight: function() {
+            // Preflight is when we need to lock down operator vs. observers.
+            // Let's try doing this via non-ack'd realtime requests and see how the approach works.
+            this.socket.emit('operator:promote', {
+                id: this.socket.id
+            });
+
             this.showOnly('preflight');
             this.mission.set({status:'preflight'});
             this.routine.preflight().then(_.bind(function() {
