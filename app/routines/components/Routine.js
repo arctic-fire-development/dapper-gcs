@@ -7,7 +7,6 @@ define([
     'underscore',
     'jquery',
     'q',
-    'io',
     'backbone',
 
     // Models
@@ -21,7 +20,7 @@ define([
     'routines/freeFlight/views/Preflight',
     'routines/freeFlight/views/Fly'
 
-], function(app, _, $, Q, io, Backbone,
+], function(app, _, $, Q, Backbone,
     Mission,
     Platform,
     Connection,
@@ -41,7 +40,7 @@ define([
 
         initialize: function() {
             _.bindAll(this, 'planning', 'preflight', 'fly');
-            this.socket = io();
+            this.socket = app.socket;
             this.connection = new Connection();
             this.platform = new Platform();
             this.planningModel = new PlanningModel();
