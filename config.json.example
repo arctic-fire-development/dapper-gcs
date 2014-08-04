@@ -5,6 +5,10 @@
     "timeout": {
         "soft": 5000,
         "hard": 20000
+      },
+      "updateIntervals" : {
+        "streamHz" : 2,
+        "heartbeatMs" : 251
       }
     },
 

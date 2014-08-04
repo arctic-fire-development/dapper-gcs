@@ -1,4 +1,7 @@
-define(['backbone', 'JST'], function(Backbone, templates) {
+'use strict';
+/*globals define */
+
+define(['backbone', 'io', 'JST'], function(Backbone, io, templates) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};
@@ -26,26 +29,20 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         template: templates['app/Templates/engineering'],
 
         initialize: function() {
-            _.bindAll(this, 'render');
+            _.bindAll(this, 'render', 'updatePlatform');
             this.listenTo(this.model, 'change', this.render);
             this.startConnection();
         },
         startConnection: function() {
-
-        // Initalize connection.
-        now.ready(_.bind(function() {
-
-            // Start connection.
-            now.updateConnection = function() {} // don't care, but server will invoke this anyhow.
-            now.startConnection(true);
-            now.updatePlatform = _.bind(function(platformJson) {
-                   this.model.set(platformJson);
-            }, this);
-
-        }, this));
-
-
+            this.socket = io();
+            this.socket.emit('startConnection');
+            this.socket.on('platform', this.updatePlatform);
         },
+
+        updatePlatform: function(platformData) {
+            this.model.set(platformData);
+        },
+
         render: function() {
             var has; if(has) return false;
             has = true;
