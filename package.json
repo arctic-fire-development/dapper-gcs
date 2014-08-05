@@ -18,7 +18,6 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "amd-loader": "0.0.5",
     "backbone": "^1.1.2",
     "express": "~3.5.1",
     "jade": "~1.5.0",

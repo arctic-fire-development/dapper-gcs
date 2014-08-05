@@ -6,3 +6,13 @@
 				a.btn.btn-primary.btn-lg(href="/mission/current") Join flight in progress
 			else
 				a.btn.btn-primary.btn-lg(href="/plan") Plan a flight
+
+#routineStartedModalOverride.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;A routine has started
+			.modal-body
+				p A routine is now being performed.
+			.modal-footer
+				button#gotoFly.btn.btn-primary(data-dismiss="modal") Join routine as observer

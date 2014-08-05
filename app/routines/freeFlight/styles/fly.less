@@ -15,12 +15,13 @@
 
 #fly {
 	.freeFlight {
+		&.row {
+			margin-top: -21px; // undo Bootstrap's little margin
+		}
 		#widgets {
-			width: 160px;
 			z-index: 500;
 			padding: 2ex;
 			margin: 0;
-			height: 100%;
 			background: rgba(0, 0, 0, .5);
 
 			.widget {
@@ -37,32 +38,11 @@
 				margin-top: 2em;
 			}
 		}
-		
-		#controls {
-			position: absolute;
-			bottom: 0;
-			margin: 1ex;
-			z-index: 5000;
 
+		#controls {
+		
 			button {
 				.animation(animation1 1s linear 0s infinite alternate);
-			}
-		}
-
-		#waitForGps {
-			margin: auto;
-			position: absolute;
-			height: 3.5em;
-			width: 50%;
-			top: 0; left: 0; bottom: 0; right: 0;
-			span {
-				display: inline-block;
-				padding-left: 1em;
-			}
-			img {
-				display: inline-block;
-				position: relative;
-				bottom: 1px;
 			}
 		}
 	}
@@ -77,5 +57,22 @@
 	span.units {
 		font-weight: 200;
 		font-size: 300%;
+	}
+}
+
+#waitForGps {
+	margin: auto;
+	position: absolute;
+	height: 3.5em;
+	width: 50%;
+	top: 0; left: 0; bottom: 0; right: 0;
+	span {
+		display: inline-block;
+		padding-left: 1em;
+	}
+	img {
+		display: inline-block;
+		position: relative;
+		bottom: 1px;
 	}
 }

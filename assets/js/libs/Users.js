@@ -32,6 +32,10 @@ Users.prototype.handleNewConnection = function(socket, next) {
 
     // If a client requests, resend a promotion notification.
     socket.on('operator:promote', this.assignOperator);
+    socket.on('operator:promote:force', function(data) {
+        operator = socket.id;
+        socket.emit('operator:promoted', operator);
+    });
 
     // Attach disconnect handlers
     socket.on('disconnect', _.bind(function() {
@@ -51,24 +55,28 @@ Users.prototype.handleNewConnection = function(socket, next) {
             socket: socket,
             timestamp: socket.handshake.issued
         };
-        this.assignOperator(socket.id);
+        this.assignOperator(socket);
         next();
     }
 };
 
-Users.prototype.assignOperator = function() {
-
+Users.prototype.assignOperator = function(socket) {
     var connectionsOrderedByTimestamp = _.sortBy(connections, 'timestamp');
+
     switch(_.size(connections)) {
         case 0:
             log.warn('No active connections present.');
             break;
+
         // If only one connection exists, that person is the operator.
         case 1:
-            // GH#203
-            operator = connectionsOrderedByTimestamp[0].socket.id
-            log.info('Promoting connection ID %s to operator', operator);
-            io.emit('operator:promoted', operator);
+            // GH#203, need to demote others if necessary.
+            // Pick the longest connected client and promote it to operator.
+            if( operator !== connectionsOrderedByTimestamp[0].socket.id ) {
+                operator = connectionsOrderedByTimestamp[0].socket.id;
+                connections[operator].socket.emit('operator:promoted', operator);
+                log.info('Promoting solo connection ID %s to operator', operator);
+            }
             break;
         default: break;
     }

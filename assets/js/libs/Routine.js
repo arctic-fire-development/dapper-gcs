@@ -39,17 +39,20 @@ Routine.prototype = {
     res.json(this.missionModel.toJSON());
   },
 
+  // TODO GH#206
   socketHandlers: function(socket) {
     socket.on('preflight', function() {
       log.info('routine thinks someone is starting preflight, signaling other connected clients to freeze');
     });
     socket.on('routine:update', _.bind(function(data) {
-      console.log('got socket realtime update mapped back to Routine object on server')
-      console.log(data);
-      console.log('setting data on model, this should propagate out to other connected clients')
       this.missionModel.set(data);
       socket.emit('routine:update', this.missionModel.toJSON());
     }, this));
+
+    // When a routine is started, signal other clients.
+    socket.on('routine:started', function() {
+      socket.broadcast.emit('routine:started');
+    });
   }
 };
 

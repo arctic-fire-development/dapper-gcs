@@ -11,7 +11,7 @@ define([
 
     // TODO GH#180 Wrap this up in a debugging context flag
     // It defines the log level of socket.io.  Consider using same library for our own code?
-    localStorage.debug='*';
+    localStorage.debug='';
 
     // Provide a global location to place configuration settings and module
     // creation.
