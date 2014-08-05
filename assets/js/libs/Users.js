@@ -39,7 +39,7 @@ Users.prototype.handleNewConnection = function(socket, next) {
 
     // Attach disconnect handlers
     socket.on('disconnect', _.bind(function() {
-        log.debug('Disconnecting socket connection %s', socket.id);
+        log.info('Disconnecting socket connection %s', socket.id);
         delete connections[socket.id];
         this.assignOperator();
     }, this));
@@ -50,7 +50,7 @@ Users.prototype.handleNewConnection = function(socket, next) {
         log.debug('Connection %s already exists in pool, rejecting connection attempt', socket.id);
         next(new Error('SocketIO connection already exists for this ID.'));
     } else {
-        log.debug('Connection ID %s connected and accepted', socket.id);
+        log.info('Connection ID %s connected and accepted', socket.id);
         connections[socket.id] = {
             socket: socket,
             timestamp: socket.handshake.issued
