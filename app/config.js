@@ -10,7 +10,6 @@ require.config({
         JST: "../build/templates",
         backbone: "assets/bower/backbone/backbone",
         io: "assets/bower/socket.io-client/socket.io",
-        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
         jquery: "assets/bower/jquery/dist/jquery",
         underscore: "assets/bower/underscore/underscore",
         "leaflet-dist": "assets/bower/leaflet-dist/leaflet",
@@ -21,7 +20,7 @@ require.config({
         bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
         "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl",
         routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min",
-        "backbone.iobind": "assets/bower/backbone.iobind/dist/backbone.iobind"
+        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap"
     },
     shim: {
         backbone: {

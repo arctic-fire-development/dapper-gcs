@@ -1,4 +1,4 @@
-define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-growl',
+define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-growl', 'underscore',
 
     // Models
     'Models/Mission',
@@ -10,7 +10,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
     'Views/Widgets/Battery',
     'Views/Widgets/Platform',
 
-], function(Backbone, templates, Q, L, BS, BG,
+], function(Backbone, templates, Q, L, BS, BG, _,
     // Models
     Mission,
 
@@ -27,7 +27,15 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         model: Mission,
         el: '#fly',
         template: templates['app/routines/freeFlight/Templates/fly'],
+
+        // Set to true when the scaffolding (map, layout) has rendered
         hasRendered: false,
+
+        // Set to true when fly-to-point and/or other map controls for flight ops are bound to map
+        mapEventsAreBound: false,
+
+        // Set to true when GPS fix has been established
+        hasGpxFix: false,
 
         events: {
             'click button.launch' : 'launch',
@@ -36,7 +44,9 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint');
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
+                'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
+                'regenerateGuiState');
         },
 
         showControls: function() {
@@ -45,9 +55,33 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             } else {
                 this.$el.find('#controls').hide();
             }
+
+            this.model.platform.isFlying().then(_.bind(function(ifFlying) {
+                console.log(ifFlying);
+                if(false === ifFlying) return;
+
+                if(this.model.platform.isRtl()) {
+                    // show stop button
+                    this.showButton('stop');
+                } else if (
+                    this.model.platform.isInUserControllableFlight()
+                    || true // see below for why
+                    ) {
+                    // Show the RTL button, enable flight controls.  The reason we explicitly check for known flight
+                    // states, then proceed to ignore the comparison with an || true, is because
+                    // there may be other states that the craft can get into that aren't expected
+                    // and we want to be reasonably sure we're giving the user a sane option.
+                    // Having RTL is that sane option, and should give the user
+                    // a clear exit back to GCS control.
+                    this.showButton('home');
+                    this.altitudeWidget.enable();
+                    this.bindFlyToPoint();
+                }
+            }, this));
         },
 
         enableAltitudeSlider: function() {
+
             if(true === this.model.isOperator) {
                 this.altitudeWidget.enable();
             } else {
@@ -63,11 +97,21 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             }
         },
 
+        // Show the button with name className, hide others.
+        showButton: function(className) {
+            _.each(this.$el.find('button'), function(e) {
+                console.log(e);
+                if(e.hasClass(className)) {
+                    e.show();
+                } else {
+                    e.hide();
+                }
+            }, this);
+        },
+
         home: function() {
             Q($.get('/drone/rtl')).then(_.bind(function() {
-
-                this.$el.find('button.home').hide();
-                this.$el.find('button.stop').show();
+                this.showButton('stop');
 
                 this.unbindFlyToPoint();
                 this.altitudeWidget.disable();
@@ -75,8 +119,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 // Detect when system has landed, then instruct disarm.
                 this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
-                        this.$el.find('button.stop').hide();
-                        this.$el.find('button.launch').show();
+                        this.showButton('launch');
                     }, this));
                 }, this);
             }, this));
@@ -84,14 +127,16 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
         stop: function() {
             Q($.get('/drone/loiter')).then(_.bind(function() {
-
-                this.$el.find('button.stop').hide();
-                this.$el.find('button.home').show();
-
+                this.showButton('home');
+                this.altitudeWidget.enable();
+                this.bindFlyToPoint();
             }, this));
         },
 
         launch: function() {
+
+            // Swap the button text immediately for responsiveness
+            this.$el.find('button.launch').html('Launching&hellip;');
 
             Q($.get('/drone/launch')).then(_.bind(function() {
 
@@ -99,7 +144,9 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 this.$el.find('button.launch').hide();
                 this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
 
-                // Enable RTL when craft is hovering.
+                // Enable RTL when craft is hovering, this is the first mode the craft will enter
+                // after its auto program is finished so we can use it as an indicator that craft is ready
+                // for manual user control.
                 this.model.platform.on('mode:hover', function() {
                     this.$el.find('button.home').attr('disabled', false);
                 }, this);
@@ -119,9 +166,20 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     this.renderLayout();
                     this.hasRendered = true;
                 }
+
+                // Regenerate GUI state from operator/platform status
+                this.confirmHaveGpsFix().then(this.regenerateGuiState);
+
             } catch(e) {
                 console.log(e);
             }
+            return this;
+        },
+
+        regenerateGuiState: function() {
+            this.showControls();
+            //TODO probably need to ensure we're restoring bindings here,
+            // though casual testing seemed to work OK?
         },
 
         flyToPoint: function(e) {
@@ -148,16 +206,20 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         },
 
         bindFlyToPoint: function() {
-            this.mapWidget.map.on('mousedown', this.flyToPoint, this);
-            this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+            if( false === this.mapEventsAreBound ) {
+                this.mapWidget.map.on('mousedown', this.flyToPoint, this);
+                this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+                this.mapEventsAreBound = true;
+            }
         },
 
         unbindFlyToPoint: function() {
             this.mapWidget.map.off('mousedown', this.flyToPoint);
             this.mapWidget.map.off('mouseup', this.hoverAtPoint);
+            this.mapEventsAreBound = false;
         },
 
-        bindMapClickEvents: function() {
+        bindAltitudeSliderEvents: function() {
 
             // When the slider is being dragged, prevent the slider from
             // being updated while the user has the mouse down,
@@ -183,57 +245,65 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
 
             // Render scaffolding
             this.$el.html(this.template);
-            
-            // Only render actual fly view once we've got GPS fix.
-            this.model.platform.once('gps:fix_established', function() {
 
+            // Instantiate subviews, now that their elements are present on the page
+            this.speedWidget = new SpeedWidget({
+                model: this.model.platform
+            });
+
+            this.altitudeWidget = new AltitudeWidget({
+                model: this.model.platform,
+                maxAltitude: this.model.planning.get('maxAltitude')
+            });
+
+            this.batteryWidget = new BatteryWidget({
+                model: this.model.platform
+            });
+
+            this.mapWidget = new MapWidget({
+                model: this.model.platform
+            });
+
+            this.model.platformWidget = new PlatformWidget({
+                model: this.model.platform
+            });
+
+            // Only render actual fly view once we've got GPS fix.
+            this.confirmHaveGpsFix().then(_.bind(function() {
                 this.$el.find('#waitForGps').hide();
                 this.$el.find('#widgets').show();
-
-                // Instantiate subviews, now that their elements are present on the page
-                this.speedWidget = new SpeedWidget({
-                    model: this.model.platform
-                });
-
-                this.altitudeWidget = new AltitudeWidget({
-                    model: this.model.platform,
-                    maxAltitude: this.model.planning.get('maxAltitude')
-                });
-
-                this.batteryWidget = new BatteryWidget({
-                    model: this.model.platform
-                });
-
-                this.mapWidget = new MapWidget({
-                    model: this.model.platform
-                });
-
-                this.platformWidget = new PlatformWidget({
-                    model: this.model.platform
-                });
-
-                // Render party
-                this.speedWidget.render();
-                this.altitudeWidget.render();
-                this.batteryWidget.render();
-                this.mapWidget.render();
-                this.bindMapClickEvents();
-
-                // Must configure/render this only after the map has been rendered.
-                this.platformWidget.map = this.mapWidget.map;
-                this.platformWidget.render();
-
-                // If we're in flight, change the GUI as needed.
-                // TODO: more needs to be done here, manage Fly button, etc.
-                if(this.model.platform.isFlying()) {
-                    this.enableAltitudeSlider();
-                    this.enableFlyToPoint();
-                }
-
-            }, this);
+                this.renderWidgets();
+            }, this));
 
             this.showControls(); // show or hide button depending on user role
             this.bindGrowlNotifications();
+
+        },
+
+        // Consider moving this to the Platform model.
+        confirmHaveGpsFix: function() {
+            var deferred = Q.defer();
+            if( true === this.hasGpsFix) {
+                deferred.resolve();
+            }
+            this.model.platform.once('gps:fix_established', _.bind(function() {
+                this.hasGpsFix = true;
+                deferred.resolve();
+            }, this));
+            return deferred.promise;
+        },
+
+        renderWidgets: function() {
+            // Render party
+            this.speedWidget.render();
+            this.altitudeWidget.render();
+            this.batteryWidget.render();
+            this.mapWidget.render();
+            this.bindAltitudeSliderEvents();
+
+            // Must configure/render this only after the map has been rendered.
+            this.model.platformWidget.map = this.mapWidget.map;
+            this.model.platformWidget.render();
 
         },
 

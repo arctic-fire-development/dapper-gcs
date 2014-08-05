@@ -49,7 +49,7 @@ define([
 
         initialize: function() {
 
-            _.bindAll(this, 'handleOperatorPromotion', 'handleOperatorDemotion')
+            _.bindAll(this, 'handleOperatorPromotion', 'handleOperatorDemotion', 'handleRoutineStarted', 'handleRoutineEnded');
 
             this.socket = app.socket;
 
@@ -73,6 +73,18 @@ define([
             // TODO GH#xxx refactor to more sensible place...?
             this.socket.on('operator:promoted', this.handleOperatorPromotion);
             this.socket.on('operator:demoted', this.handleOperatorDemotion);
+            this.socket.on('routine:started', this.handleRoutineStarted);
+            this.socket.on('routine:ended', this.handleRoutineEnded);
+
+        },
+
+        handleRoutineStarted: function() {
+            if( true !== this.mission.isOperator ) {
+                this.homeView.renderRoutineStartedModalOverride();
+            }
+        },
+
+        handleRoutineEnded: function() {
 
         },
 
@@ -152,8 +164,11 @@ define([
             // Preflight is when we need to lock down operator vs. observers.
             // Let's try doing this via non-ack'd realtime requests and see how the approach works.
             this.socket.emit('operator:promote', {
-                id: this.socket.id
+                id: this.socket.id,
             });
+
+            // Alert all clients that a routine is about to be underway.
+            this.socket.emit('routine:started');
 
             this.showOnly('preflight');
             this.mission.set({status:'preflight'});

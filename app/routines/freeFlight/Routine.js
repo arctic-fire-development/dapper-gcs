@@ -116,18 +116,29 @@ define([
                 this.get('mission').connection = this.connection;
                 this.get('mission').planning = this.planningModel;
 
-                var flyView = new FreeFlightFlyView({
+                this.flyView = new FreeFlightFlyView({
                     model: this.get('mission')
-                }).render();
+                });
+                this.flyView.render();
 
-                try {
-                    this.socket.on('platform', function(platformJson) {
-                        platform.set(platformJson);
-                    }, this);
-                } catch(e) {
-                    console.log('error in setting socket connection');
-                    console.log(e);
-                }
+                this.socket.on('platform', function(platformJson) {
+                    platform.set(platformJson);
+                }, this);
+
+                this.socket.on('operator:promoted', _.bind(function() {
+                    this.get('mission').isOperator = true;
+                    try {
+                        console.log('flyView is re-rendering');
+                        this.flyView.render();
+                    } catch(e) {
+                        console.log(e);
+                    }
+                }, this));
+
+                this.socket.on('operator:demoted', _.bind(function() {
+                    this.flyView.render();
+                }, this));
+
             } catch(e) {
                 console.log(e);
             }
