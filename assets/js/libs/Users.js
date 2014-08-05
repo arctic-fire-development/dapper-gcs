@@ -32,9 +32,13 @@ Users.prototype.handleNewConnection = function(socket, next) {
 
     // If a client requests, resend a promotion notification.
     socket.on('operator:promote', this.assignOperator);
+
+    // Force promotion of a specific client (when starting a mission, etc),
+    // and demote other clients.
     socket.on('operator:promote:force', function(data) {
         operator = socket.id;
         socket.emit('operator:promoted', operator);
+        socket.broadcast.emit('operator:demoted');
     });
 
     // Attach disconnect handlers
@@ -69,18 +73,21 @@ Users.prototype.assignOperator = function(socket) {
             break;
 
         // If only one connection exists, that person is the operator.
-        case 1:
-            // GH#203, need to demote others if necessary.
-            // Pick the longest connected client and promote it to operator.
+        // Pick the longest-connected client and promote it to operator.
+        case 1: // fallthrough -- code for 1..n other connections should be identical here.
+        default:
             if( operator !== connectionsOrderedByTimestamp[0].socket.id ) {
                 operator = connectionsOrderedByTimestamp[0].socket.id;
                 connections[operator].socket.emit('operator:promoted', operator);
                 log.info('Promoting solo connection ID %s to operator', operator);
             }
+
+            // Demote other clients.  GH#203.
+            connections[operator].socket.broadcast.emit('operator:demoted');
+
             break;
-        default: break;
     }
-    
+
 };
 
 module.exports = Users;

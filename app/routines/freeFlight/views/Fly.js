@@ -1,4 +1,4 @@
-define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-growl', 'underscore',
+define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'underscore',
 
     // Models
     'Models/Mission',
@@ -10,7 +10,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
     'Views/Widgets/Battery',
     'Views/Widgets/Platform',
 
-], function(Backbone, templates, Q, L, BS, BG, _,
+], function(app, Backbone, templates, Q, L, BS, _,
     // Models
     Mission,
 
@@ -168,7 +168,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                 }
 
                 // Regenerate GUI state from operator/platform status
-                this.confirmHaveGpsFix().then(this.regenerateGuiState);
+                this.model.platform.confirmHaveGpsFix().then(this.regenerateGuiState);
 
             } catch(e) {
                 console.log(e);
@@ -269,7 +269,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             });
 
             // Only render actual fly view once we've got GPS fix.
-            this.confirmHaveGpsFix().then(_.bind(function() {
+            this.model.platform.confirmHaveGpsFix().then(_.bind(function() {
                 this.$el.find('#waitForGps').hide();
                 this.$el.find('#widgets').show();
                 this.renderWidgets();
@@ -278,19 +278,6 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             this.showControls(); // show or hide button depending on user role
             this.bindGrowlNotifications();
 
-        },
-
-        // Consider moving this to the Platform model.
-        confirmHaveGpsFix: function() {
-            var deferred = Q.defer();
-            if( true === this.hasGpsFix) {
-                deferred.resolve();
-            }
-            this.model.platform.once('gps:fix_established', _.bind(function() {
-                this.hasGpsFix = true;
-                deferred.resolve();
-            }, this));
-            return deferred.promise;
         },
 
         renderWidgets: function() {
@@ -310,11 +297,11 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
         // Hook up various growl notifications.
         bindGrowlNotifications: function() {
             this.model.platform.on('status:standby', function() {
-                this.growl('System is in standby mode.', 'success', 10000);
+                app.growl('System is in standby mode.', 'success', 10000);
             }, this);
 
             this.model.platform.on('disarmed', function() {
-                this.growl('System is now disarmed.', 'success', 10000);
+                app.growl('System is now disarmed.', 'success', 10000);
             }, this);
 
             this.model.connection.on('change:notification', function() {
@@ -326,7 +313,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     default: message = 'Connection notification not understood: ' + this.model.connection.get('notification'), type='danger'; break;
                 }
 
-                this.growl(message);
+                app.growl(message);
 
             }, this);
 
@@ -342,24 +329,24 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
                     default: message = "Switching to custom_mode " + mode, delay=10000, type='danger';
                 }
 
-                this.growl(message, type, delay);
+                app.growl(message, type, delay);
 
             }, this);
 
             // Battery notifications
             var batteryIcon = '<span class="glyphicon glyphicon-flash"></span>';
             this.model.platform.once('battery:half', function() {
-                this.growl(batteryIcon + ' Battery is at half power.');
+                app.growl(batteryIcon + ' Battery is at half power.');
             }, this);
             this.model.platform.once('battery:quarter', function() {
-                this.growl(
+                app.growl(
                     batteryIcon + ' Battery is at quarter power.',
                     'warning',
                     1000000000 // persistent
                 );
             }, this);
             this.model.platform.once('battery:low', function() {
-                this.growl(
+                app.growl(
                     batteryIcon + ' Battery is very low, land safely immediately.',
                     'danger',
                     1000000000
@@ -369,29 +356,11 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             // GPS notifications
             var gpsIcon = '<span class="glyphicon glyphicon-map-marker"></span>';
             this.model.platform.on('gps:fix_established', function(){
-                this.growl(gpsIcon + ' GPS fix established', 'info');
+                app.growl(gpsIcon + ' GPS fix established', 'info');
             }, this);
             this.model.platform.on('gps:fix_lost', function(){
-                this.growl(gpsIcon + ' GPS fix lost', 'warning');
+                app.growl(gpsIcon + ' GPS fix lost', 'warning');
             }, this);
-
-        },
-
-        growl: function(message, type, delay) {
-
-            type = type || 'info';
-            delay = delay || 6000; // ms
-
-            $.bootstrapGrowl(message, {
-                ele: 'body', // which element to append to
-                type: type, // (null, 'info', 'danger', 'success')
-                offset: {from: 'bottom', amount: 20}, // 'top', or 'bottom'
-                align: 'right', // ('left', 'right', or 'center')
-                width: 250, // (integer, or 'auto')
-                delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                allow_dismiss: true, // If true then will display a cross to close the popup.
-                stackup_spacing: 10 // spacing between consecutively stacked growls.
-            });
 
         }
 
