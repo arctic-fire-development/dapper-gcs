@@ -89,31 +89,23 @@ define([
         },
 
         handleOperatorPromotion: function() {
-
-            this.mission.isOperator = true;
-
-            $('#indicators li.isOperator').show();
-            $('#indicators li.isObserver').hide();
-
-            $.bootstrapGrowl("<span class='glyphicon glyphicon-cloud-upload'></span> You've been promoted to operator for this mission.", {
-                ele: 'body', // which element to append to
-                type: 'success', // (null, 'info', 'danger', 'success')
-                offset: {from: 'bottom', amount: 20}, // 'top', or 'bottom'
-                align: 'right', // ('left', 'right', or 'center')
-                width: 250, // (integer, or 'auto')
-                delay: 8000, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                allow_dismiss: true, // If true then will display a cross to close the popup.
-                stackup_spacing: 10 // spacing between consecutively stacked growls.
-            });
-
+            // Only deal if this is a change.
+            if(false === this.mission.isOperator)  {
+                this.mission.isOperator = true;
+                $('#indicators li.isOperator').show();
+                $('#indicators li.isObserver').hide();
+                app.growl("<span class='glyphicon glyphicon-cloud-upload'></span> You've been promoted to operator for this mission.", "success", 10000);
+            }
         },
 
         handleOperatorDemotion: function() {
-
-            this.mission.isOperator = false;
-
-            $('#indicators.isOperator').hide();
-            $('#indicators.isObserver').show();
+            // Only squawk if this is a change.
+            if(true === this.mission.isOperator) {
+                this.mission.isOperator = false;
+                app.growl("<span class='glyphicon glyphicon-eye-open'></span> Another user is now the active operator.", "warning", 10000);
+                $('#indicators.isOperator').hide();
+                $('#indicators.isObserver').show();
+            }
         },
 
         // Works for 2 menu items!  Hacky!  =)
@@ -163,7 +155,7 @@ define([
         preflight: function() {
             // Preflight is when we need to lock down operator vs. observers.
             // Let's try doing this via non-ack'd realtime requests and see how the approach works.
-            this.socket.emit('operator:promote', {
+            this.socket.emit('operator:promote:force', {
                 id: this.socket.id,
             });
 

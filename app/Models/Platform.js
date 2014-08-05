@@ -188,6 +188,27 @@ the MAVLink messages that set them.
             );
         },
 
+
+        // Promised-based function for handling when we get a GPS fix.
+        confirmHaveGpsFix: function() {
+            var deferred = Q.defer();
+
+            // Return immediately if we do presently have GPS fix.
+            if( true === this.hasGpsFix()) {
+                deferred.resolve();
+            }
+
+            var checkGps = _.bind(function() {
+                if(true === this.hasGpsFix()) {
+                    clearInterval(interval);
+                    deferred.resolve(true);
+                }
+            }, this);
+
+            var interval = setInterval(checkGps, 200);
+            return deferred.promise;
+        },
+
         // The system is flying if it's active and relative altitude is greater than zero.
         // The second assumption -- that relative alt > 1 -- is problematic.  GH#134
         // We wait until we have defined values before answering a client, because sometimes

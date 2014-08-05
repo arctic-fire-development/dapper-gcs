@@ -29,6 +29,11 @@
         active: false
       },
 
+      // Flag indicating if this client GUI is the operator of this mission.
+      // We don't want this property to persist via shared state to other clients,
+      // so it's not in the attributes list.
+      isOperator: false,
+
       // Here, we set up the appropriate reference to the socket depending
       // on if it's client or server.
       constructor: function(attr, options) {
