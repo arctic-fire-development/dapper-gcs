@@ -57,7 +57,7 @@ define(['backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'bootstrap-g
             }
 
             this.model.platform.isFlying().then(_.bind(function(ifFlying) {
-                console.log(ifFlying);
+
                 if(false === ifFlying) return;
 
                 if(this.model.platform.isRtl()) {
