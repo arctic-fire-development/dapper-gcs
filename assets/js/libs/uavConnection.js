@@ -78,6 +78,11 @@ var hasConnected = false;
 // Set to true if the connection is in a lost state.
 var lostConnection = false;
 
+// Used to keep track of the last error emitted to the logs, to avoid spamming
+// the logs with a huge sequence of the same error (since some of the possible errors
+// occur during heartbeat-type events)
+var lastError;
+
 // Incoming config is an nconf instance, already read in the server code.
 // Protocol Parser is a mavlink instance
 // log is a Winston logger, already configured + ready to use
@@ -241,7 +246,11 @@ UavConnection.prototype.disconnected = function() {
                 // We need to handle the 'error' event for TCP connections, otherwise its default behavior is to
                 // throw an exception, which may not be what is expected in the surrounding code.
                 connection.on('error', function(e) {
-                    log.error('[UavConnection] TCP connection error message: ' + e);
+                    // Don't spam the error log.  May want to expand this logic for everywhere in this code, too.
+                    if(lastError != e.code ) {
+                        log.error('[UavConnection] TCP connection error message: ' + e);    
+                    }
+                    lastError = e.code;
                 });
                 break;
 
