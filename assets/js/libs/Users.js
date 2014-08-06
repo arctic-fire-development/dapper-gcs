@@ -35,7 +35,7 @@ Users.prototype.handleNewConnection = function(socket, next) {
 
     // Force promotion of a specific client (when starting a mission, etc),
     // and demote other clients.
-    socket.on('operator:promote:force', function(data) {
+    socket.on('operator:promote:force', function() {
         operator = socket.id;
         socket.emit('operator:promoted', operator);
         socket.broadcast.emit('operator:demoted');

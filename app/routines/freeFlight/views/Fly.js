@@ -34,9 +34,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         // Set to true when fly-to-point and/or other map controls for flight ops are bound to map
         mapEventsAreBound: false,
 
-        // Set to true when GPS fix has been established
-        hasGpxFix: false,
-
         events: {
             'click button.launch' : 'launch',
             'click button.home' : 'home',

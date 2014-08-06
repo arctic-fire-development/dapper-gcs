@@ -160,9 +160,7 @@ define([
         preflight: function() {
             // Preflight is when we need to lock down operator vs. observers.
             // Let's try doing this via non-ack'd realtime requests and see how the approach works.
-            this.socket.emit('operator:promote:force', {
-                id: this.socket.id,
-            });
+            this.socket.emit('operator:promote:force');
 
             // Alert all clients that a routine is about to be underway.
             this.socket.emit('routine:started');
