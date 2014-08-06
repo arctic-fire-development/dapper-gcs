@@ -124,13 +124,18 @@ define([
                 // Hook up platform-based updates.
                 // The socket connection is established in the BaseRoutine/preflight code.
                 this.socket.on('platform', function(platformJson) {
-                    platform.set(platformJson);
+                    try {
+                        platform.set(platformJson);
+                    } catch(e) {
+                        //alert("Error in socket callback handler," + e);
+                        console.log(e);
+                        //throw(e);
+                    }
                 }, this);
 
                 this.socket.on('operator:promoted', _.bind(function() {
                     this.get('mission').isOperator = true;
                     try {
-                        console.log('flyView is re-rendering');
                         this.flyView.render();
                     } catch(e) {
                         console.log(e);
@@ -138,6 +143,7 @@ define([
                 }, this));
 
                 this.socket.on('operator:demoted', _.bind(function() {
+                    this.get('mission').isOperator = true;
                     this.flyView.render();
                 }, this));
 
