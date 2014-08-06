@@ -79,7 +79,7 @@ Users.prototype.assignOperator = function(socket) {
             if( operator !== connectionsOrderedByTimestamp[0].socket.id ) {
                 operator = connectionsOrderedByTimestamp[0].socket.id;
                 connections[operator].socket.emit('operator:promoted', operator);
-                log.info('Promoting solo connection ID %s to operator', operator);
+                log.info('Promoting connection ID %s to operator', operator);
             }
 
             // Demote other clients.  GH#203.

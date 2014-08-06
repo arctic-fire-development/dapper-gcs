@@ -133,18 +133,28 @@ define([
                     }
                 }, this);
 
-                this.socket.on('operator:promoted', _.bind(function() {
-                    this.get('mission').isOperator = true;
-                    try {
-                        this.flyView.render();
-                    } catch(e) {
-                        console.log(e);
+                this.socket.on('operator:promoted', _.bind(function(operator) {
+
+                    if(app.socket.io.engine.id === operator) {
+                        this.get('mission').isOperator = true;
+                        try {
+                            this.flyView.render();
+                        } catch(e) {
+                            console.log(e);
+                        }
+                    } else {
+                        console.log('Got promotion event for someone else');
                     }
+
                 }, this));
 
                 this.socket.on('operator:demoted', _.bind(function() {
-                    this.get('mission').isOperator = true;
-                    this.flyView.render();
+                    try {
+                        this.get('mission').isOperator = false;
+                        this.flyView.render();
+                    } catch(e) {
+                        console.log(e)
+                    }
                 }, this));
 
             } catch(e) {
