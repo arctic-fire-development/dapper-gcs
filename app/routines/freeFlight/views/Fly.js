@@ -55,28 +55,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             } else {
                 this.$el.find('#controls').hide();
             }
-
-            this.model.platform.isFlying().then(_.bind(function(ifFlying) {
-                if(false === ifFlying) return;
-
-                if(this.model.platform.isRtl()) {
-                    // show stop button
-                    this.showButton('stop');
-                } else if (
-                    this.model.platform.isInUserControllableFlight()
-                    || true // see below for why
-                    ) {
-                    // Show the RTL button, enable flight controls.  The reason we explicitly check for known flight
-                    // states, then proceed to ignore the comparison with an || true, is because
-                    // there may be other states that the craft can get into that aren't expected
-                    // and we want to be reasonably sure we're giving the user a sane option.
-                    // Having RTL is that sane option, and should give the user
-                    // a clear exit back to GCS control.
-                    this.showButton('home');
-                    this.altitudeWidget.enable();
-                    this.bindFlyToPoint();
-                }
-            }, this));
         },
 
         enableAltitudeSlider: function() {
@@ -92,7 +70,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             if(true === this.model.isOperator) {
                 this.bindFlyToPoint();
             } else {
-                // no-op, or, this.unbindFlyToPoint();
+                this.unbindFlyToPoint();
             }
         },
 
@@ -110,8 +88,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         home: function() {
             Q($.get('/drone/rtl')).then(_.bind(function() {
-                this.showButton('stop');
 
+                // Disable user control while craft is in RTL.
+                this.showButton('stop');
                 this.unbindFlyToPoint();
                 this.altitudeWidget.disable();
 
@@ -121,11 +100,13 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                         this.showButton('launch');
                     }, this));
                 }, this);
+
             }, this));
         },
 
         stop: function() {
             Q($.get('/drone/loiter')).then(_.bind(function() {
+                // Switch back to free flight mode.
                 this.showButton('home');
                 this.altitudeWidget.enable();
                 this.bindFlyToPoint();
@@ -176,9 +157,34 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         regenerateGuiState: function() {
+
+            // Default state should show/hide controls and disable UI interactions.
             this.showControls();
-            //TODO probably need to ensure we're restoring bindings here,
-            // though casual testing seemed to work OK?
+            this.altitudeWidget.disable();
+            this.unbindFlyToPoint();
+
+            this.model.platform.isFlying().then(_.bind(function(ifFlying) {
+                if(false === ifFlying) return;
+
+                if(this.model.platform.isRtl()) {
+                    // show stop button
+                    this.showButton('stop');
+                } else if (
+                    this.model.platform.isInUserControllableFlight()
+                    || true // see below for why
+                    ) {
+                    // Show the RTL button, enable flight controls.  The reason we explicitly check for known flight
+                    // states, then proceed to ignore the comparison with an || true, is because
+                    // there may be other states that the craft can get into that aren't expected
+                    // and we want to be reasonably sure we're giving the user a sane option.
+                    // Having RTL is that sane option, and should give the user
+                    // a clear exit back to GCS control.
+                    this.showButton('home');
+                    this.enableAltitudeSlider();
+                    this.enableFlyToPoint();
+                }
+            }, this));
+
         },
 
         flyToPoint: function(e) {
@@ -234,7 +240,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // and do an immediate refresh.
             // Send a final alt adjustment to the current altitude.
             this.altitudeWidget.slider.on('slideStop', _.bind(function(slideEvt) {
-                $.get('/drone/changeAltitude', { alt: this.model.platform.get('relative_alt') });
+                $.get('/drone/loiter');
                 this.altitudeWidget.suspendSliderRender = false;
                 this.altitudeWidget.render();
             }, this));
