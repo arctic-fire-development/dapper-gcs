@@ -11,6 +11,7 @@ html(lang='en')
 		script.
 			var appConfig = appConfig || {};
 			appConfig.platforms = !{JSON.stringify(platforms)}
+
 	body
 		nav#main-navbar.navbar.navbar-default(role="navigation")
 			.container-fluid
@@ -25,8 +26,16 @@ html(lang='en')
 				#navbar.collapse.navbar-collapse
 					ul.nav.navbar-nav
 						li(data-name="mission").active
-							a(href="/resumeCurrentMissionStep") Mission
+							a(href="/mission/current") Mission
 						li(data-name="engineering")
 							a(href="/engineering") Engineering
+
+					ul#indicators.nav.navbar-nav.navbar-right
+						li.isOperator
+							a
+								span.glyphicon.glyphicon-cloud-upload
+						li.isObserver
+							a
+								span.glyphicon.glyphicon-eye-open
 
 	block content

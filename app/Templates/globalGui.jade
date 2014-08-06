@@ -1,0 +1,20 @@
+#routineStartedModalOverride.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;A routine has started
+			.modal-body
+				p A routine is now being performed.
+			.modal-footer
+				button#gotoFly.btn.btn-primary(data-dismiss="modal") Join routine as observer
+
+#lostServerConnection.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to server
+			.modal-body
+				p
+					img(src="images/lolinternet.gif")
+				p The connection to the GCS server was lost.  Refresh your browser window.
+	

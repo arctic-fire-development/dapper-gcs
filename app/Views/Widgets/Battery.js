@@ -12,8 +12,10 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         },
 
         render: function() {
+            var battery = this.model.get('battery_remaining');
+            if(battery < 0) { battery = 0; }
             this.$el.html(this.template({
-                battery_remaining: this.model.get('battery_remaining')
+                battery_remaining: battery
             }));
 
             /* Commenting out instead of nuking to keep the intent in place,

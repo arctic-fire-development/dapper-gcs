@@ -11,7 +11,6 @@ define([
     "Models/Mission",
     "Models/Platform",
     "Models/Connection",
-    "routines/freeFlight/models/Planning",
 
     // Parent objects
     "routines/components/Routine",
@@ -25,7 +24,6 @@ define([
     Mission,
     Platform,
     Connection,
-    PlanningModel,
     BaseRoutine,
     PlanningView,
     PreflightView,
@@ -36,7 +34,6 @@ define([
 
         planning: function() {
             var deferred = Q.defer();
-            this.planningModel = new PlanningModel();
             var planningView = new PlanningView({
                 model: this.planningModel,
                 deferred: deferred,
@@ -109,23 +106,59 @@ define([
 
         fly: function() {
             try{
+
                 var flightCompletedDeferred = Q.defer();
                 var platform = this.platform; // to juggle context references
-                var mission = new Mission({
-                    platform: this.platform,
-                    connection: this.connection,
-                    planning: this.planningModel // TODO possibly not how we want to structure this, but OK for now?
-                });
 
-                var flyView = new FreeFlightFlyView({
-                    model: mission
-                }).render();
+                // We keep some structures separate from the Backbone-managed attributes because
+                // we don't want to sync or persist them.
+                this.get('mission').platform = this.platform;
+                this.get('mission').connection = this.connection;
+                this.get('mission').planning = this.planningModel;
+
+                this.flyView = new FreeFlightFlyView({
+                    model: this.get('mission')
+                });
+                this.flyView.render();
 
                 // Hook up platform-based updates.
                 // The socket connection is established in the BaseRoutine/preflight code.
                 this.socket.on('platform', function(platformJson) {
-                    platform.set(platformJson);
+                    try {
+                        platform.set(platformJson);
+                    } catch(e) {
+                        //alert("Error in socket callback handler," + e);
+                        console.log(e);
+                        //throw(e);
+                    }
                 }, this);
+
+                this.socket.on('operator:promoted', _.bind(function(operator) {
+
+                    // TODO GH#219, improve ID management here.
+                    if(app.socket.io.engine.id === operator) {
+                        this.get('mission').isOperator = true;
+                        try {
+                            this.flyView.render();
+                        } catch(e) {
+                            console.log(e);
+                        }
+                    } else {
+                        console.log('Got promotion event for someone else');
+                    }
+
+                }, this));
+
+                this.socket.on('operator:demoted', _.bind(function() {
+                    if( false !== this.get('mission').isOperator ) {
+                        try {
+                            this.get('mission').isOperator = false;
+                            this.flyView.render();
+                        } catch(e) {
+                            console.log(e)
+                        }
+                    }
+                }, this));
 
             } catch(e) {
                 console.log(e);
