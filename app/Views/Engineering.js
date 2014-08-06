@@ -1,7 +1,7 @@
 'use strict';
 /*globals define */
 
-define(['backbone', 'io', 'JST'], function(Backbone, io, templates) {
+define(['backbone', 'io', 'JST', 'app'], function(Backbone, io, templates, app) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};
@@ -34,7 +34,7 @@ define(['backbone', 'io', 'JST'], function(Backbone, io, templates) {
             this.startConnection();
         },
         startConnection: function() {
-            this.socket = io();
+            this.socket = app.socket;
             this.socket.emit('startConnection');
             this.socket.on('platform', this.updatePlatform);
         },

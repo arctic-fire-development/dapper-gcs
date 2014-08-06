@@ -1,4 +1,4 @@
-define(['backbone', 'underscore'], function(Backbone, _) {
+define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
 
     var Platform = Backbone.Model.extend({
 
@@ -75,7 +75,7 @@ the MAVLink messages that set them.
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
                 // Again GH#122.
-                if(5 == this.get('custom_mode')) {
+                if(5 == this.get('custom_mode')) { // Loiter mode.
                     this.trigger('mode:hover');
                 }
             }, this);
@@ -104,6 +104,27 @@ the MAVLink messages that set them.
                     this.trigger('battery:half');
                 }
             }, this);
+        },
+
+        // A few convenience methods to help the GUI decide what to do.
+        // See GH#122.
+        // The intent of this one is to answer, "Is the craft in a mode where it's flying
+        // and the user is likely to interact with it?"
+        isInUserControllableFlight: function() {
+            if(
+                this.get('custom_mode') === 4 // Guided mode
+                || this.get('custom_mode') === 5 // Loiter mode
+            ) {
+                return true;
+            }
+            return false;
+        },
+        // GH#122
+        isRtl: function() {
+            if( this.get('custom_mode') === 6) { // RTL mode
+                return true;
+            }
+            return false;
         },
 
         // We override the set function in order to manipulate values as required when they are set.
@@ -156,19 +177,60 @@ the MAVLink messages that set them.
         },
 
         // We have a GPS fix if we have lat, lon, and a known good fix_type.
+        // Also reject when both lat/lon are zero, which prevents a case where we start
+        // getting values but they're set to zero (may only occur in SITL).
         // This may not be a complete set of criteria, but it's close.
         hasGpsFix: function() {
             return (
                 this.get('fix_type') >= 2 // 2 + greater means has x/y fix.  See MAVLink spec for this, GPS_RAW_INT
-                && _.isNumber(this.get('lat'))
-                && _.isNumber(this.get('lon'))
+                && _.isNumber(this.get('lat')) && this.get('lat') != 0
+                && _.isNumber(this.get('lon')) && this.get('lon') != 0
             );
         },
 
+
+        // Promised-based function for handling when we get a GPS fix.
+        confirmHaveGpsFix: function() {
+            var deferred = Q.defer();
+
+            // Return immediately if we do presently have GPS fix.
+            if( true === this.hasGpsFix()) {
+                deferred.resolve();
+            }
+
+            var checkGps = _.bind(function() {
+                if(true === this.hasGpsFix()) {
+                    clearInterval(interval);
+                    deferred.resolve(true);
+                }
+            }, this);
+
+            var interval = setInterval(checkGps, 200);
+            return deferred.promise;
+        },
+
         // The system is flying if it's active and relative altitude is greater than zero.
-        // The second assumption -- that relative alt > 0 -- is problematic.  GH#134
+        // The second assumption -- that relative alt > 1 -- is problematic.  GH#134
+        // We wait until we have defined values before answering a client, because sometimes
+        // client code can query before all telemetry data is present.
         isFlying: function() {
-            return this.get('system_status') == 4 && this.get('relative_alt') > 0;
+            var deferred = Q.defer();
+            var checkStatus = _.bind(function() {
+                if( this.get('system_status') == 4 && this.get('relative_alt') > 1 ) {
+                    clearInterval(interval);
+                    deferred.resolve(true); // yep, flying as best we can tell
+                } else if (
+                    'undefined' !== typeof(this.get('system_status'))
+                    && 'undefined' !== typeof(this.get('relative_alt'))
+                ) {
+                    // If these values are both numbers but they don't match our criteria for flight,
+                    // then let's assume not flying.
+                    clearInterval(interval);
+                    deferred.resolve(false);
+                }
+            }, this);
+            var interval = setInterval(checkStatus, 200);
+            return deferred.promise;
         }
 
     });

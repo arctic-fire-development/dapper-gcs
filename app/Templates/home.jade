@@ -2,4 +2,7 @@
 	.container
 		h1 Fly Routine<span>.</span>ly<span class="terminal">.</span>
 		p
-			a.btn.btn-primary.btn-lg(href="/plan") Plan a flight
+			if active
+				a.btn.btn-primary.btn-lg(href="/mission/current") Join flight in progress
+			else
+				a.btn.btn-primary.btn-lg(href="/plan") Plan a flight

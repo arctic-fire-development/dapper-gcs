@@ -4,12 +4,12 @@ define([
 
     // Application + dependencies
     'app',
-    'io',
     'underscore',
     'backbone',
     'jquery',
     'require',
     'routefilter',
+    'bootstrap-growl',
 
     'routines/freeFlight/Routine',
 
@@ -18,16 +18,18 @@ define([
     'Models/Platform',
 
     // Dependent views
+    'Views/GlobalGui',
     'Views/Home',
     'Views/Plan',
     'Views/Engineering'
-], function(app, io, _, Backbone, $, require, rf,
+], function(app, _, Backbone, $, require, rf, BG,
     
     RoutineFreeFlight,
 
     Mission,
     Platform,
     
+    GlobalGuiView,
     HomeView,
     PlanView,
     EngineeringView
@@ -44,18 +46,71 @@ define([
             'mission/preflight' : 'preflight',
             'mission/fly' : 'fly',
             'engineering' : 'engineering',
-            'resumeCurrentMissionStep' : 'resumeCurrentMissionStep'
+            'mission/current' : 'resumeCurrentMissionStep'
         },
-        currentMission: undefined,
 
         initialize: function() {
 
-            this.homeView = new HomeView();
-            this.mission = new Mission();
+            _.bindAll(this, 'handleOperatorPromotion', 'handleOperatorDemotion', 'handleRoutineStarted', 'handleRoutineEnded');
+
+            this.socket = app.socket;
+
+            this.mission = new Mission({}, { socket: this.socket });
+            this.mission.fetch();
+
+            var Routine = require(this.getRoutineName());
+            this.routine = new Routine({
+                mission: this.mission
+            });
+
+            this.globalGuiView = new GlobalGuiView().render();
+
+            this.homeView = new HomeView({
+                model: this.mission,
+                socket: app.socket
+            });
 
             this.planView = new PlanView({
                 model: this.mission
             });
+
+            // TODO GH#xxx refactor to more sensible place...?
+            this.socket.on('operator:promoted', this.handleOperatorPromotion);
+            this.socket.on('operator:demoted', this.handleOperatorDemotion);
+            this.socket.on('routine:started', this.handleRoutineStarted);
+            this.socket.on('routine:ended', this.handleRoutineEnded);
+            this.socket.on('disconnect', this.globalGuiView.renderLostServerConnection);
+
+        },
+
+        handleRoutineStarted: function() {
+            if( true !== this.mission.isOperator ) {
+                this.globalGuiView.renderRoutineStartedModalOverride();
+            }
+        },
+
+        handleRoutineEnded: function() {
+
+        },
+
+        handleOperatorPromotion: function() {
+            // Only deal if this is a change.
+            if(false === this.mission.isOperator)  {
+                this.mission.isOperator = true;
+                $('#indicators li.isOperator').show();
+                $('#indicators li.isObserver').hide();
+                app.growl("<span class='glyphicon glyphicon-cloud-upload'></span> You've been promoted to operator for this mission.", "success", 10000);
+            }
+        },
+
+        handleOperatorDemotion: function() {
+            // Only squawk if this is a change.
+            if(true === this.mission.isOperator) {
+                this.mission.isOperator = false;
+                $('#indicators li.isOperator').hide();
+                $('#indicators li.isObserver').show();
+                app.growl("<span class='glyphicon glyphicon-eye-open'></span> Another user is now the active operator.", "warning", 10000);
+            }
         },
 
         // Works for 2 menu items!  Hacky!  =)
@@ -78,8 +133,8 @@ define([
         },
 
         resumeCurrentMissionStep: function() {
-            if(this.currentMission) {
-                this.navigate('mission/'+this.currentMission, { trigger: true });
+            if('not started' !== this.mission.get('status')) {
+                this.navigate('mission/'+this.mission.get('status'), { trigger: true });
             } else {
                 this.navigate('plan', { trigger: true });
             }
@@ -96,7 +151,6 @@ define([
         },
 
         planning: function() {
-            this.currentMission = 'planning';
             this.showOnly('planning');
             this.routine.planning().then(_.bind(function() {
                 this.navigate('mission/preflight', { trigger: true });
@@ -104,25 +158,29 @@ define([
         },
 
         preflight: function() {
-            this.currentMission = 'preflight';
+            // Preflight is when we need to lock down operator vs. observers.
+            // Let's try doing this via non-ack'd realtime requests and see how the approach works.
+            this.socket.emit('operator:promote:force');
+
+            // Alert all clients that a routine is about to be underway.
+            this.socket.emit('routine:started');
+
             this.showOnly('preflight');
+            this.mission.set({status:'preflight'});
             this.routine.preflight().then(_.bind(function() {
                 this.navigate('mission/fly', { trigger: true });
             }, this));
         },
 
         fly: function() {
-            this.currentMission = 'fly';
             this.showOnly('fly');
+            // TODO this can't be right/here, otherwise any observer will also trigger this action.
+            this.mission.set({status:'fly', active: true});
             this.routine.fly();
         },
 
         mission: function() {
             this.showOnly('mission');
-            var routine = require(this.getRoutineName());
-            this.routine = new routine().set({
-                mission: this.mission
-            });
             this.navigate('mission/planning', { trigger: true });
         },
 

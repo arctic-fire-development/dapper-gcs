@@ -18,7 +18,9 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
     MavMission = require('./assets/js/libs/mavMission.js'),
     quadUdl = require('./assets/js/libs/udlImplementations/ArduCopter.js'),
     platforms = require('./assets/js/libs/platforms.js'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    Users = require('./assets/js/libs/Users.js'),
+    RoutineObj = require('./assets/js/libs/Routine.js');
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -104,6 +106,9 @@ var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
 
 var platform = {}, connection = {};
+
+var routineObj = new RoutineObj(logger, app, io);
+var users = new Users(logger, io);
 
 io.on('connection', function(socket) {
   socket.on('startConnection', function() {
@@ -257,9 +262,11 @@ app.get('/drone/flyToPoint', function(req, res) {
 app.get('/drone/loiter', function(req, res) {
   logger.verbose('Setting LOITER mode...');
   Q.fcall(quad.setLoiterMode).then(function() {
-      res.send(200);
-    }
-  );
+    // TODO I don't think this promise is ever getting resolved, because I suspect this ack doesn't get sent.
+    // GH#221.  Hack below is just to send the 200 immediately.
+    res.send(200);
+  });
+  res.send(200);
 });
 
 app.get('/drone/changeAltitude', function(req, res) {

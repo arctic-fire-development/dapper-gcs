@@ -5,6 +5,7 @@ define(['backbone', 'leaflet-dist'], function(Backbone, L) {
         hasRendered: false,
 
         initialize: function(options) {
+            _.bindAll(this, 'render');
             this.map = options.map;
             this.model.on('change:lat change:lon', this.render, this);
             this.breadcrumb = [];
