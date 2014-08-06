@@ -75,7 +75,7 @@ the MAVLink messages that set them.
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
                 // Again GH#122.
-                if(5 == this.get('custom_mode')) {
+                if(5 == this.get('custom_mode')) { // Loiter mode.
                     this.trigger('mode:hover');
                 }
             }, this);
@@ -112,8 +112,8 @@ the MAVLink messages that set them.
         // and the user is likely to interact with it?"
         isInUserControllableFlight: function() {
             if(
-                this.get('custom_mode') === 4
-                || this.get('custom_mode') === 5
+                this.get('custom_mode') === 4 // Guided mode
+                || this.get('custom_mode') === 5 // Loiter mode
             ) {
                 return true;
             }
@@ -121,7 +121,7 @@ the MAVLink messages that set them.
         },
         // GH#122
         isRtl: function() {
-            if( this.get('custom_mode') === 6) {
+            if( this.get('custom_mode') === 6) { // RTL mode
                 return true;
             }
             return false;

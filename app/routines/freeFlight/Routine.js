@@ -150,11 +150,13 @@ define([
                 }, this));
 
                 this.socket.on('operator:demoted', _.bind(function() {
-                    try {
-                        this.get('mission').isOperator = false;
-                        this.flyView.render();
-                    } catch(e) {
-                        console.log(e)
+                    if( false !== this.get('mission').isOperator ) {
+                        try {
+                            this.get('mission').isOperator = false;
+                            this.flyView.render();
+                        } catch(e) {
+                            console.log(e)
+                        }
                     }
                 }, this));
 
