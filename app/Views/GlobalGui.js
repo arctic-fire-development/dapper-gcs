@@ -19,6 +19,13 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             });
         },
 
+       renderLostServerConnection: function() {
+            $('#lostServerConnection').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
         gotoFly: function() {
             app.router.navigate('mission/fly', { trigger: true });
         }

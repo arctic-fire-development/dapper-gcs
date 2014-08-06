@@ -79,6 +79,7 @@ define([
             this.socket.on('operator:demoted', this.handleOperatorDemotion);
             this.socket.on('routine:started', this.handleRoutineStarted);
             this.socket.on('routine:ended', this.handleRoutineEnded);
+            this.socket.on('disconnect', this.globalGuiView.renderLostServerConnection);
 
         },
 
