@@ -262,9 +262,11 @@ app.get('/drone/flyToPoint', function(req, res) {
 app.get('/drone/loiter', function(req, res) {
   logger.verbose('Setting LOITER mode...');
   Q.fcall(quad.setLoiterMode).then(function() {
-      res.send(200);
-    }
-  );
+    // TODO I don't think this promise is ever getting resolved, because I suspect this ack doesn't get sent.
+    // GH#221.  Hack below is just to send the 200 immediately.
+    res.send(200);
+  });
+  res.send(200);
 });
 
 app.get('/drone/changeAltitude', function(req, res) {

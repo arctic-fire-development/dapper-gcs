@@ -135,6 +135,7 @@ define([
 
                 this.socket.on('operator:promoted', _.bind(function(operator) {
 
+                    // TODO GH#219, improve ID management here.
                     if(app.socket.io.engine.id === operator) {
                         this.get('mission').isOperator = true;
                         try {
