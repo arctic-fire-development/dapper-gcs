@@ -57,7 +57,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             }
 
             this.model.platform.isFlying().then(_.bind(function(ifFlying) {
-
+                console.log(ifFlying);
+                console.log(this.model);
                 if(false === ifFlying) return;
 
                 if(this.model.platform.isRtl()) {
@@ -100,11 +101,11 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         // Show the button with name className, hide others.
         showButton: function(className) {
             _.each(this.$el.find('button'), function(e) {
-                console.log(e);
-                if(e.hasClass(className)) {
-                    e.show();
+                $e = $(e);
+                if($e.hasClass(className)) {
+                    $e.show();
                 } else {
-                    e.hide();
+                    $e.hide();
                 }
             }, this);
         },
@@ -206,8 +207,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         bindFlyToPoint: function() {
-            if( false === this.mapEventsAreBound ) {
+            if( false === this.mapEventsAreBound && true === this.model.isOperator ) {
                 this.mapWidget.map.on('mousedown', this.flyToPoint, this);
+                this.mapWidget.map.on('contextmenu', this.flyToPoint, this);
                 this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
                 this.mapEventsAreBound = true;
             }
@@ -215,6 +217,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         unbindFlyToPoint: function() {
             this.mapWidget.map.off('mousedown', this.flyToPoint);
+            this.mapWidget.map.off('contextmenu', this.flyToPoint);
             this.mapWidget.map.off('mouseup', this.hoverAtPoint);
             this.mapEventsAreBound = false;
         },
@@ -246,7 +249,24 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // Render scaffolding
             this.$el.html(this.template);
 
+            // Only render actual fly view once we've got GPS fix.
+            this.model.platform.confirmHaveGpsFix().then(_.bind(function() {
+                this.$el.find('#waitForGps').hide();
+                this.$el.find('#widgets').show();
+                this.renderWidgets();
+                this.showControls(); // show or hide button depending on user role
+                this.bindGrowlNotifications();
+            }, this));
+
+        },
+
+        renderWidgets: function() {
+
             // Instantiate subviews, now that their elements are present on the page
+            // GOTCHA: when instantiated, these hook up some event-based binding
+            // callbacks to the underlying model.  So even though the GUI may not be
+            // fully built, it's possible for them to fire render() events that will mess
+            // things up.  Wait until we have GPS fix so we can do this in an orderly fashion.
             this.speedWidget = new SpeedWidget({
                 model: this.model.platform
             });
@@ -264,23 +284,10 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 model: this.model.platform
             });
 
-            this.model.platformWidget = new PlatformWidget({
+            this.platformWidget = new PlatformWidget({
                 model: this.model.platform
             });
 
-            // Only render actual fly view once we've got GPS fix.
-            this.model.platform.confirmHaveGpsFix().then(_.bind(function() {
-                this.$el.find('#waitForGps').hide();
-                this.$el.find('#widgets').show();
-                this.renderWidgets();
-            }, this));
-
-            this.showControls(); // show or hide button depending on user role
-            this.bindGrowlNotifications();
-
-        },
-
-        renderWidgets: function() {
             // Render party
             this.speedWidget.render();
             this.altitudeWidget.render();
@@ -288,10 +295,14 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.mapWidget.render();
             this.bindAltitudeSliderEvents();
 
-            // Must configure/render this only after the map has been rendered.
-            this.model.platformWidget.map = this.mapWidget.map;
-            this.model.platformWidget.render();
-
+            try {
+                // Must configure/render this only after the map has been rendered.
+                this.platformWidget.map = this.mapWidget.map;
+                this.platformWidget.render();
+            } catch(e) {
+                console.log(e);
+                console.log(e.stack);
+            }
         },
 
         // Hook up various growl notifications.

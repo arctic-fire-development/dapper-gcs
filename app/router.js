@@ -18,6 +18,7 @@ define([
     'Models/Platform',
 
     // Dependent views
+    'Views/GlobalGui',
     'Views/Home',
     'Views/Plan',
     'Views/Engineering'
@@ -28,6 +29,7 @@ define([
     Mission,
     Platform,
     
+    GlobalGuiView,
     HomeView,
     PlanView,
     EngineeringView
@@ -61,6 +63,8 @@ define([
                 mission: this.mission
             });
 
+            this.globalGuiView = new GlobalGuiView().render();
+
             this.homeView = new HomeView({
                 model: this.mission,
                 socket: app.socket
@@ -80,7 +84,7 @@ define([
 
         handleRoutineStarted: function() {
             if( true !== this.mission.isOperator ) {
-                this.homeView.renderRoutineStartedModalOverride();
+                this.globalGuiView.renderRoutineStartedModalOverride();
             }
         },
 
@@ -102,9 +106,9 @@ define([
             // Only squawk if this is a change.
             if(true === this.mission.isOperator) {
                 this.mission.isOperator = false;
+                $('#indicators li.isOperator').hide();
+                $('#indicators li.isObserver').show();
                 app.growl("<span class='glyphicon glyphicon-eye-open'></span> Another user is now the active operator.", "warning", 10000);
-                $('#indicators.isOperator').hide();
-                $('#indicators.isObserver').show();
             }
         },
 

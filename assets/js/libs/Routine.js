@@ -36,6 +36,7 @@ util.inherits(Routine, events.EventEmitter);
 Routine.prototype = {
 
   get: function(req, res) {
+    log.debug(this.missionModel.toJSON());
     res.json(this.missionModel.toJSON());
   },
 
