@@ -5,7 +5,7 @@ app/assets/bower/*
 # No config files!
 config.json
 
-# No upstart generated fiels
+# No upstart generated files
 dapper-gcs.log
 dapper-gcs.pid
 
