@@ -20,7 +20,7 @@ define([
     // Dependent views
     'Views/GlobalGui',
     'Views/Home',
-    'Views/Plan',
+    'Views/Select',
     'Views/Engineering'
 ], function(app, _, Backbone, $, require, rf, BG,
     
@@ -31,7 +31,7 @@ define([
     
     GlobalGuiView,
     HomeView,
-    PlanView,
+    SelectView,
     EngineeringView
 
     ) {
@@ -40,7 +40,7 @@ define([
 
         routes: {
             '': 'home',
-            'plan' : 'plan',
+            'select' : 'select',
             'mission' : 'mission',
             'mission/planning' : 'planning',
             'mission/preflight' : 'preflight',
@@ -70,7 +70,7 @@ define([
                 socket: app.socket
             });
 
-            this.planView = new PlanView({
+            this.selectView = new SelectView({
                 model: this.mission
             });
 
@@ -121,7 +121,7 @@ define([
 
         // Pass the name of the div to show, others are hidden for 'navigation' :)
         showOnly: function(name) {
-            var panes = ['home', 'plan', 'mission', 'preflight', 'planning', 'fly', 'engineering'];
+            var panes = ['home', 'select', 'mission', 'preflight', 'planning', 'fly', 'engineering'];
             _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
             $('#'+name).show();
         },
@@ -145,9 +145,9 @@ define([
             this.homeView.render();
         },
 
-        plan: function() {
-            this.showOnly('plan');
-            this.planView.render();
+        select: function() {
+            this.showOnly('select');
+            this.selectView.render();
         },
 
         planning: function() {

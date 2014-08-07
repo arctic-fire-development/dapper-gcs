@@ -1,9 +1,9 @@
 define(['backbone', 'JST'], function(Backbone, templates) {
 
-    var PlanView = Backbone.View.extend({
+    var SelectView = Backbone.View.extend({
 
-        el: '#plan',
-        template: templates['app/Templates/plan'],
+        el: '#select',
+        template: templates['app/Templates/select'],
         initialize: function() {
             _.bindAll(this, 'render', 'updateMission');
             this.listenTo(this.model, 'change', this.render);
@@ -14,7 +14,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             'change #payloadSelection': 'updateMission'
         },
         render: function() {
-            
+
             // Render scaffolding, filling in the gaps as provided
             this.$el.html(this.template({
                 platforms: appConfig.platforms,
@@ -38,6 +38,6 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         }
     });
 
-    return PlanView;
+    return SelectView;
 
 });
