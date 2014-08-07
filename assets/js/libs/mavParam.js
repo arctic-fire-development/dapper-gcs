@@ -15,8 +15,6 @@ var _ = require('underscore'),
     Q = require('q'),
     Qretry = require('qretry'),
     mavlink = require("mavlink_ardupilotmega_v1.0");
-    //    EventEmitter = require('events').EventEmitter,  TODO GH#194
-
 
 // Logger, passed in object constructor for common logging
 var log;
@@ -68,6 +66,7 @@ MavParam.prototype.set = function(name, value) {
             delete deferreds[name];
             delete promises[name];
             log.debug('Verified parameter [' + name + '] set to [' + value + ']');
+            mavlinkParser.removeListener('PARAM_VALUE', paramVerifier);
         }
     }, this);
 
