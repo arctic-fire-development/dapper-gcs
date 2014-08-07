@@ -10,7 +10,7 @@
         define(['exports', 'backbone'], factory);
     } else if (typeof exports === 'object') {
         // CommonJS
-        factory(exports, require('Backbone'));
+        factory(exports, require('backbone'));
     } else {
         // Browser globals
         factory((root.commonJsStrict = {}), root.Backbone);
