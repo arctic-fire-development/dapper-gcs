@@ -33,7 +33,9 @@ define([
                 align: 'right', // ('left', 'right', or 'center')
                 width: 250, // (integer, or 'auto')
                 delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!
-                allow_dismiss: true, // If true then will display a cross to close the popup.
+                // For allow_dismiss below, see GH#193.  This is a cheap interim fix.  We'll likely need to clone/improve
+                // on that library in order to address it more nicely.
+                allow_dismiss: false, // If true then will display a cross to close the popup.
                 stackup_spacing: 10 // spacing between consecutively stacked growls.
             });
 
