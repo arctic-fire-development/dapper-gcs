@@ -1,3 +1,5 @@
+'use strict';
+/*globals require, module */
 /**
 Module for loading/saving sets of mavlink parameters.
 This is a Javascript translation from the mavlink/pymavlink/mavparm.py script in the main mavlink repository.
@@ -14,7 +16,7 @@ TBD make #4 work
 var _ = require('underscore'),
     Q = require('q'),
     Qretry = require('qretry'),
-    mavlink = require("mavlink_ardupilotmega_v1.0");
+    mavlink = require('mavlink_ardupilotmega_v1.0');
 
 // Logger, passed in object constructor for common logging
 var log;
@@ -27,10 +29,6 @@ var deferreds = {};
 
 // Reference to the active mavlink parser/link object in use
 var mavlinkParser;
-
-// True if the system is actively loading parameters.
-// This is just to prevent spurious triggers.
-var isLoadingParams;
 
 // Log object is assumed to be a winston object.
 function MavParam(mavlinkParserObject, logger) {
@@ -57,7 +55,7 @@ MavParam.prototype.set = function(name, value) {
         var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
         mavlinkParser.send(param_set);
         return deferred.promise;
-    }
+    };
 
     // Listen for verified parameters.
     var paramVerifier = _.bind(function(message) {
@@ -70,7 +68,7 @@ MavParam.prototype.set = function(name, value) {
         }
     }, this);
 
-    promises[name] = Qretry(paramSetter,
+    promises[name] = new Qretry(paramSetter,
     {
         maxRetry: 5,
         interval: 100,
@@ -99,6 +97,27 @@ MavParam.prototype.get = function(name) {
     mavlinkParser.send(param_request_read);
 
     return deferred.promise;
+};
+
+// Load a group of parameters.  Parameters is an array of arrays:
+// [
+//   [ param_name, value], ...
+// ]
+MavParam.prototype.loadParameters = function(parameters) {
+
+    if(_.isEmpty(parameters)) {
+      log.error('Empty param list provided to loadParameters()');
+      throw new Error('Empty param list provided to loadParameters()');
+    }
+
+    var promises = [];
+
+    _.each(parameters, function(e) {
+        promises.push(this.set(e[0], e[1]));
+    }, this);
+
+    return promises;
+
 };
 
 MavParam.prototype.getAll = function() {
