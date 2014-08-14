@@ -117,7 +117,7 @@ UavConnection.prototype.hasStarted = function() {
 // Establish the binary receive/send logs.
 UavConnection.prototype.startLogging = function() {
 
-    var logTime = moment().format('-MM-DD-YYYY-HH-MM-ss');
+    var logTime = moment().format('-MM-DD-YYYY-HH-mm-ss');
     receivedBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:receivedBinary') + logTime);
     receivedBinaryLog.on('error', function(err) {
         log.error(err);
@@ -126,7 +126,7 @@ UavConnection.prototype.startLogging = function() {
     sentBinaryLog.on('error', function(err) {
         log.error(err);
     });
-    
+
 };
 
 // Explicitly close the streams to ensure all data is flushed to disk.
@@ -161,7 +161,7 @@ UavConnection.prototype.invokeState = function() {
 };
 
 UavConnection.prototype.start = function() {
-    
+
     if(true === started) {
         log.warn('Asked to start connection manager, but connection already started, refused.');
         return;
@@ -198,7 +198,7 @@ UavConnection.prototype.updateHeartbeat = function() {
 };
 
 // The actual heartbeat to be sent to the GCS will depend on the protocol, so we either need a protocol shim or something
-// to be really flexible, but that's not important yet. 
+// to be really flexible, but that's not important yet.
 // TODO GH#124.
 // This is invoked once-per-configurable amount (default, 1hz), and is attached when the connection reaches
 // "connected" state.
@@ -275,7 +275,7 @@ UavConnection.prototype.disconnected = function() {
                 connection.on('error', function(e) {
                     // Don't spam the error log.  May want to expand this logic for everywhere in this code, too.
                     if(lastError != e.code ) {
-                        log.error('[UavConnection] TCP connection error message: ' + e);    
+                        log.error('[UavConnection] TCP connection error message: ' + e);
                     }
                     lastError = e.code;
                 });
@@ -437,7 +437,7 @@ UavConnection.prototype.connected = function() {
         log.info('Connection re-established from lost state.');
         lostConnection = false;
         this.emit('connection:regained');
-    }        
+    }
 
     // Have we lost link?  True if we're timing out and have connected previously.
     if (
