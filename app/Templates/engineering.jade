@@ -14,10 +14,10 @@
           th(scope="row") System Status
           td #{system_status}
         tr
-          th(scope="row") RSSI
+          th(scope="row") Signal Strength: RSSI
           td #{rssi}
         tr
-          th(scope="row") Remote RSSI
+          th(scope="row") Signal Strength: Remote RSSI
           td #{remrssi}
         tr
           th(scope="row") RX Errors
@@ -31,7 +31,7 @@
       table.table
         tr
           th(scope="row") Voltage
-          td #{voltage_battery}
+          td #{voltage_battery} V
         tr
           th(scope="row") Current
           td #{current_battery}
@@ -39,14 +39,11 @@
           th(scope="row") Battery Remaining
           td #{battery_remaining}%
         tr
-          th(scope="row") GPS Fix Type
+          th(scope="row") GPS: Fix Type
           td #{fix_type}
         tr
-          th(scope="row") GPS # Satellites
+          th(scope="row") GPS: # Satellites
           td #{satellites_visible}
         tr
-          th(scope="row") GPS # HDOP
-          td #{hdop}
-        tr
-          th(scope="row") Signal Strength
+          th(scope="row") GPS: HDOP
           td #{hdop}

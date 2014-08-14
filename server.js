@@ -351,7 +351,7 @@ function bindClientEventBridge() {
 
       mavlinkParser.on('SYS_STATUS', function(message) {
           platform = _.extend(platform, {
-              voltage_battery: message.voltage_battery,
+              voltage_battery: message.voltage_battery / 1000,
               current_battery: message.current_battery,
               battery_remaining: message.battery_remaining,
               drop_rate_comm: message.drop_rate_comm,
