@@ -14,10 +14,10 @@ the MAVLink messages that set them.
 
 From mavlink.GLOBAL_POSITION_INT:
 These values are interpolated/smoothed, unlike the gps_raw_int below:
-    lat: degrees
-    lon: degrees
-    alt: absolute altitude, meters
-    relative_alt: relative.  how is this set, barometer?  GH#255
+    lat: float [degrees]
+    lon: float [egrees]
+    alt: absolute altitude wrt WGS84 [meters]
+    relative_alt: relative altitude from where system was armed.  how is this set, barometer? [unit ?]  GH#255
 
 From mavlink.GPS_RAW_INT:
     fix_type: 0 = none, 1 = ?, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
@@ -25,13 +25,13 @@ From mavlink.GPS_RAW_INT:
     eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
 
 From mavlink.SYS_STATUS:
-    voltage_battery: volts
+    voltage_battery: [volts]
     current_battery: ? in ?
     battery_remaining: % remaining
 
 From mavlink.VFR_HUD:
     groundspeed: kph
-    heading: ? direction ? degrees ?
+    heading: compass direction [degrees]
 
 From mavlink.RADIO_STATUS:
     rssi: ? units ? meaning ?

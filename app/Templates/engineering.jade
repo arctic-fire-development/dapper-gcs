@@ -13,19 +13,6 @@
         tr
           th(scope="row") System Status
           td #{system_status}
-        tr
-          th(scope="row") Signal Strength: RSSI
-          td #{rssi}
-        tr
-          th(scope="row") Signal Strength: Remote RSSI
-          td #{remrssi}
-        tr
-          th(scope="row") RX Errors
-          td #{rxerrors}
-        tr
-          th(scope="row") Fixed RX Errors
-          td #{rxfixed}
-
     .col-md-6
       h2 Hardware indicators
       table.table
@@ -47,3 +34,19 @@
         tr
           th(scope="row") GPS: HDOP
           td #{hdop}
+  .row.opaque
+    .col-md-6
+      h2 Communication System Status
+      table.table
+        tr
+          th(scope="row") Signal Strength: RSSI
+          td #{rssi}
+        tr
+          th(scope="row") Signal Strength: Remote RSSI
+          td #{remrssi}
+        tr
+          th(scope="row") RX Errors
+          td #{rxerrors}
+        tr
+          th(scope="row") Fixed RX Errors
+          td #{rxfixed}
