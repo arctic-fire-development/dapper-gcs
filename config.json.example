@@ -1,4 +1,8 @@
 {
+  "identities": {
+    "gcsId" : 255,
+    "gcsComponent" : 1
+  },
 
   "connection" : {
     "type": "tcp",
@@ -8,7 +12,8 @@
       },
       "updateIntervals" : {
         "streamHz" : 2,
-        "heartbeatMs" : 251
+        "heartbeatMs" : 251,
+        "sendHeartbeatMs" : 1000
       }
     },
 
