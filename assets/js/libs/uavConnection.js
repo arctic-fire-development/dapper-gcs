@@ -71,6 +71,10 @@ var lastHeartbeat = undefined;
 // Time elapsed since last heartbeat
 var timeSinceLastHeartbeat = undefined;
 
+// Reference to timer function to send heartbeats to GCS.
+// Hang onto the reference so we can clear it if we need to.
+var sendHeartbeatInterval;
+
 // If true, then this connection has previously been established.
 // Used to convey if the connection has been temporarily lost.
 var hasConnected = false;
@@ -193,6 +197,28 @@ UavConnection.prototype.updateHeartbeat = function() {
     }
 };
 
+// The actual heartbeat to be sent to the GCS will depend on the protocol, so we either need a protocol shim or something
+// to be really flexible, but that's not important yet. 
+// TODO GH#124.
+// This is invoked once-per-configurable amount (default, 1hz), and is attached when the connection reaches
+// "connected" state.
+UavConnection.prototype.sendHeartbeat = function() {
+    var heartbeatMessage;
+    if(!heartbeatMessage) {
+        heartbeatMessage = new mavlink.messages.heartbeat(
+            mavlink.MAV_TYPE_GCS, // type                      : Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM) (uint8_t)
+            mavlink.MAV_AUTOPILOT_INVALID, // autopilot                 : Autopilot type / class. defined in MAV_AUTOPILOT ENUM (uint8_t)
+            0, // base_mode                 : System mode bitfield, see MAV_MODE_FLAGS ENUM in mavlink/include/mavlink_types.h (uint8_t)
+            0, // custom_mode               : A bitfield for use for autopilot-specific flags. (uint32_t)
+            0, // system_status             : System status flag, see MAV_STATE ENUM (uint8_t)
+            3 // mavlink_version           : MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version (uint8_t)
+            // We set mavlink_version to 3 because it matches the magic we see elsewhere in incoming packets :) it's Mavlink 1.0.
+        );
+    }
+    log.silly('Sending GCS heartbeat to UAV...');
+    this.sendAsGcs(heartbeatMessage);
+};
+
 UavConnection.prototype.disconnected = function() {
 
     // Reset this because we've lost (or never had) the physical connection;
@@ -200,7 +226,8 @@ UavConnection.prototype.disconnected = function() {
     lastHeartbeat = undefined;
     timeSinceLastHeartbeat = undefined;
     isConnected = false;
-    clearInterval(heartbeatMonitor);
+    clearInterval(heartbeatMonitor); // harmless if timer is not defined
+    clearInterval(sendHeartbeatInterval); // harmless if timer is not defined
     heartbeatMonitor = setInterval(this.heartbeat, config.get('connection:updateIntervals:heartbeatMs'));
 
     log.silly('[UavConnection] Trying to connect from disconnected state...');
@@ -318,6 +345,9 @@ UavConnection.prototype.connecting = function() {
                 .then(_.bind(function(sysid_mygcs) {
                     gcsSysId = sysid_mygcs;
                     log.debug('Got GCS sysid %d', sysid_mygcs);
+                    if(gcsSysId !== config.get('identities:gcsId')) {
+                        log.error('GCS ID mismatch between UAV and local GCS.');
+                    }
                 }, this))
                 .fail(function(e) { log.error(util.inspect(e)); });
         }
@@ -375,24 +405,32 @@ UavConnection.prototype.handleDataEvent = function(message) {
     protocol.parseBuffer(message);
 };
 
-// Upon connection for the first time, request all MAVLink data streams available.
-// Also switch back to 'connecting' state in case we lose the link.
-UavConnection.prototype.connected = function() {
-
-    // Only do this once upon obtaining connection.
-    // The rate parameter of the data stream seems to be in Hz.
-    var request_data_stream = _.once(_.bind(function() {
-        var request = new mavlink.messages.request_data_stream(
+// Helper method to request the data stream, needs to be bound in this scope to avoid being called often.
+UavConnection.prototype.requestDataStream = _.once(function() {
+    var request = new mavlink.messages.request_data_stream(
             uavSysId, // target system
             uavComponentId, // target component
             mavlink.MAV_DATA_STREAM_ALL, // get all data streams
             config.get('connection:updateIntervals:streamHz'), // rate, Hz
             1 // start sending this stream (0=stop)
         );
-        var p = new Buffer(request.pack());
-        this.write(p);
-    }, this));
-    request_data_stream();
+        log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
+        protocol.send(request);
+});
+
+UavConnection.prototype.startSendingHeartbeats = _.once(function() {
+    return setInterval(
+        _.bind(this.sendHeartbeat, this),
+        config.get('connection:updateIntervals:sendHeartbeatMs')
+    )
+});
+
+// Upon connection for the first time, request all MAVLink data streams available.
+// Also switch back to 'connecting' state in case we lose the link.
+UavConnection.prototype.connected = function() {
+
+    this.requestDataStream();
+    sendHeartbeatInterval = this.startSendingHeartbeats();
 
     // If connection has been regained, signal the client.
     if(true === lostConnection) {
@@ -430,6 +468,21 @@ UavConnection.prototype.write = function(data) {
             // special case, don't do anything.
             break;
     }
+};
+
+// We have a special case with APM/MAVLink where two message types will be checked for the specific
+// ID corresponding to the MY_GCSID parameter (default 255) -- heartbeat and rc_override.  We can do
+// that inline, but let's be noisy about it by putting that code here.  In the future, perhaps this should migrate
+// into the MAVLink protocol implementation itself  (TODO GH#195)
+// Log and write to binary log/transport layer.
+// Parameter is a mavlink message object instance. (TODO GH#124)
+UavConnection.prototype.sendAsGcs = function(message) {
+    var buf = new Buffer(message.pack(protocol.seq, config.get('identities:gcsId'), config.get('identities:gcsComponent')));
+    this.write(buf);
+    // TODO GH#195 -- we need to move this code by refactoring the Mavlink JS generator
+    protocol.seq = (protocol.seq + 1) % 255;
+    protocol.total_packets_sent +=1;
+    protocol.total_bytes_sent += buf.length;
 };
 
 exports.UavConnection = UavConnection;
