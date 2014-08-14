@@ -62,8 +62,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
                 });
 
                 this.marker = L.marker([this.model.get('homeLat'), this.model.get('homeLon')], {
-                    icon: homeIcon,
-                    iconAngle: 0
+                    icon: homeIcon
                 }).addTo(this.map);
 
             }, this);

@@ -4,6 +4,10 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
 
         defaults: {
 
+            /* Some properties we manage independently from what the server provides.
+            These should still be undefined, but we can enumerate them here. */
+            armed: undefined
+
 /*
 We leave all items undefined and require that the client code using this model enforce its own handling.
 This is because the defaults are _unknown_ until they're set from real data from a UAV, and it's misleading
@@ -58,17 +62,30 @@ the MAVLink messages that set them.
                 }
             }, this);
 
+            // Hook up event bindings when system is armed/disarmed
+            this.on('change:armed', function() {
+                if(true === this.get('armed')) {
+                    this.trigger('armed');
+                } else if(false === this.get('armed')) {
+                    this.trigger('disarmed');
+                } else {
+                    throw('System in unclear state regarding armed/disarmed!')
+                }
+            }, this);
+
             // Managed armed/disarmed, and set home location too.
             this.on('change:base_mode', function() {
                 // GH#122.  Replace 128 with an abstraction to the appropriate mavlink mapping.
                 if(128 & this.get('base_mode')) {
+                    // This means the system is armed.  When the APM Quad arms, then it also
+                    // sets its home location.
                     this.set({
                         homeLat: this.get('lat'),
                         homeLon: this.get('lon')
                     });
-                    this.trigger('armed');
+                    this.set('armed', true);
                 } else {
-                    this.trigger('disarmed');
+                    this.set('armed', false);
                 }
             }, this);
 
@@ -148,6 +165,8 @@ the MAVLink messages that set them.
             return Backbone.Model.prototype.set.call(this, attrs, options);
         },
 
+        // This function is used to tidy up any incoming parameters where we want all the information
+        // that is available, but we don't want to display it the same way to the user (i.e. useless precision).
         cleanup: function(attrs) {
 
             if('relative_alt' in attrs) {
