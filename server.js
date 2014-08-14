@@ -351,7 +351,7 @@ function bindClientEventBridge() {
 
       mavlinkParser.on('SYS_STATUS', function(message) {
           platform = _.extend(platform, {
-              voltage_battery: message.voltage_battery / 1000,
+              voltage_battery: message.voltage_battery / 1000,  // millivolts to volts
               current_battery: message.current_battery,
               battery_remaining: message.battery_remaining,
               drop_rate_comm: message.drop_rate_comm,
@@ -373,7 +373,7 @@ function bindClientEventBridge() {
           platform = _.extend(platform, {
               fix_type: message.fix_type,
               satellites_visible: message.satellites_visible,
-              hdop: message.eph/100
+              hdop: message.eph/100  // cm to m
           });
           io.emit('platform', platform);
       });
