@@ -12,40 +12,33 @@ to assign them defaults.
 For convenience/reference, items that will be set/used by client code are enumerated below, with references back to
 the MAVLink messages that set them.
 
-            // Set by mavlink.global_position_int packets
-            lat: undefined,
-            lon: undefined,
-            alt: undefined,
-            relative_alt: undefined,
+From mavlink.GLOBAL_POSITION_INT:
+These values are interpolated/smoothed, unlike the gps_raw_int below:
+    lat: degrees
+    lon: degrees
+    alt: absolute altitude, meters
+    relative_alt: relative.  how is this set, barometer?  GH#255
 
-            // Set by mavlink.gps_raw_int packets
-            fix_type: undefined,
-            satellites_visible: undefined,
-            eph: undefined,
+From mavlink.GPS_RAW_INT:
+    fix_type: 0 = none, 1 = ?, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
+    satellites_visible: integer, # of satellites
+    eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
 
-            // TODO GH#147
-            // Set by mavFlightMode interpreting a variety of packets
-            stateMode: undefined,
-            stateAuto: undefined,
-            stateGuided: undefined,
-            stateStabilize: undefined,
-            stateManual: undefined,
-            stateArmed: undefined,
+From mavlink.SYS_STATUS:
+    voltage_battery: volts
+    current_battery: ? in ?
+    battery_remaining: % remaining
 
-            // Set by mavlink.SYS_STATUS packets
-            voltage_battery: undefined,
-            current_battery: undefined,
-            battery_remaining: undefined, // %remaining
+From mavlink.VFR_HUD:
+    groundspeed: kph
+    heading: ? direction ? degrees ?
 
-            // Set by mavlink.vfr_hud packets
-            groundspeed: 0,
-            heading: undefined,
+From mavlink.RADIO_STATUS:
+    rssi: ? units ? meaning ?
+    remrssi: ? units ? meaning ?
+    rxerrors: ? units ? meaning ?
+    rxfixed: ? units ? meaning ?
 
-            // Set by mavlink.radio_status packets
-            rssi: undefined,
-            remrssi: undefined,
-            rxerrors: undefined,
-            rxfixed:, undefined
 */
 
         },
