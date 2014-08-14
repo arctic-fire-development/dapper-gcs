@@ -95,6 +95,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
                         this.showButton('launch');
+                        this.$el.find('button.launch').removeAttr('disabled');
                     }, this));
                 }, this);
 
@@ -112,13 +113,13 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         launch: function() {
 
-            // Swap the button text immediately for responsiveness
-            this.$el.find('button.launch').html('Launching&hellip;');
+            // Swap the button text immediately for responsiveness, but disable it
+            this.$el.find('button.launch').html('Launching&hellip;').attr('disabled', 'disabled');
 
             Q($.get('/drone/launch')).then(_.bind(function() {
 
-                // Swap buttons out
-                this.$el.find('button.launch').hide();
+                // Swap buttons out, restore "Fly" text on launch button
+                this.$el.find('button.launch').html('Fly').hide();
                 this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
 
                 // Enable RTL when craft is hovering, this is the first mode the craft will enter

@@ -227,8 +227,9 @@ app.get('/drone/launch', function(req, res) {
 });
 
 app.get('/drone/disarm', function(req, res) {
-  quad.disarm();
-  res.send(200);
+  quad.disarm().then(function() {
+    res.send(200);
+  });
 });
 
 app.get('/drone/flyToPoint', function(req, res) {
