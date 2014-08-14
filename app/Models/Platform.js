@@ -15,19 +15,20 @@ the MAVLink messages that set them.
 From mavlink.GLOBAL_POSITION_INT:
 These values are interpolated/smoothed, unlike the gps_raw_int below:
     lat: float [degrees]
-    lon: float [egrees]
+    lon: float [degrees]
     alt: absolute altitude wrt WGS84 [meters]
     relative_alt: relative altitude from where system was armed.  how is this set, barometer? [unit ?]  GH#255
 
 From mavlink.GPS_RAW_INT:
-    fix_type: 0 = none, 1 = ?, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
+    fix_type: 0, 1 = none, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
     satellites_visible: integer, # of satellites
     eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
 
 From mavlink.SYS_STATUS:
     voltage_battery: [volts]
-    current_battery: ? in ?
-    battery_remaining: % remaining
+    current_battery: [Amps] note: autopilot reports this as 10*milliAmps, so must divide by 10,000 to get Amps in ?
+    battery_remaining: % Remaining battery energy in percent
+    drop_rate_comm: % Communication drops in percent
 
 From mavlink.VFR_HUD:
     groundspeed: kph
