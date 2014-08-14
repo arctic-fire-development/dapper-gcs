@@ -139,31 +139,13 @@ quad.setProtocol(mavlinkParser);
 // Anything referencing 'routine' falls into this bucket.
 var routine = {};
 
-// TODO move this to MavParams module.
-function loadParameters(parameters) {
-    
-    if(_.isEmpty(parameters)) {
-      logger.error('Empty param list provided to loadParameters()');
-      throw new Error('Empty param list provided to loadParameters()');
-    }
-
-    var promises = [];
-
-    _.each(parameters, function(e) {
-        promises.push(mavParams.set(e[0], e[1]));
-    });
-
-    return promises;
-
-}
-
 app.get('/drone/params/load', function(req, res) {
     
     logger.info('loading parameters for SITL Copter...');
     
     // TODO hardcoded platform D:
     logger.debug(platforms[0].parameters);
-    var promises = loadParameters(platforms[0].parameters);
+    var promises = mavParams.loadParameters(platforms[0].parameters);
 
     // Hack/hardcoding interactive parameter setting
     promises.push(
