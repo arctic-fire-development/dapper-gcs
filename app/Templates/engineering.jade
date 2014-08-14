@@ -13,6 +13,18 @@
         tr
           th(scope="row") System Status
           td #{system_status}
+        tr
+          th(scope="row") RSSI
+          td #{rssi}
+        tr
+          th(scope="row") Remote RSSI
+          td #{remrssi}
+        tr
+          th(scope="row") RX Errors
+          td #{rxerrors}
+        tr
+          th(scope="row") Fixed RX Errors
+          td #{rxfixed}
 
     .col-md-6
       h2 Hardware indicators
@@ -34,4 +46,7 @@
           td #{satellites_visible}
         tr
           th(scope="row") GPS # HDOP
+          td #{hdop}
+        tr
+          th(scope="row") Signal Strength
           td #{hdop}

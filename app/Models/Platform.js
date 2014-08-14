@@ -21,6 +21,7 @@ the MAVLink messages that set them.
             // Set by mavlink.gps_raw_int packets
             fix_type: undefined,
             satellites_visible: undefined,
+            eph: undefined,
 
             // TODO GH#147
             // Set by mavFlightMode interpreting a variety of packets
@@ -39,6 +40,12 @@ the MAVLink messages that set them.
             // Set by mavlink.vfr_hud packets
             groundspeed: 0,
             heading: undefined,
+
+            // Set by mavlink.radio_status packets
+            rssi: undefined,
+            remrssi: undefined,
+            rxerrors: undefined,
+            rxfixed:, undefined
 */
 
         },
