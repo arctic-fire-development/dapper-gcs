@@ -115,6 +115,7 @@ var users = new Users(logger, io);
 
 io.on('connection', function (socket) {
     socket.on('startConnection', function () {
+
         if (false === uavConnectionManager.hasStarted()) {
             uavConnectionManager.start();
             bindClientEventBridge();
@@ -142,6 +143,7 @@ quad.setProtocol(mavlinkParser);
 var routine = {};
 
 app.get('/drone/params/load', function (req, res) {
+
     logger.info('loading parameters for SITL Copter...');
 
     // TODO hardcoded platform D:
@@ -153,21 +155,22 @@ app.get('/drone/params/load', function (req, res) {
         mavParams.set('WPNAV_SPEED', routine.maxSpeed)
     );
 
-    Q.allSettled(promises)
-        .then(
-            function () {
-                res.send(200);
-            },
-            function (failed) {
-                logger.error(failed);
-                res.sent(500);
-            }
-        );
+    Q.allSettled(promises).then(
+        function () {
+            res.send(200);
+        },
+        function (failed) {
+            logger.error(failed);
+            res.sent(500);
+        }
+    );
+
 });
 
 // TODO GH#164
 // This code is a prototype for when we properly bind this into the client GUI.
 app.get('/drone/mission/load', function (req, res) {
+
     var lat = parseFloat(req.query.lat);
     var lng = parseFloat(req.query.lng);
     var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
@@ -183,11 +186,11 @@ app.get('/drone/mission/load', function (req, res) {
 // This is just a stub to handle getting the home/armed location to the
 // mission-build-takeoff section.
 function loadTakeoffMission() {
+
     var deferred = Q.defer();
     var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
 
-    quad.getLatLon()
-        .then(function (location) {
+    quad.getLatLon().then(function (location) {
             logger.info('Building auto/hover mission from home point: ', location);
             var mission = mm.buildTakeoffThenHoverMission(location[0], location[1]);
             mm.loadMission(mission)
@@ -207,6 +210,7 @@ function loadTakeoffMission() {
 }
 
 app.get('/drone/launch', function (req, res) {
+
     logger.debug('launching freeflight mission');
 
     try {
@@ -227,22 +231,24 @@ app.get('/drone/launch', function (req, res) {
 });
 
 app.get('/drone/disarm', function (req, res) {
-    quad.disarm();
-    res.send(200);
+    quad.disarm().then(function () {
+        res.send(200);
+    });
 });
 
 app.get('/drone/flyToPoint', function (req, res) {
+
     var lat = parseFloat(req.query.lat);
     var lng = parseFloat(req.query.lng);
     logger.info('Flying to %d %d', lat, lng);
     quad.flyToPoint(lat, lng, platform);
     res.send(200);
+
 });
 
 app.get('/drone/loiter', function (req, res) {
     logger.verbose('Setting LOITER mode...');
-    Q.fcall(quad.setLoiterMode)
-    .then(function () {
+    Q.fcall(quad.setLoiterMode).then(function () {
         // TODO I don't think this promise is ever getting resolved, because I suspect this ack doesn't get sent.
         // GH#221.  Hack below is just to send the 200 immediately.
         res.send(200);
@@ -251,6 +257,7 @@ app.get('/drone/loiter', function (req, res) {
 });
 
 app.get('/drone/changeAltitude', function (req, res) {
+
     var alt = parseInt(req.query.alt);
 
     // TODO GH#154 unsafe prototype code below; idea being, protect from sending messages that are outside
@@ -262,6 +269,7 @@ app.get('/drone/changeAltitude', function (req, res) {
     logger.info('Changing altitude to %d', alt);
     quad.changeAltitude(alt, platform);
     res.send(200);
+
 });
 
 app.get('/drone/rtl', function (req, res) {
@@ -294,9 +302,7 @@ function exitHandler(options, err) {
         console.log(err.stack);
     }
 
-    if (options.exit) {
-        process.exit();
-    }
+    if (options.exit) process.exit();
 
     // For restarting with Nodemon
     if (options.killProcess) {
@@ -359,8 +365,8 @@ function bindClientEventBridge() {
 
     mavlinkParser.on('SYS_STATUS', function (message) {
         platform = _.extend(platform, {
-            voltage_battery: message.voltage_battery,
-            current_battery: message.current_battery,
+            voltage_battery: message.voltage_battery / 1000, // millivolts to volts
+            current_battery: message.current_battery / 10000, // convert from 10*milliAmps to Amps
             battery_remaining: message.battery_remaining,
             drop_rate_comm: message.drop_rate_comm,
             errors_comm: message.errors_comm
@@ -380,7 +386,18 @@ function bindClientEventBridge() {
     mavlinkParser.on('GPS_RAW_INT', function (message) {
         platform = _.extend(platform, {
             fix_type: message.fix_type,
-            satellites_visible: message.satellites_visible
+            satellites_visible: message.satellites_visible,
+            hdop: message.eph / 100 // cm to m
+        });
+        io.emit('platform', platform);
+    });
+
+    mavlinkParser.on('RADIO_STATUS', function (message) {
+        platform = _.extend(platform, {
+            rssi: message.rssi,
+            remrssi: message.remrssi,
+            rxerrors: message.rxerrors,
+            rxfixed: message.fixed
         });
         io.emit('platform', platform);
     });
