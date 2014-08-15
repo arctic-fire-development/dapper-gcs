@@ -134,6 +134,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.enableAltitudeSlider();
                 this.enableFlyToPoint();
 
+                // Send a growl notification to all other connected clients
+                app.socket.emit("launching");
+
             }, this));
         },
 
