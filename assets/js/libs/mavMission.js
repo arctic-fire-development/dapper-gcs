@@ -124,6 +124,9 @@ MavMission.prototype.sendToPlatform = function() {
     // http://qgroundcontrol.org/mavlink/waypoint_protocol
     mavlinkParser.on('MISSION_ACK', function ackMission(ack) {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
+            // log.debug the mission_items in QGC format
+            this.toQGC();
+            
             mavlinkParser.removeListener('MISSION_ACK', ackMission);
             self.emit('mission:loaded');
         } else {
@@ -232,6 +235,33 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
     );
 
     return [takeoff, hover];
+};
+
+MavMission.prototype.toQGC = function(){
+    log.debug('QGC format mission items');
+
+    var QGC_mission_items = [];
+    QGC_mission_items.push('QGC WPL <VERSION>');
+    log.debug('QGC WPL <VERSION>');
+
+    _.each(this.mission_items, function(item){
+        var QGC_format_item = [
+            item[2],    // sequence number
+            item[5],    // current
+            item[3],    // coordinate frame
+            item[4],    // command
+            item[7],    // param1
+            item[8],    // param2
+            item[9],    // param3
+            item[10],   // param4
+            item[11],   // x
+            item[12],   // y
+            item[13],   // z
+            item[6]     // autocontinue
+            ];
+        QGC_mission_items.push(QGC_format_item);
+        log.debug(QGC_format_item.join('\t'));
+    });
 };
 
 module.exports = MavMission;
