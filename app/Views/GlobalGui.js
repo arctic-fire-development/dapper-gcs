@@ -9,6 +9,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         },
         render: function() {
             this.$el.html(this.template);
+            this.bindGrowlNotifications();
             return this;
         },
 
