@@ -1,26 +1,26 @@
 'use strict';
 /*globals define */
 
-define(['backbone', 'io', 'JST', 'app'], function(Backbone, io, templates, app) {
+define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app'], function($, Backbone, _, io, templates, app) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};
-    mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED = 1 // 0b00000001 Reserved for future use.
-    mavlink.MAV_MODE_FLAG_TEST_ENABLED = 2 // 0b00000010 system has a test mode enabled. This flag is intended for
+    mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED = 1; // 0b00000001 Reserved for future use.
+    mavlink.MAV_MODE_FLAG_TEST_ENABLED = 2; // 0b00000010 system has a test mode enabled. This flag is intended for
                             // temporary system tests and should not be
                             // used for stable implementations.
-    mavlink.MAV_MODE_FLAG_AUTO_ENABLED = 4 // 0b00000100 autonomous mode enabled, system finds its own goal
+    mavlink.MAV_MODE_FLAG_AUTO_ENABLED = 4; // 0b00000100 autonomous mode enabled, system finds its own goal
                             // positions. Guided flag can be set or not,
                             // depends on the actual implementation.
-    mavlink.MAV_MODE_FLAG_GUIDED_ENABLED = 8 // 0b00001000 guided mode enabled, system flies MISSIONs / mission items.
-    mavlink.MAV_MODE_FLAG_STABILIZE_ENABLED = 16 // 0b00010000 system stabilizes electronically its attitude (and
+    mavlink.MAV_MODE_FLAG_GUIDED_ENABLED = 8; // 0b00001000 guided mode enabled, system flies MISSIONs / mission items.
+    mavlink.MAV_MODE_FLAG_STABILIZE_ENABLED = 16; // 0b00010000 system stabilizes electronically its attitude (and
                             // optionally position). It needs however
                             // further control inputs to move around.
-    mavlink.MAV_MODE_FLAG_HIL_ENABLED = 32 // 0b00100000 hardware in the loop simulation. All motors / actuators are
+    mavlink.MAV_MODE_FLAG_HIL_ENABLED = 32; // 0b00100000 hardware in the loop simulation. All motors / actuators are
                             // blocked, but internal software is full
                             // operational.
-    mavlink.MAV_MODE_FLAG_MANUAL_INPUT_ENABLED = 64 // 0b01000000 remote control input is enabled.
-    mavlink.MAV_MODE_FLAG_SAFETY_ARMED = 128 // 0b10000000 MAV safety set to armed. Motors are enabled / running / can
+    mavlink.MAV_MODE_FLAG_MANUAL_INPUT_ENABLED = 64; // 0b01000000 remote control input is enabled.
+    mavlink.MAV_MODE_FLAG_SAFETY_ARMED = 128; // 0b10000000 MAV safety set to armed. Motors are enabled / running / can
                             // start. Ready to fly.
 
     var EngineeringView = Backbone.View.extend({
@@ -48,18 +48,18 @@ define(['backbone', 'io', 'JST', 'app'], function(Backbone, io, templates, app) 
             has = true;
             var mode, manual, armed = '';
             if(this.model.get('base_mode') & mavlink.MAV_MODE_FLAG_AUTO_ENABLED) {
-                mode = "auto"
+                mode = "auto";
             }
             if(this.model.get('base_mode') & mavlink.MAV_MODE_FLAG_GUIDED_ENABLED) {
-                mode = "guided"
+                mode = "guided";
             }
             if(this.model.get('base_mode') & mavlink.MAV_MODE_FLAG_STABILIZE_ENABLED) {
-                mode = "stabilize"
+                mode = "stabilize";
             }
             if(this.model.get('base_mode') & mavlink.MAV_MODE_FLAG_MANUAL_INPUT_ENABLED) {
-                manual = "" // this is normally the case, ignore it
+                manual = ""; // this is normally the case, ignore it
             } else {
-                manual = "manual mode disabled&#8253;"
+                manual = "manual mode disabled&#8253;";
             }
             if(this.model.get('base_mode') & mavlink.MAV_MODE_FLAG_SAFETY_ARMED) {
                 armed = "armed";
@@ -68,7 +68,12 @@ define(['backbone', 'io', 'JST', 'app'], function(Backbone, io, templates, app) 
             }
 
             // Render scaffolding, filling in the gaps as provided
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.html(this.template(_.extend(this.model.toJSON(),
+                {
+                    voltage_battery: this.model.get('voltage_battery').toFixed(2),
+                    current_battery: this.model.get('current_battery').toFixed(2)
+                }
+            )));
 
             $('#modeSummary').html(_.template(
                 '<span class="mode <%= mode %>"><%= mode %></span> <%= manual %> <span class="<%= armed %>"><%= armed %></span>', {

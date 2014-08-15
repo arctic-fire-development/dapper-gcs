@@ -13,20 +13,46 @@
         tr
           th(scope="row") System Status
           td #{system_status}
-
     .col-md-6
       h2 Hardware indicators
       table.table
         tr
           th(scope="row") Voltage
-          td #{voltage_battery}
+          td #{voltage_battery} V
         tr
           th(scope="row") Current
-          td #{current_battery}
+          td #{current_battery} A
         tr
           th(scope="row") Battery Remaining
           td #{battery_remaining}%
         tr
-          th(scope="row") GPS Fix Type
+          th(scope="row") GPS: Fix Type
           td #{fix_type}
-        
+        tr
+          th(scope="row") GPS: # Satellites
+          td #{satellites_visible}
+        tr
+          th(scope="row") GPS: HDOP
+          td #{hdop}
+  .row.opaque
+    .col-md-6
+      h2 Communication System Status
+      table.table
+        tr
+          th(scope="row") Signal Strength: RSSI
+          td #{rssi}
+        tr
+          th(scope="row") Signal Strength: Remote RSSI
+          td #{remrssi}
+        tr
+          th(scope="row") RX Errors
+          td #{rxerrors}
+        tr
+          th(scope="row") Fixed RX Errors
+          td #{rxfixed}
+        tr
+          th(scope="row") Drop Rate Comm
+          td #{drop_rate_comm}
+        tr
+          th(scope="row") Errors Comm
+          td #{errors_comm}
