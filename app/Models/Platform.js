@@ -3,6 +3,8 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
     var Platform = Backbone.Model.extend({
 
         defaults: {
+            voltage_battery: 0,
+            current_battery: 0
 
 /*
 We leave all items undefined and require that the client code using this model enforce its own handling.
@@ -12,33 +14,34 @@ to assign them defaults.
 For convenience/reference, items that will be set/used by client code are enumerated below, with references back to
 the MAVLink messages that set them.
 
-            // Set by mavlink.global_position_int packets
-            lat: undefined,
-            lon: undefined,
-            alt: undefined,
-            relative_alt: undefined,
+From mavlink.GLOBAL_POSITION_INT:
+These values are interpolated/smoothed, unlike the gps_raw_int below:
+    lat: float [degrees]
+    lon: float [degrees]
+    alt: absolute altitude wrt WGS84 [meters]
+    relative_alt: relative altitude from where system was armed.  how is this set, barometer? [unit ?]  GH#255
 
-            // Set by mavlink.gps_raw_int packets
-            fix_type: undefined,
-            satellites_visible: undefined,
+From mavlink.GPS_RAW_INT:
+    fix_type: 0, 1 = none, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
+    satellites_visible: integer, # of satellites
+    eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
 
-            // TODO GH#147
-            // Set by mavFlightMode interpreting a variety of packets
-            stateMode: undefined,
-            stateAuto: undefined,
-            stateGuided: undefined,
-            stateStabilize: undefined,
-            stateManual: undefined,
-            stateArmed: undefined,
+From mavlink.SYS_STATUS:
+    voltage_battery: [volts]
+    current_battery: [Amps] note: autopilot reports this as 10*milliAmps, so must divide by 10,000 to get Amps in ?
+    battery_remaining: % Remaining battery energy in percent
+    drop_rate_comm: % Communication drops in percent
 
-            // Set by mavlink.SYS_STATUS packets
-            voltage_battery: undefined,
-            current_battery: undefined,
-            battery_remaining: undefined, // %remaining
+From mavlink.VFR_HUD:
+    groundspeed: kph
+    heading: compass direction [degrees]
 
-            // Set by mavlink.vfr_hud packets
-            groundspeed: 0,
-            heading: undefined,
+From mavlink.RADIO_STATUS:
+    rssi: ? units ? meaning ?
+    remrssi: ? units ? meaning ?
+    rxerrors: ? units ? meaning ?
+    rxfixed: ? units ? meaning ?
+
 */
 
         },

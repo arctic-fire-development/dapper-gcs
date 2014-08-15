@@ -112,7 +112,7 @@ var users = new Users(logger, io);
 
 io.on('connection', function(socket) {
   socket.on('startConnection', function() {
-    
+
     if(false === uavConnectionManager.hasStarted()) {
       uavConnectionManager.start();
       bindClientEventBridge();
@@ -140,9 +140,9 @@ quad.setProtocol(mavlinkParser);
 var routine = {};
 
 app.get('/drone/params/load', function(req, res) {
-    
+
     logger.info('loading parameters for SITL Copter...');
-    
+
     // TODO hardcoded platform D:
     logger.debug(platforms[0].parameters);
     var promises = mavParams.loadParameters(platforms[0].parameters);
@@ -160,7 +160,7 @@ app.get('/drone/params/load', function(req, res) {
         logger.error(failed);
         res.sent(500);
       }
-    ); 
+    );
 
 });
 
@@ -202,7 +202,7 @@ function loadTakeoffMission() {
   .fail(function(error) {
     logger.error(error.toString());
   });
-  
+
   return deferred.promise;
 }
 
@@ -292,11 +292,11 @@ function exitHandler(options, err) {
       logger.debug('Closing logfiles...');
       uavConnectionManager.stopLogging();
     }
-    
+
     if (err) {
       console.log(err.stack);
     }
-    
+
     if (options.exit) process.exit();
 
     // For restarting with Nodemon
@@ -323,7 +323,7 @@ function bindClientEventBridge() {
       // TODO GH#180
       // Bind this in the same scope as the other client/server connections so we can be sure we're not
       // flooding event handlers.
-      // mavlinkParser.on('message', function(m) { 
+      // mavlinkParser.on('message', function(m) {
       //   logger.silly('Got MAVLink message %s', m.name);
       // });
 
@@ -351,8 +351,8 @@ function bindClientEventBridge() {
 
       mavlinkParser.on('SYS_STATUS', function(message) {
           platform = _.extend(platform, {
-              voltage_battery: message.voltage_battery,
-              current_battery: message.current_battery,
+              voltage_battery: message.voltage_battery / 1000,  // millivolts to volts
+              current_battery: message.current_battery / 10000, // convert from 10*milliAmps to Amps
               battery_remaining: message.battery_remaining,
               drop_rate_comm: message.drop_rate_comm,
               errors_comm: message.errors_comm
@@ -372,7 +372,18 @@ function bindClientEventBridge() {
       mavlinkParser.on('GPS_RAW_INT', function(message) {
           platform = _.extend(platform, {
               fix_type: message.fix_type,
-              satellites_visible: message.satellites_visible
+              satellites_visible: message.satellites_visible,
+              hdop: message.eph/100  // cm to m
+          });
+          io.emit('platform', platform);
+      });
+
+      mavlinkParser.on('RADIO_STATUS', function(message) {
+          platform = _.extend(platform, {
+              rssi: message.rssi,
+              remrssi: message.remrssi,
+              rxerrors: message.rxerrors,
+              rxfixed: message.fixed
           });
           io.emit('platform', platform);
       });
