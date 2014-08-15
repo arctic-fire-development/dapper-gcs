@@ -24,7 +24,7 @@ function Routine(logger, appInstance, socketIo) {
   this.missionModel = new MissionModel();
 
   _.bindAll(this, 'socketHandlers', 'get');
-  
+
   // Hook up various URL/socket endpoints handled here
   app.get('/routine', this.get);
   io.on('connection', this.socketHandlers);
@@ -53,6 +53,11 @@ Routine.prototype = {
     // When a routine is started, signal other clients.
     socket.on('routine:started', function() {
       socket.broadcast.emit('routine:started');
+    });
+
+    socket.on('launching', function(){
+        log.info('Launching vehicle');
+        socket.broadcast.emit('launching');
     });
   }
 };

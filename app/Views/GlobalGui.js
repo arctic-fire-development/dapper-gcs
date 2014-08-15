@@ -19,7 +19,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             });
         },
 
-       renderLostServerConnection: function() {
+        renderLostServerConnection: function() {
             $('#lostServerConnection').modal({
                 backdrop: 'static', // forbid dismiss by click
                 keyboard: false // forbid dismiss by escape
@@ -28,6 +28,12 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
 
         gotoFly: function() {
             app.router.navigate('mission/fly', { trigger: true });
+        },
+
+        bindGrowlNotifications: function(){
+            app.socket.on('launching', function(){
+                app.growl('Launching');
+            });
         }
 
     });
