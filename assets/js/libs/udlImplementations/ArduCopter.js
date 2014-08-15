@@ -150,19 +150,13 @@ ArduCopterUdl.prototype.disarm = function() {
         }
     });
 
-    // More troubleshooting.  Some messages that come back from the APM
-    // as status text, rather than direct failures.  TODO see if this is always true / research.
-    protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
-        if( msg.severity == mavlink.MAV_SEVERITY_ERROR ) {
-            log.debug('Arming rejected: %s', msg.text);
-            throw new Error('Arming rejected due to status text message error');
-        }
-    });
-
+    // Fun fact: when the system is instructed to disarm, it'll send back a status message (STATUSTEXT)
+    // with MAV_SEVERITY_ERROR stating 'DISARMING MOTORS'.  We don't need to trap that,
+    // but ...there it is.
     protocol.on('HEARTBEAT', function verifyDisarmed(msg) {
         log.verbose('heartbeat.base_mode: %d', msg.base_mode);
         try {
-            if (false === msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
+            if (0  === (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
                 protocol.removeListener('HEARTBEAT', verifyDisarmed);
                 deferred.resolve();
             } else {
