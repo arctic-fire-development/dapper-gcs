@@ -126,7 +126,7 @@ MavMission.prototype.sendToPlatform = function() {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
             // log.debug the mission_items in QGC format
             this.toQGC();
-            
+
             mavlinkParser.removeListener('MISSION_ACK', ackMission);
             self.emit('mission:loaded');
         } else {
@@ -238,11 +238,11 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
 };
 
 MavMission.prototype.toQGC = function(){
-    log.debug('QGC format mission items');
+    console.log('QGC format mission items');
 
     var QGC_mission_items = [];
-    QGC_mission_items.push('QGC WPL <VERSION>');
-    log.debug('QGC WPL <VERSION>');
+    QGC_mission_items.push('QGC WPL 1.1');
+    console.log('QGC WPL 1.1');
 
     _.each(this.mission_items, function(item){
         var QGC_format_item = [
@@ -260,7 +260,7 @@ MavMission.prototype.toQGC = function(){
             item[6]     // autocontinue
             ];
         QGC_mission_items.push(QGC_format_item);
-        log.debug(QGC_format_item.join('\t'));
+        console.log(QGC_format_item.join('\t'));
     });
 };
 
