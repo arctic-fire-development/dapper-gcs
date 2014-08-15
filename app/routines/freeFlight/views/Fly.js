@@ -114,6 +114,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // Swap the button text immediately for responsiveness
             this.$el.find('button.launch').html('Launching&hellip;');
+            // Send a growl notification to all other connected clients
+            app.socket.emit("launching");
 
             Q($.get('/drone/launch')).then(_.bind(function() {
 
@@ -133,9 +135,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 // that the system is in flight.
                 this.enableAltitudeSlider();
                 this.enableFlyToPoint();
-
-                // Send a growl notification to all other connected clients
-                app.socket.emit("launching");
 
             }, this));
         },
