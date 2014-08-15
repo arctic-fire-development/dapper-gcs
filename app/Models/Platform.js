@@ -3,6 +3,8 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
     var Platform = Backbone.Model.extend({
 
         defaults: {
+            voltage_battery: 0,
+            current_battery: 0
 
 /*
 We leave all items undefined and require that the client code using this model enforce its own handling.
