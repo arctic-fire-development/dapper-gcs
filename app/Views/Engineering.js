@@ -1,7 +1,7 @@
 'use strict';
 /*globals define */
 
-define(['backbone', 'underscore', 'io', 'JST', 'app'], function(Backbone, _, io, templates, app) {
+define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app'], function($, Backbone, _, io, templates, app) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};
@@ -68,7 +68,12 @@ define(['backbone', 'underscore', 'io', 'JST', 'app'], function(Backbone, _, io,
             }
 
             // Render scaffolding, filling in the gaps as provided
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.html(this.template(_.extend(this.model.toJSON(),
+                {
+                    voltage_battery: this.model.get('voltage_battery').toFixed(2),
+                    current_battery: this.model.get('current_battery').toFixed(2)
+                }
+            )));
 
             $('#modeSummary').html(_.template(
                 '<span class="mode <%= mode %>"><%= mode %></span> <%= manual %> <span class="<%= armed %>"><%= armed %></span>', {
