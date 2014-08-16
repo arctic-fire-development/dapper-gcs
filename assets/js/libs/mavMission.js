@@ -44,7 +44,9 @@ the APM.mission_current enum below.
 
 */
 var _ = require('underscore'),
-    Q = require('q');
+    Q = require('q'),
+    fs = require('fs'),
+    moment = require('moment');
 
 // Logging object (winston)
 var log;
@@ -76,6 +78,9 @@ var APM = {
     }
 };
 
+// Waypoints, an ordered array of waypoint MAVLink objects
+var missionItems = [];
+
 // Handler when the ArduPilot requests individual waypoints: upon receiving a request,
 // Send the next one.
 function missionRequestHandler(missionItemRequest) {
@@ -90,9 +95,6 @@ function missionRequestHandler(missionItemRequest) {
 
     mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
 }
-
-// Waypoints, an ordered array of waypoint MAVLink objects
-var missionItems = [];
 
 // Mission object constructor
 var MavMission = function(mavlinkProtocol, mavlinkProtocolInstance, uavConnectionObject, logger) {
@@ -124,6 +126,10 @@ MavMission.prototype.sendToPlatform = function() {
     // http://qgroundcontrol.org/mavlink/waypoint_protocol
     mavlinkParser.on('MISSION_ACK', function ackMission(ack) {
         if (mavlink.MAV_MISSION_ACCEPTED === ack.type) {
+
+            // log.debug the mission_items in QGC format
+            self.writeToQgcFormat();
+
             mavlinkParser.removeListener('MISSION_ACK', ackMission);
             self.emit('mission:loaded');
         } else {
@@ -286,6 +292,45 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
     );
 
     return [takeoff, hover];
+};
+
+// Dumps current mission plan to console in QGC format, should be able
+// to copy/paste and load in APM planner to check the mission out.
+MavMission.prototype.writeToQgcFormat = function(filename) {
+
+    filename = filename || './tmp/waypoints' + moment().format('-MM-DD-YYYY-HH-mm-ss') + '.txt';
+
+    try {
+        log.verbose('Writing QGC format mission items to %s', filename);
+
+        var qgcMissionItems = [];
+        qgcMissionItems.push('QGC WPL 120');
+
+        _.each(missionItems, function(item) {
+            var qgcMissionItem = [
+                item.seq,    // sequence number
+                item.current,    // current
+                item.frame,    // coordinate frame
+                item.command,
+                item.param1,
+                item.param2,
+                item.param3,
+                item.param4,
+                item.x,
+                item.y,
+                item.z,
+                item.autocontinue
+            ];
+            qgcMissionItems.push(qgcMissionItem.join('\t'));
+        });
+
+        fs.writeFile(filename, qgcMissionItems.join('\n'), function(err) {
+            if(err) log.error('Error writing QGC format waypoints, %s', err);
+        });
+
+    } catch(e) {
+        log.error(e);
+    }
 };
 
 module.exports = MavMission;
