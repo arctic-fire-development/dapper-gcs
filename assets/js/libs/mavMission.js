@@ -133,6 +133,60 @@ MavMission.prototype.sendToPlatform = function() {
     });
 };
 
+// Read the current mission from the UAV, into this instance of MavMission.
+MavMission.prototype.fetchFromPlatform = function() {
+    var deferred = Q.defer();
+
+    // Count of waypoints to be fetched
+    var count = 0;
+
+    // Index of which waypoint we're requesting
+    var index = 0;
+
+    missionItems = []; // clear current mission items
+
+    // Request mission item #n
+    var sendMissionRequest = function(n) {
+        var missionRequest = new mavlink.messages.mission_request(mavlinkParser.srcSystem, mavlinkParser.srcComponent, n);
+        mavlinkParser.send(missionRequest);
+    };
+
+    mavlinkParser.once('MISSION_COUNT', function fetchWaypoints(msg) {
+        log.debug('Got waypoint count %d', msg.count);
+        count = msg.count;
+        sendMissionRequest(0);
+    });
+
+    mavlinkParser.on('MISSION_ITEM', function handleMissionItem(msg) {
+        log.debug('Got mission item at index = %d', index);
+
+        if(index !== msg.seq) {
+            log.error('Mismatch between mission item requested and received.');
+        }
+
+        index++;
+        missionItems[msg.seq] = msg;
+        if(index < count) {
+            // Send next request
+            sendMissionRequest(index);
+        } else {
+            // Done, send final ack
+            var missionAck = new mavlink.messages.mission_ack(mavlinkParser.srcSystem, mavlinkParser.srcComponent, mavlink.MAV_MISSION_ACCEPTED);
+            mavlinkParser.send(missionAck);
+            mavlinkParser.removeListener('MISSION_ITEM', handleMissionItem);
+            log.info('Downloaded mission items from platform.');
+            deferred.resolve(this);
+        }
+    });
+
+    // This starts the process off.
+    var waypointRequestList = new mavlink.messages.mission_request_list(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
+    mavlinkParser.send(waypointRequestList);
+    log.verbose('Requesting mission from UAV...');
+
+    return deferred.promise;
+};
+
 // MissionItemMessage is a MAVLink MessageItem object
 MavMission.prototype.addMissionItem = function(missionItemMessage) {
     if (_.isUndefined(missionItemMessage)) {
