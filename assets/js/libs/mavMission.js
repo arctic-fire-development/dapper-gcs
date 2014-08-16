@@ -173,6 +173,7 @@ MavMission.prototype.fetchFromPlatform = function() {
             // Done, send final ack
             var missionAck = new mavlink.messages.mission_ack(mavlinkParser.srcSystem, mavlinkParser.srcComponent, mavlink.MAV_MISSION_ACCEPTED);
             mavlinkParser.send(missionAck);
+            mavlinkParser.removeListener('MISSION_ITEM', handleMissionItem);
             log.info('Downloaded mission items from platform.');
             deferred.resolve(this);
         }
