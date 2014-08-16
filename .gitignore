@@ -15,6 +15,7 @@ dapper-gcs.pid
 *.DS_Store
 .monitor
 logs/
+tmp/
 
 # These files and/or directory contents are always rebuilt during build processes.
 public/
