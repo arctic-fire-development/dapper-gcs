@@ -24,7 +24,7 @@
             label.btn.btn-success.btn-sm
               <input type="radio" name="compass" id="compass_yes"/> Yes
           span.txt Is the compass calibrated for this area?
-          button.btn.btn-default.btn-sm.pull-right(type="button")
+          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistCompass")
             span.glyphicon.glyphicon-question-sign
 
         li.list-group-item.manual
@@ -34,7 +34,7 @@
             label.btn.btn-success.btn-sm
               <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Propellers inspected?
-          button.btn.btn-default.btn-sm.pull-right(type="button")
+          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistPropellers")
             span.glyphicon.glyphicon-question-sign
 
         li.list-group-item.manual
@@ -44,7 +44,7 @@
             label.btn.btn-success.btn-sm
               <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Payload installation inspected?
-          button.btn.btn-default.btn-sm.pull-right(type="button")
+          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistPayload")
             span.glyphicon.glyphicon-question-sign
 
         li.list-group-item.manual
@@ -54,9 +54,84 @@
             label.btn.btn-success.btn-sm
               <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Visual safety survey of takeoff/landing area?
-          button.btn.btn-default.btn-sm.pull-right(type="button")
+          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistSafety")
             span.glyphicon.glyphicon-question-sign
 
 form(role="form")
   div.form-group
     button.continue.pull-right.btn.btn-primary.btn-lg Fly routine
+
+
+#preflightChecklistCompass.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;Is the compass calibrated?
+      .modal-body
+        p A properly calibrated compass ensures proper vehicle orientation during flight.  Since magnetic field strength
+          | varies over time and space, regularly performing this calibration is important.
+
+        ul
+          li When was the last compass calibration performed?
+        p Follow the manufacturer's instructions to perform compass calibration.
+      .modal-footer
+        button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
+
+#preflightChecklistPropellers.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-refresh"></span>&nbsp;&nbsp;Are the propellers correctly installed?
+      .modal-body
+        p Nothing causes more goofs than incorrectly installed or damaged propellers.
+        ul
+          li Are all propellers facing up?
+          li Is each propeller in the proper place?
+          li Inspect each propeller:
+            ul
+              li Leading edge free from cracks?
+              li Trailing edge free from significant cracks or missing chunks?
+              li Tips checked for cracks?
+              li Hub of propeller is solid?
+              li Propeller is securely fastened to motor shaft?
+      .modal-footer
+        button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
+
+#preflightChecklistPayload.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-camera"></span>&nbsp;&nbsp;Is the payload ready to fly?
+      .modal-body
+        p Doing a flight and discovering that you didn't set the camera to record is frustrating.
+        ul
+          li Ensure payload is properly mounted.
+          li Make sure the battery in the device is charged.
+          li Is the SD Card empty with enough room to record?
+          li Is the clock set correctly on the GoPro?
+          li Did you hit record?
+          li Did you put it in the right capture mode (video, frames)?
+          li Is the lens dirty or smudged?
+      .modal-footer
+        button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
+
+#preflightChecklistSafety.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;&nbsp;Is it safe to fly here?
+      .modal-body
+        p
+          strong Fly safely.
+          | &nbsp;Always follow relevant laws when doing a flight with your drone, and respect the privacy and safety of others.
+        ul
+          li Do you have enough horizontal clearance to obtain good GPS lock and get a safe takeoff?
+          li What vertical clearance do you have?  Are there nearby chimneys, towers or power lines?
+          li Are you within 5 miles of an airport or in other classified airspace?
+          li If applicable, have you submitted a NOTAM or COA?
+          li Are you sure you're in the right place?
+          li Do you have permission to fly?
+          li Do nearby people know you're about to fly?
+          li Are there loose children or pets nearby?
+      .modal-footer
+        button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
