@@ -1,24 +1,26 @@
+'use strict';
+
 define([
 
     // Application + dependencies
-    "app",
-    "underscore",
-    "jquery",
-    "q",
-    "backbone",
+    'app',
+    'underscore',
+    'jquery',
+    'q',
+    'backbone',
 
     // Models
-    "Models/Mission",
-    "Models/Platform",
-    "Models/Connection",
+    'Models/Mission',
+    'Models/Platform',
+    'Models/Connection',
 
     // Parent objects
-    "routines/components/Routine",
+    'routines/components/Routine',
 
     // Dependent views
-    "routines/freeFlight/views/Planning",
-    "routines/freeFlight/views/Preflight",
-    "routines/freeFlight/views/Fly"
+    'routines/freeFlight/views/Planning',
+    'routines/freeFlight/views/Preflight',
+    'routines/freeFlight/views/Fly'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
@@ -35,9 +37,8 @@ define([
         planning: function() {
             var deferred = Q.defer();
             var planningView = new PlanningView({
-                model: this.planningModel,
-                deferred: deferred,
-                mission: this.get('mission')
+                model: this.get('mission'),
+                deferred: deferred
             }).render();
             return deferred.promise;
         },
@@ -115,7 +116,6 @@ define([
                 this.get('mission').platform = this.platform;
                 this.get('mission').connection = this.connection;
                 this.get('mission').planning = this.planningModel;
-
                 this.flyView = new FreeFlightFlyView({
                     model: this.get('mission')
                 });
@@ -127,7 +127,7 @@ define([
                     try {
                         platform.set(platformJson);
                     } catch(e) {
-                        //alert("Error in socket callback handler," + e);
+                        //alert('Error in socket callback handler,' + e);
                         console.log(e);
                         //throw(e);
                     }

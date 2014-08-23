@@ -57,6 +57,7 @@ module.exports = function(grunt) {
                     {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg', '**/*.gif'], dest: 'public/images/'},
                     {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
                     {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'},
+                    {expand: true, cwd: 'app/assets/bower/fuelux/fonts', src: '*', dest: 'public/fonts/'},
                     {expand: true, cwd: 'assets/fonts/', src: '**/*.woff', dest: 'public/fonts/'}
                 ]
             }
@@ -159,7 +160,8 @@ module.exports = function(grunt) {
                         "build/less.css",
                         "assets/css/**/*.css",
                         "app/assets/bower/leaflet-dist/leaflet.css",
-                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css"
+                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css",
+                        "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]
                 }
             }

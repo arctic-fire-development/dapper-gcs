@@ -1,4 +1,6 @@
-define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, templates, Q, BS, app) {
+'use strict';
+
+define(['backbone', 'JST', 'q', 'bootstrap', 'app', 'moment', 'fuelux'], function(Backbone, templates, Q, BS, app, moment, fuelux) {
 
     var HomeView = Backbone.View.extend({
 
@@ -7,7 +9,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
 
         render: function() {
 
-            Q($.get('/routine')).then(_.bind(function(data) {
+            Q($.get('/routine')).then(_.bind(function() {
                 this.$el.html(this.template(this.model.toJSON()));
             }, this));
 

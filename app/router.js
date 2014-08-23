@@ -23,12 +23,12 @@ define([
     'Views/Select',
     'Views/Engineering'
 ], function(app, _, Backbone, $, require, rf, BG,
-    
+
     RoutineFreeFlight,
 
     Mission,
     Platform,
-    
+
     GlobalGuiView,
     HomeView,
     SelectView,
@@ -74,12 +74,20 @@ define([
                 model: this.mission
             });
 
+            // Hook some events up on the main wizard sequence
+            $('#flightWizard').wizard();
+
             // TODO GH#xxx refactor to more sensible place...?
             this.socket.on('operator:promoted', this.handleOperatorPromotion);
             this.socket.on('operator:demoted', this.handleOperatorDemotion);
             this.socket.on('routine:started', this.handleRoutineStarted);
             this.socket.on('routine:ended', this.handleRoutineEnded);
             this.socket.on('disconnect', this.globalGuiView.renderLostServerConnection);
+
+            // Just reload the screen when we're reconnected.  Not perfect, but a start.
+            this.socket.on('reconnect', function() {
+                document.location.reload(true);
+            });
 
         },
 
@@ -121,10 +129,11 @@ define([
 
         // Pass the name of the div to show, others are hidden for 'navigation' :)
         showOnly: function(name) {
-            var panes = ['home', 'select', 'mission', 'preflight', 'planning', 'fly', 'engineering'];
+            var panes = ['home', 'flightWizard', 'fly', 'engineering'];
             _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
             $('#'+name).show();
         },
+
         // Set the active top-level bootstrap item.
         setActiveMenu: function(menu) {
             $('#navbar ul.navbar-nav li').each(function() {
@@ -146,12 +155,19 @@ define([
         },
 
         select: function() {
-            this.showOnly('select');
+            this.showOnly('flightWizard');
+
+            // Prepare the wizard!  Maybe should be moved to its own view at some point?
+            $('#flightWizard').wizard('selectedItem', { step: 1 });
+
             this.selectView.render();
         },
 
         planning: function() {
-            this.showOnly('planning');
+
+            this.showOnly('flightWizard');
+            $('#flightWizard').wizard('selectedItem', {step: 2});
+
             this.routine.planning().then(_.bind(function() {
                 this.navigate('mission/preflight', { trigger: true });
             }, this));
@@ -165,7 +181,9 @@ define([
             // Alert all clients that a routine is about to be underway.
             this.socket.emit('routine:started');
 
-            this.showOnly('preflight');
+            this.showOnly('flightWizard');
+            $('#flightWizard').wizard('selectedItem', {step: 3});
+
             this.mission.set({status:'preflight'});
             this.routine.preflight().then(_.bind(function() {
                 this.navigate('mission/fly', { trigger: true });
@@ -175,15 +193,20 @@ define([
         fly: function() {
             this.showOnly('fly');
             // TODO this can't be right/here, otherwise any observer will also trigger this action.
+            // GH#289
             this.mission.set({status:'fly', active: true});
             this.routine.fly();
         },
 
+        // TODO GH#290 This handles the menu item, so it needs to dispatch you to the current state (flight, planning, etc).
+        // Well... maybe not.  This gets called when, for example, user clicks on Continue button during Select phase.
+        // Not sure if this is just some bit rot or what...?
         mission: function() {
-            this.showOnly('mission');
+            this.showOnly('wizard');
             this.navigate('mission/planning', { trigger: true });
         },
 
+        // TODO GH#291 this is making extra copies of engineering views
         engineering: function() {
             this.showOnly('engineering');
             this.engineeringView = new EngineeringView({
@@ -196,7 +219,7 @@ define([
 
             // Pending real plugin architecture, hardcode to free flight mode.
             return routineName = 'routines/freeFlight/Routine';
-            
+
         }
 
     });
