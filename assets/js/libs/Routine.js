@@ -3,7 +3,7 @@
 
 var _ = require('underscore'),
   // We share the model code with the client, which needs a few tricks to work.
-  // TODOGH#xxx
+  // TODO GH#xxx
   MissionModel = require('../../../app/Models/Mission');
 
 // Reference to global socket.io -- probably move elsewhere, just exploring for now.
@@ -21,7 +21,7 @@ function Routine(logger, appInstance, socketIo) {
   io = socketIo;
   app = appInstance;
 
-  this.missionModel = new MissionModel();
+  this.mission = new MissionModel();
 
   _.bindAll(this, 'socketHandlers', 'get');
 
@@ -36,8 +36,8 @@ util.inherits(Routine, events.EventEmitter);
 Routine.prototype = {
 
   get: function(req, res) {
-    log.debug(this.missionModel.toJSON());
-    res.json(this.missionModel.toJSON());
+    log.debug(this.mission.toJSON());
+    res.json(this.mission.toJSON());
   },
 
   // TODO GH#206
@@ -46,8 +46,8 @@ Routine.prototype = {
       log.info('routine thinks someone is starting preflight, signaling other connected clients to freeze');
     });
     socket.on('routine:update', _.bind(function(data) {
-      this.missionModel.set(data);
-      socket.emit('routine:update', this.missionModel.toJSON());
+      this.mission.set(data);
+      socket.emit('routine:update', this.mission.toJSON());
     }, this));
 
     // When a routine is started, signal other clients.

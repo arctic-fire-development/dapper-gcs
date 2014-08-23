@@ -13,7 +13,6 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
         },
 
         render: function() {
-
             if (false === this.hasRendered) {
                 // Do initial map setup
                 this.renderLayout();

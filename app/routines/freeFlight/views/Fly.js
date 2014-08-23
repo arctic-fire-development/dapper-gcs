@@ -147,6 +147,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             try {
                 if (false === this.hasRendered) {
                     this.renderLayout();
+                    this.$el.find('#myLoader').loader('play');
                     this.hasRendered = true;
                 }
 
@@ -160,7 +161,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         regenerateGuiState: function() {
-
             // Default state should show/hide controls and disable UI interactions.
             this.showControls();
             this.altitudeWidget.disable();
@@ -280,7 +280,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             this.altitudeWidget = new AltitudeWidget({
                 model: this.model.platform,
-                maxAltitude: this.model.planning.get('maxAltitude')
+                maxAltitude: this.model.get('maxAltitude')
             });
 
             this.batteryWidget = new BatteryWidget({

@@ -1,62 +1,62 @@
-.jumbotron
+#freeFlightPreflight.col-md-12
+  h2 Pre-flight checklist
   .row
-    .col-md-6.col-md-offset-3
-      h1 Free Flight<span>.</span>
-      #sitl-preflight.panel.panel-default
-        .panel-heading Free Flight mode: Preflight.
-        .panel-body
+    .col-md-6
+      h3 Automated checks
+      ul.list-group.checklist
+        li.list-group-item
+          #preflightSitlConnectionManager.statusWidget
 
-          ul.list-group.checklist
-            li.list-group-item
-              #preflightSitlConnectionManager.statusWidget
+        if parameters
+          li.list-group-item
+            #loadParameters.statusWidget
+              .disconnected <span class="glyphicon glyphicon-tasks"></span> Flight parameters not loaded.
+              .connecting(style="display:none") <span class="glyphicon glyphicon-tasks"></span> Loading flight parameters&hellip;
+              .connected(style="display:none") <span class="glyphicon glyphicon-ok"></span> Flight parameters loaded.
 
-            if parameters
-              li.list-group-item
-                #loadParameters.statusWidget
-                  .disconnected <span class="glyphicon glyphicon-tasks"></span> Flight parameters not loaded.
-                  .connecting(style="display:none") <span class="glyphicon glyphicon-tasks"></span> Loading flight parameters&hellip;
-                  .connected(style="display:none") <span class="glyphicon glyphicon-ok"></span> Flight parameters loaded.
+    .col-md-6
+      h3 Manual checks
+      ul.list-group.checklist
+        li.list-group-item.manual
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="compass" id="compass_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="compass" id="compass_yes"/> Yes
+          span.txt Is the compass calibrated for this area?
+          button.btn.btn-default.btn-sm.pull-right(type="button")
+            span.glyphicon.glyphicon-question-sign
 
-            li.list-group-item.manual
-              .btn-group(data-toggle="buttons")
-                label.btn.btn-danger.btn-sm.
-                  <input checked type="radio" name="compass" id="compass_no"/> No
-                label.btn.btn-success.btn-sm.
-                  <input type="radio" name="compass" id="compass_yes"/> Yes
-              span.txt Is the compass calibrated for this area?
-              button.btn.btn-default.btn-sm.pull-right(type="button")
-                span.glyphicon.glyphicon-question-sign
-            
-            li.list-group-item.manual
-              .btn-group(data-toggle="buttons")
-                label.btn.btn-danger.btn-sm.
-                  <input checked type="radio" name="props" id="props_no"/> No
-                label.btn.btn-success.btn-sm.
-                  <input type="radio" name="props" id="props_yes"/> Yes
-              span.txt Propellers inspected?
-              button.btn.btn-default.btn-sm.pull-right(type="button")
-                span.glyphicon.glyphicon-question-sign
-            
-            li.list-group-item.manual
-              .btn-group(data-toggle="buttons")
-                label.btn.btn-danger.btn-sm.
-                  <input checked type="radio" name="props" id="props_no"/> No
-                label.btn.btn-success.btn-sm.
-                  <input type="radio" name="props" id="props_yes"/> Yes
-              span.txt Payload installation inspected?
-              button.btn.btn-default.btn-sm.pull-right(type="button")
-                span.glyphicon.glyphicon-question-sign
+        li.list-group-item.manual
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="props" id="props_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="props" id="props_yes"/> Yes
+          span.txt Propellers inspected?
+          button.btn.btn-default.btn-sm.pull-right(type="button")
+            span.glyphicon.glyphicon-question-sign
 
-            li.list-group-item.manual
-              .btn-group(data-toggle="buttons")
-                label.btn.btn-danger.btn-sm.
-                  <input checked type="radio" name="props" id="props_no"/> No
-                label.btn.btn-success.btn-sm.
-                  <input type="radio" name="props" id="props_yes"/> Yes
-              span.txt Visual safety survey of takeoff/landing area?
-              button.btn.btn-default.btn-sm.pull-right(type="button")
-                span.glyphicon.glyphicon-question-sign
+        li.list-group-item.manual
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="props" id="props_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="props" id="props_yes"/> Yes
+          span.txt Payload installation inspected?
+          button.btn.btn-default.btn-sm.pull-right(type="button")
+            span.glyphicon.glyphicon-question-sign
 
-          form(role="form")
-            div.form-group
-              button.continue.pull-right.btn.btn-primary.btn-lg Fly routine
+        li.list-group-item.manual
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="props" id="props_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="props" id="props_yes"/> Yes
+          span.txt Visual safety survey of takeoff/landing area?
+          button.btn.btn-default.btn-sm.pull-right(type="button")
+            span.glyphicon.glyphicon-question-sign
+
+form(role="form")
+  div.form-group
+    button.continue.pull-right.btn.btn-primary.btn-lg Fly routine

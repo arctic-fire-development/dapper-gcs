@@ -20,7 +20,9 @@ require.config({
         bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
         "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl",
         routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min",
-        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap"
+        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
+        fuelux: "assets/bower/fuelux/dist/js/fuelux",
+        moment: "assets/bower/moment/moment"
     },
     shim: {
         backbone: {
