@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet-dist'], function(Backbone, L) {
+define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone, L, LRM) {
 
     var PlatformWidget = Backbone.View.extend({
 
@@ -21,18 +21,17 @@ define(['backbone', 'leaflet-dist'], function(Backbone, L) {
             if(false === this.hasRendered) {
 
                 this.myIcon = L.icon({
-                    iconUrl: '/images/quadcopter.min.svg',
-                    iconSize: [50, 100],
-                    iconAnchor: [25, 50],
-                    popupAnchor: [-3, -76]
+                    iconUrl: '/images/quadcopter.png',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
                 });
 
                 this.marker = L.marker([64.9, -147.1], {
                     icon: this.myIcon,
                     iconAngle: 0
                 }).addTo(this.map);
-    
-                // Do once; 
+
+                // Do once;
                 this.map.panTo(LatLng);
 
                 this.hasRendered = true;
@@ -52,18 +51,8 @@ define(['backbone', 'leaflet-dist'], function(Backbone, L) {
                 }, this);
             }
 
-/*
-            var panMap = _.throttle(_.bind(function() {
-            }, this), 5000);
-            panMap();
-*/
-
-
             this.marker.setLatLng(LatLng);
-
-            // Commenting this out instead of nuking for the moment because the functionality
-            // can be patched/restored, but this method is out of date.
-            // this.marker.setIconAngle(this.model.get('heading'));
+            this.marker.setIconAngle(this.model.get('heading'));
 
         }
     });

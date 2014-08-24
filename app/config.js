@@ -14,13 +14,15 @@ require.config({
         underscore: "assets/bower/underscore/underscore",
         "leaflet-dist": "assets/bower/leaflet-dist/leaflet",
         "leaflet-bing-plugin": "assets/bower/leaflet-plugins/layer/tile/Bing",
+        "leaflet-rotate-marker": "assets/bower/leaflet-plugins/layer/Marker.Rotate",
         requirejs: "assets/bower/requirejs/require",
         q: "assets/bower/q/q",
         "bootstrap-slider": "../assets/js/libs/bootstrap-slider/js/bootstrap-slider",
         bootstrapValidator: "assets/bower/bootstrapValidator/dist/js/bootstrapValidator",
         "bootstrap-growl": "assets/bower/bootstrap-growl/jquery.bootstrap-growl",
         routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min",
-        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap"
+        bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
+        fuelux: "assets/bower/fuelux/dist/js/fuelux"
     },
     shim: {
         backbone: {
