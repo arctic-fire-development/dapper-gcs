@@ -74,7 +74,7 @@ ArduCopterUdl.prototype.takeoff = function() {
 
         // We need to send this message with a special header
         // so that APM will respect it.
-        mavlink.connection.sendAsGcs(throttle);
+        protocol.connection.sendAsGcs(throttle);
 
         // When system is shown to be "Active," we're in business.
         protocol.on('HEARTBEAT', function confirmSystemActive(msg) {
