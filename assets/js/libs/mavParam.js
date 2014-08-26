@@ -16,6 +16,7 @@ TBD make #4 work
 var _ = require('underscore'),
     Q = require('q'),
     Qretry = require('qretry'),
+    EventEmitter = require('events').EventEmitter,
     mavlink = require('mavlink_ardupilotmega_v1.0');
 
 // Logger, passed in object constructor for common logging
@@ -82,14 +83,17 @@ MavParam.prototype.set = function(name, value) {
 
 MavParam.prototype.get = function(name) {
     var deferred = Q.defer();
-    
+
     var parameterVerifier = _.bind(function(msg) {
+        log.silly('Verifying parameter match between requested [%s] and received [%s]', name, msg.param_id);
         if(name === msg.param_id) {
             mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
+            log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
             deferred.resolve(msg.param_value);
         }
     }, this);
 
+    log.silly('Adding paramVerifier listener from single GET instance for [%s]...', name);
     mavlinkParser.on('PARAM_VALUE', parameterVerifier);
 
     var index = -1; // this will use the name as the lookup method
