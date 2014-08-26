@@ -115,7 +115,6 @@ define([
                 // we don't want to sync or persist them.
                 this.get('mission').platform = this.platform;
                 this.get('mission').connection = this.connection;
-                this.get('mission').planning = this.planningModel;
                 this.flyView = new FreeFlightFlyView({
                     model: this.get('mission')
                 });
