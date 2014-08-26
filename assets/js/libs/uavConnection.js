@@ -152,7 +152,7 @@ UavConnection.prototype.heartbeat = function() {
     this.emit(this.state);
 
     this.invokeState(this.state);
-    log.silly('time since last heartbeat: %d', timeSinceLastHeartbeat);
+    log.heartbeat('time since last heartbeat: %d', timeSinceLastHeartbeat);
 };
 
 // Convenience function to make the meaning of the awkward syntax more clear.
@@ -182,7 +182,7 @@ UavConnection.prototype.getState = function() {
 UavConnection.prototype.updateHeartbeat = function() {
 
     try {
-        log.silly('Heartbeat updated: ' + Date.now());
+        log.heartbeat('Heartbeat updated: ' + Date.now());
         lastHeartbeat = Date.now();
 
         // When we get a heartbeat, switch back to connected state.
@@ -215,7 +215,7 @@ UavConnection.prototype.sendHeartbeat = function() {
             // We set mavlink_version to 3 because it matches the magic we see elsewhere in incoming packets :) it's Mavlink 1.0.
         );
     }
-    log.silly('Sending GCS heartbeat to UAV...');
+    log.heartbeat('Sending GCS heartbeat to UAV...');
     this.sendAsGcs(heartbeatMessage);
 };
 
@@ -229,6 +229,7 @@ UavConnection.prototype.disconnected = function() {
     clearInterval(heartbeatMonitor); // harmless if timer is not defined
     clearInterval(sendHeartbeatInterval); // harmless if timer is not defined
     heartbeatMonitor = setInterval(this.heartbeat, config.get('connection:updateIntervals:heartbeatMs'));
+    attachDataEventListener = true; // be sure and listen for the regained heartbeat
 
     log.silly('[UavConnection] Trying to connect from disconnected state...');
 
@@ -236,17 +237,34 @@ UavConnection.prototype.disconnected = function() {
 
         switch (config.get('connection:type')) {
             case 'serial':
+                // Note that our error handling around the serial port is a bit weak, simply
+                // reporting it to the logger as an error.  At this point, it's not clear what all
+                // errors we'll see or what they mean, so I'm OK with just logging + ignoring
+                // these errors at this point.
+
                 dataEventName = 'data';
                 connection = new SerialPort(
                     config.get('serial:device'), {
-                        baudrate: config.get('serial:baudrate')
+                        baudrate: config.get('serial:baudrate'),
+                        // See:
+                        // https://github.com/voodootikigod/node-serialport/issues/284
+                        //
+                        // We need this callback specified both here and with the 'close' event until that
+                        // issue is resolved, because it's unclear where they may differ in internal
+                        // execution.
+                        disconnectedCallback: _.bind(this.changeState, this, 'disconnected')
                     }
                 );
+
+                connection.on('error', function(err) {
+                    log.error(err);
+                });
 
                 // Once the connection is opened, move to a connecting state
                 connection.on('open', _.bind(this.changeState, this, 'connecting'));
 
                 // If we lose the connection, try and re-establish immediately.
+                // See above where we specify in disconnectedCallback as well.
                 connection.on('close', _.bind(this.changeState, this, 'disconnected'));
                 break;
 
