@@ -4,7 +4,9 @@ var mavlink = require("mavlink_ardupilotmega_v1.0"),
 var messages = fs.readFileSync(process.argv[2]);
 var mavlinkParser = new mavlink();
 mavlinkParser.on('message', function(message) {
+  if(message.name !== 'HEARTBEAT') {
     console.log(message);
+  }
 });
 mavlinkParser.pushBuffer(messages);
 mavlinkParser.parseBuffer();
