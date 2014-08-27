@@ -44,6 +44,12 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
+
+            this.myIcon = L.icon({
+                    iconUrl: '/images/target.png',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
+            });
         },
 
         showControls: function() {
@@ -191,8 +197,15 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         flyToPoint: function(e) {
-            this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.mapWidget.map);
-            $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+
+            // Don't draw another line if one's currently down.
+            if(this.targetMarker && this.targetLine) {
+                return;
+            }
+
+            this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+                icon: this.myIcon
+            }).addTo(this.mapWidget.map);
             this.targetLine = L.polyline(
                 [
                     L.latLng(e.latlng.lat, e.latlng.lng),
@@ -205,27 +218,31 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                     color: 'red'
                 }
             ).addTo(this.mapWidget.map);
+            $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+
         },
 
         hoverAtPoint: function(e) {
             $.get('/drone/loiter');
             this.mapWidget.map.removeLayer(this.targetMarker);
             this.mapWidget.map.removeLayer(this.targetLine);
+            this.targetMarker = undefined;
+            this.targetLine = undefined;
         },
 
         bindFlyToPoint: function() {
             if( false === this.mapEventsAreBound && true === this.model.isOperator ) {
-                this.mapWidget.map.on('mousedown', this.flyToPoint, this);
+                this.mapWidget.map.on('mousedown touchstart', this.flyToPoint, this);
                 this.mapWidget.map.on('contextmenu', this.flyToPoint, this);
-                this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+                this.mapWidget.map.on('mouseup touchend', this.hoverAtPoint, this);
                 this.mapEventsAreBound = true;
             }
         },
 
         unbindFlyToPoint: function() {
-            this.mapWidget.map.off('mousedown', this.flyToPoint);
+            this.mapWidget.map.off('mousedown touchstart', this.flyToPoint);
             this.mapWidget.map.off('contextmenu', this.flyToPoint);
-            this.mapWidget.map.off('mouseup', this.hoverAtPoint);
+            this.mapWidget.map.off('mouseup touchend', this.hoverAtPoint);
             this.mapEventsAreBound = false;
         },
 

@@ -314,12 +314,14 @@ UavConnection.prototype.connecting = function() {
 
         isConnected = false;
 
-        log.silly('establishing MAVLink connection...');
+        log.silly('establishing MAVLink connection...', { ifAttach: attachDataEventListener} );
 
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
         // to avoid attaching too many callbacks.
         if (true === attachDataEventListener) {
+
+            log.silly('attaching data event listener in UavConnection')
 
             // One time, wait for a heartbeat then set the srcSystem / srcComponent
             // Possible loose ends here.  TODO GH#195.
