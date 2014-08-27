@@ -35,7 +35,7 @@ var logger = module.exports = new(winston.Logger)({
   transports: [
     new(winston.transports.Console)({
       colorize: true,
-      level: process.env.GCS_LOG_LEVEL, // if undefined, will be 'info'.
+      level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
     })
   ],
   levels: gcsLogConfig.levels,

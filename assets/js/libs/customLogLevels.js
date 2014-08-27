@@ -1,11 +1,3 @@
-/*
- * npm-config.js: Config that conform to npm logging levels.
- *
- * (C) 2010 Charlie Robbins
- * MIT LICENCE
- *
- */
-
 var gcsConfig = exports;
 
 gcsConfig.levels = {
