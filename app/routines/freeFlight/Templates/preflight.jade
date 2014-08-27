@@ -1,7 +1,7 @@
 #freeFlightPreflight.col-md-12
   h2 Pre-flight checklist
   .row
-    .col-md-6
+    .col-md-4
       h3 Automated checks
       ul.list-group.checklist
         li.list-group-item
@@ -14,52 +14,61 @@
               .connecting(style="display:none") <span class="glyphicon glyphicon-tasks"></span> Loading flight parameters&hellip;
               .connected(style="display:none") <span class="glyphicon glyphicon-ok"></span> Flight parameters loaded.
 
-    .col-md-6
+    .col-md-8
       h3 Manual checks
       ul.list-group.checklist
+
         li.list-group-item.manual
-          .btn-group(data-toggle="buttons")
-            label.btn.btn-danger.btn-sm.active
-              <input checked type="radio" name="compass" id="compass_no"/> No
-            label.btn.btn-success.btn-sm
-              <input type="radio" name="compass" id="compass_yes"/> Yes
           span.txt Is the compass calibrated for this area?
-          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistCompass")
-            span.glyphicon.glyphicon-question-sign
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="compass" id="compass_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="compass" id="compass_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#preflightChecklistCompass")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
 
         li.list-group-item.manual
-          .btn-group(data-toggle="buttons")
-            label.btn.btn-danger.btn-sm.active
-              <input checked type="radio" name="props" id="props_no"/> No
-            label.btn.btn-success.btn-sm
-              <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Propellers inspected?
-          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistPropellers")
-            span.glyphicon.glyphicon-question-sign
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="props" id="props_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="props" id="props_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#preflightChecklistPropellers")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
 
         li.list-group-item.manual
-          .btn-group(data-toggle="buttons")
-            label.btn.btn-danger.btn-sm.active
-              <input checked type="radio" name="props" id="props_no"/> No
-            label.btn.btn-success.btn-sm
-              <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Payload installation inspected?
-          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistPayload")
-            span.glyphicon.glyphicon-question-sign
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="props" id="props_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="props" id="props_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#preflightChecklistPayload")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
 
         li.list-group-item.manual
-          .btn-group(data-toggle="buttons")
-            label.btn.btn-danger.btn-sm.active
-              <input checked type="radio" name="props" id="props_no"/> No
-            label.btn.btn-success.btn-sm
-              <input type="radio" name="props" id="props_yes"/> Yes
           span.txt Visual safety survey of takeoff/landing area?
-          button.btn.btn-info.btn-sm.pull-right(type="button", data-toggle="modal", data-target="#preflightChecklistSafety")
-            span.glyphicon.glyphicon-question-sign
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="props" id="props_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="props" id="props_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#preflightChecklistSafety")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
 
 form(role="form")
   div.form-group
-    button.continue.pull-right.btn.btn-primary.btn-lg Fly routine
+    button.continue.btn.btn-primary.btn-lg.pull-right Fly routine
 
 
 #preflightChecklistCompass.modal

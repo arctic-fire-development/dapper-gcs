@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L) {
+define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend'], function(Backbone, L, LBP, LTE) {
 
     var MapWidget = Backbone.View.extend({
 
@@ -30,7 +30,10 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin'], function(Backbone, L
             this.map = L.map('mapWidget', {
                 minZoom: 1,
                 maxZoom: 18,
-                zoomControl: false // to reposition
+                zoomControl: false,
+                scrollWheelZoom: false,
+                tap: true,
+                attributionControl: false
             }).setView([64.9, -147.1], 18);
 
             new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
