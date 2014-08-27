@@ -17,6 +17,11 @@ var APM = {
         LOITER: 5,
         RTL: 6,
         LAND: 9
+    },
+    // from MAV_STATE enum
+    system_status: {
+        STANDBY: 3,
+        ACTIVE: 4
     }
 };
 
@@ -45,12 +50,8 @@ ArduCopterUdl.prototype.takeoff = function() {
     log.info('ArduCopter UDL: sending takeoff command...');
 
     if (true === config.get('sitl:active')) {
-        log.info('ArduCopter UDL: sending SITL command for takeoff...');
 
-        // setTimeout(function() {
-        //     var rc_override = new mavlink.messages.rc_channels_override(253, 1, 0, 0, 1500, 0, 0, 0, 0, 0);
-        //     protocol.send(rc_override);
-        // }, 4000);
+        log.info('ArduCopter UDL: sending SITL command for takeoff...');
 
         try {
             var sitlUdp = dgram.createSocket('udp4');
@@ -61,12 +62,28 @@ ArduCopterUdl.prototype.takeoff = function() {
         }
         deferred.resolve();
 
-        // This code is currently nonfunctional.  What we want to do is to trigger the
-        // "takeoff" by forcing an RC control override to RC3.
-        // var rc_override = new mavlink.messages.rc_channels_override(1, 1, 0, 0, 1500, 0, 0, 0, 0, 0);
-        // var rc_override_send = _.partial(_.bind(protocol.send, protocol), rc_override);
-        // setInterval(rc_override_send, 50);
+    } else {
 
+        var throttle = new mavlink.messages.rc_channels_override(
+            mavlink.srcSystem,
+            mavlink.srcComponent,
+            0, 0, // release channels 1, 2 back to RC controller
+            1530, // RC3 = throttle, this value should be good enough
+            0, 0, 0, 0, 0
+        ); // release other channels
+
+        // We need to send this message with a special header
+        // so that APM will respect it.
+        protocol.connection.sendAsGcs(throttle);
+
+        // When system is shown to be "Active," we're in business.
+        protocol.on('HEARTBEAT', function confirmSystemActive(msg) {
+            if (msg.system_status == APM.system_status.ACTIVE) {
+                log.debug('System confirmed as active, should be taking off...');
+                protocol.removeListener('HEARTBEAT', confirmSystemActive);
+                deferred.resolve();
+            }
+        });
     }
 
     return deferred.promise;

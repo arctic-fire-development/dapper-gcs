@@ -255,8 +255,11 @@ MavMission.prototype.getMissionItems = function() {
 
 // Given lat/lon, build a two-item mission that takes off and hovers.
 // Returns an array of mission items.
-MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
-
+MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
+    if(!lat || !lon || !alt) {
+        log.error('Lat [%d], lon [%d], alt [%d] zero or undefined in buildTakeoffThenHoverMission', lat, lon, alt);
+        throw new Error('Lat, Lon, or Altitude were zero/undefined when asked to build takeoff mission');
+    }
     var takeoff = new mavlink.messages.mission_item(
         mavlinkParser.srcSystem,
         mavlinkParser.srcComponent,
@@ -288,7 +291,7 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon) {
         0,
         lat,
         lon,
-        20 // hover at 20 meters.  TODO GH#162
+        alt
     );
 
     return [takeoff, hover];

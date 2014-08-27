@@ -1,23 +1,28 @@
-
-#sitl-preflight {
-  .statusWidget {
-    margin: 0; padding: 0;
-    div {
-      padding: 1em;
-      
-      span {
-        &.glyphicon {
-          display: inline-block;
-          padding-right: 1em;
-        }
-        &.extra {
-          display: inline;
-        }
-      }
+#freeFlightPreflight {
+  #connectionWidget div {
+    padding: 1rem;
+  }
+  #loadParameters div {
+    padding: 1rem;
+  }
+  #preflightSitlConnectionManager {
+    #connectionWidgetLoader {
+      font-size: 2rem;
+      height: 2rem;
+      width: auto;
+      padding: 0 2ex 0 0;
+      position: relative;
+      top: .4ex;
+      margin: 0;
+      line-height: 1rem;
+      display: inline-block;
     }
   }
-  // Override other styles from global widget styling.
-  #connectionWidget {
-    padding: 0;
+  .btn-group {
+    label.btn-danger:not(.active), label.btn-success:not(.active) {
+      background: #fff;
+      color: #888;
+      border: 1px solid #aaa;
+    }
   }
 }

@@ -14,6 +14,7 @@
     "3l": "~1.4.4",
     "bootstrap-growl": "~1.1.0",
     "routefilter": "~0.2.1",
-    "socket.io-client": "~1.0.6"
+    "socket.io-client": "~1.0.6",
+    "fuelux": "~3.0.0"
   }
 }

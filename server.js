@@ -87,6 +87,7 @@ app.set('platforms', platforms);
 
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
+app.get('/checklist', routes.checklist);
 
 // Catchall/redirect for routes not otherwise handled, go home.
 app.use(function (req, res) {
@@ -112,7 +113,7 @@ app.set('mavParams', mavParams);
 var platform = {},
   connection = {};
 
-var routineObj = new RoutineObj(logger, app, io);
+var routine = new RoutineObj(logger, app, io);
 var users = new Users(logger, io);
 
 io.on('connection', function (socket) {
@@ -142,20 +143,47 @@ quad.setProtocol(mavlinkParser);
 // This should evolve into a single strong session-based model of some kind, with DB persistence.
 // See GH#119.
 // Anything referencing 'routine' falls into this bucket.
-var routine = {};
 
 app.get('/drone/params/load', function (req, res) {
 
   logger.info('loading parameters for SITL Copter...');
 
   // TODO hardcoded platform D:
-  logger.debug(platforms[0].parameters);
   var promises = mavParams.loadParameters(platforms[0].parameters);
 
   // Hack/hardcoding interactive parameter setting
-  promises.push(
-    mavParams.set('WPNAV_SPEED', routine.maxSpeed)
-  );
+  // GH#164
+  // stored on gcs as m/s, send over mavlink as cm/s
+  promises.push(mavParams.set('WPNAV_SPEED', routine.mission.get('maxSpeed')*100));
+
+  // Fence seems to be enabled by default on Iris to 100m, so,
+  // let's just be sure and do that with whatever the user has specified too.
+  promises.push(mavParams.set('FENCE_TYPE', 1)); // altitude-only fence
+  promises.push(mavParams.set('FENCE_ALT_MAX', routine.mission.get('maxAltitude')));
+
+  // There's four different failsafes and we may want
+  // to treat them differently (and each has its own slight
+  // different in choices of actions to take) but I think the user's
+  // perspective is normally going to be "either RTL" or
+  // "ignore" (i.e. safe, or danger, not some illusion of finessed
+  // control somewhere in-between!)
+  // If GPS is lost, best we can do is either land in place (no) or
+  // alt-hold (better choice here I think).
+  // Also this code needs to get out of server.js, GH#294
+  switch(routine.mission.get('failsafeBehavior')) {
+    case 'ignore':
+      promises.push(mavParams.set('FS_BATT_ENABLE', 0));   //disable failsafe
+      promises.push(mavParams.set('FS_GCS_ENABLE', 0));     //disable failsafe
+      promises.push(mavParams.set('FS_GPS_ENABLE', 0));     //disable failsafe
+      break;
+
+    case 'rtl': // fallthru
+    default: // default to safe choices
+      promises.push(mavParams.set('FS_BATT_ENABLE', 2));  //rtl if battery low
+      promises.push(mavParams.set('FS_GCS_ENABLE', 1));     //rtl if no heartbeat from GCS
+      promises.push(mavParams.set('FS_GPS_ENABLE', 1));     //ALT HOLD if GPS lost.
+      break;
+  }
 
   Q.allSettled(promises)
     .then(
@@ -177,7 +205,7 @@ app.get('/drone/mission/load', function (req, res) {
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
-  var mission = mm.buildTakeoffThenHoverMission(lat, lng);
+  var mission = mm.buildTakeoffThenHoverMission(lat, lng, routine.mission.get('takeoffAltitude'));
   var promise = mm.loadMission(mission);
 
   Q.when(promise, function () {
@@ -196,7 +224,7 @@ function loadTakeoffMission() {
   quad.getLatLon()
     .then(function (location) {
       logger.info('Building auto/hover mission from home point: ', location);
-      var mission = mm.buildTakeoffThenHoverMission(location[0], location[1]);
+      var mission = mm.buildTakeoffThenHoverMission(location[0], location[1], routine.mission.get('takeoffAltitude'));
       mm.loadMission(mission)
         .then(function () {
           logger.info('Auto/hover mission loaded into APM.');
@@ -219,9 +247,9 @@ app.get('/drone/launch', function (req, res) {
 
   try {
 
-    Q.fcall(quad.arm)
-      .then(loadTakeoffMission)
+    Q.fcall(loadTakeoffMission)
       .then(quad.setAutoMode)
+      .then(quad.arm)
       .then(quad.takeoff)
       .then(function () {
         res.send(200);
@@ -272,7 +300,7 @@ app.get('/drone/changeAltitude', function (req, res) {
     alt = routine.maxAltitude;
   }
 
-  logger.info('Changing altitude to %d', alt);
+  logger.info('Changing altitude to %d m', alt);
   quad.changeAltitude(alt, platform);
   res.send(200);
 
@@ -280,18 +308,12 @@ app.get('/drone/changeAltitude', function (req, res) {
 
 app.get('/drone/rtl', function (req, res) {
   logger.info('Setting RTL mode...');
-  quad.rtl();
+  quad.rtl(); //missing ack
   res.send(200);
 });
 
 app.get('/platforms', function (req, res) {
   res.json(platforms);
-});
-
-app.post('/routines/freeFlight/planning', function (req, res) {
-  routine.maxSpeed = req.body.maxSpeed * 100; // translate km/h to cm/s
-  routine.maxAltitude = req.body.maxAltitude;
-  res.send(200);
 });
 
 // Set up exit handlers so we can clean up as best as possible upon server process shutdown
@@ -383,7 +405,7 @@ function bindClientEventBridge() {
   mavlinkParser.on('VFR_HUD', function (message) {
     platform = _.extend(platform, {
       airspeed: message.airspeed,
-      groundspeed: message.groundspeed,
+      groundspeed: message.groundspeed * 2.23694, // m/s to miles/hour
       heading: message.heading
     });
     io.emit('platform', platform);
