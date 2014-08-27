@@ -11,6 +11,7 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
   nconf = require('nconf'),
   requirejs = require('requirejs'),
   winston = require('winston'),
+  gcsLogConfig = require('./assets/js/libs/customLogLevels.js'),
   Q = require('q'),
   server = http.createServer(app),
   io = require('socket.io')(server),
@@ -36,9 +37,10 @@ var logger = module.exports = new(winston.Logger)({
       colorize: true,
       level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
     })
-  ]
+  ],
+  levels: gcsLogConfig.levels,
+  colors: gcsLogConfig.colors
 });
-logger.setLevels(winston.config.npm.levels);
 
 // Fetch configuration information.
 nconf.argv()
@@ -327,7 +329,8 @@ function exitHandler(options, err) {
   }
 
   if (err) {
-    console.log(err.stack);
+    logger.error(util.inspect(err));
+    console.log(util.inspect(err));
   }
 
   if (options.exit) process.exit();
@@ -354,10 +357,12 @@ process.on('SIGINT', exitHandler.bind(null, {
   exit: true
 }));
 
-//catches uncaught exceptions
-process.on('uncaughtException', exitHandler.bind(null, {
-  exit: true
-}));
+// Shunt uncaught exceptions to the log.
+process.on('uncaughtException', function(error) {
+  exitHandler({
+    exit: false
+  }, error);
+});
 
 // TODO: move this function elsewhere
 function bindClientEventBridge() {
