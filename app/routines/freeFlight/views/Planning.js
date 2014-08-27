@@ -13,7 +13,8 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         events: {
             'click .continue' : 'continue',
             'change input' : 'updateParameters',
-            'change input[name="maxAltitude"]' : 'metersToFeet'
+            'change input[name="maxAltitude"]' : 'metersToFeet',
+            'change input[name="takeoffAltitude"]' : 'metersToFeet'
         },
 
         updateParameters: function(e) {
@@ -28,16 +29,25 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                         feet: parseInt(this.$('#maxAltitude')[0].value * 3.28084, 10)
                     }
                 )
-            )
+            );
+            this.$el.find('.takeoffAltitudeToFeet').html(
+                _.template('<span><%= feet %></span>ft',
+                    {
+                        feet: parseInt(this.$('#takeoffAltitude')[0].value * 3.28084, 10)
+                    }
+                )
+            );
         },
 
         continue: function() {
-            this.model.save();
             this.options.deferred.resolve();
         },
 
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
+            $('#equipmentChecklist').click(function() {
+                window.open('/checklist', 'Equipment Checklist');
+            });
             this.metersToFeet();
             return this;
         }

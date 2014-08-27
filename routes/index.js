@@ -8,3 +8,9 @@ exports.index = function(req, res) {
         platforms: req.app.get('platforms')
     });
 };
+
+exports.checklist = function(req, res) {
+    res.render('checklist', {
+        title: 'Drone Flight Equipment Checklist'
+    });
+};

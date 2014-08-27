@@ -1,58 +1,31 @@
-// Darkly 3.1.1
+// Cosmo 3.2.0
 // Bootswatch
 // -----------------------------------------------------
 
 // Navbar =====================================================================
 
 .navbar {
-  border-width: 0;
-
-  &-default {
-
-    .badge {
-      background-color: #fff;
-      color: @navbar-default-bg;
-    }
-  }
 
   &-inverse {
 
     .badge {
       background-color: #fff;
-      color: @navbar-inverse-bg;
-    }
-  }
-
-  &-brand {
-    padding: 18.5px 15px 20.5px;
-  }
-
-  &-form {
-    .form-control {
-      background-color: white;
-
-      &:focus {
-        border-color: white;
-      }
+      color: @brand-primary;
     }
   }
 }
 
 // Buttons ====================================================================
 
-.btn:active {
-  .box-shadow(none);
-}
-
-.btn-group.open .dropdown-toggle {
-  .box-shadow(none);
-}
-
 // Typography =================================================================
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
 
 .text-primary,
 .text-primary:hover {
-  color: lighten(@brand-primary, 10%);
+  color: @brand-primary;
 }
 
 .text-success,
@@ -80,7 +53,7 @@
 table,
 .table {
 
-  a {
+  a:not(.btn) {
     text-decoration: underline;
   }
 
@@ -94,162 +67,126 @@ table,
       color: #fff;
     }
   }
-
-  > thead > tr > th,
-  > tbody > tr > th,
-  > tfoot > tr > th,
-  > thead > tr > td,
-  > tbody > tr > td,
-  > tfoot > tr > td {
-    border: none;
-  }
-
-  &-bordered > thead > tr > th,
-  &-bordered > tbody > tr > th,
-  &-bordered > tfoot > tr > th,
-  &-bordered > thead > tr > td,
-  &-bordered > tbody > tr > td,
-  &-bordered > tfoot > tr > td {
-    border: 1px solid @table-border-color;
-  }
 }
 
 // Forms ======================================================================
 
-input,
-textarea {
-  color: @input-color;
-}
-
-.form-control,
-input,
-textarea {
-  border: none;
-  .box-shadow(none);
-
-  &:focus {
-    .box-shadow(none);
-  }
-}
 
 .has-warning {
   .help-block,
-  .control-label {
+  .control-label,
+  .form-control-feedback {
     color: @brand-warning;
   }
 
   .form-control,
-  .form-control:focus {
-    .box-shadow(none);
+  .form-control:focus,
+  .input-group-addon {
+    border: 1px solid @brand-warning;
   }
 }
 
 .has-error {
   .help-block,
-  .control-label {
+  .control-label,
+  .form-control-feedback {
     color: @brand-danger;
   }
 
   .form-control,
-  .form-control:focus {
-    .box-shadow(none);
+  .form-control:focus,
+  .input-group-addon {
+    border: 1px solid @brand-danger;
   }
 }
 
 .has-success {
   .help-block,
-  .control-label {
+  .control-label,
+  .form-control-feedback {
     color: @brand-success;
   }
 
   .form-control,
-  .form-control:focus {
-    .box-shadow(none);
+  .form-control:focus,
+  .input-group-addon {
+    border: 1px solid @brand-success;
   }
-}
-
-.input-group-addon {
-  color: @text-color;
 }
 
 // Navs =======================================================================
 
-.nav {
-  .open > a,
-  .open > a:hover,
-  .open > a:focus {
-    border-color: @nav-tabs-border-color;
+.nav-pills {
+
+  & > li > a {
+    border-radius: 0;
   }
 }
 
-.nav-tabs > li > a,
-.nav-pills > li > a {
-  color: #fff;
-}
+.dropdown-menu {
 
-.pager {
-  a,
-  a:hover {
-    color: #fff;
-  }
-
-  .disabled {
-    &>a,
-    &>a:hover,
-    &>a:focus,
-    &>span {
-      background-color: @pagination-disabled-bg;
-    }
+  & > li > a:hover,
+  & > li > a:focus {
+    background-image: none;
   }
 }
 
 // Indicators =================================================================
 
-.alert {
+.close {
+  text-decoration: none;
+  text-shadow: none;
+  opacity: 0.4;
 
-  a,
-  .alert-link {
-    color: #fff;
-    text-decoration: underline;
+  &:hover,
+  &:focus {
+    opacity: 1;
   }
+}
+
+.alert {
+  border: none;
+
+  .alert-link {
+    text-decoration: underline;
+    color: #fff;
+  }
+}
+
+.label {
+  border-radius: 0;
 }
 
 // Progress bars ==============================================================
 
 .progress {
-  height: 10px;
+  height: 8px;
   .box-shadow(none);
   .progress-bar {
-    font-size: 10px;
-    line-height: 10px;
+    font-size: 8px;
+    line-height: 8px;
   }
 }
 
 // Containers =================================================================
 
-.well {
-  .box-shadow(none);
-}
-
-.popover,
-.modal {
-  color: @gray-dark;
-}
-
-.breadcrumb a {
-  color: #fff;
-}
-
-.panel-default > .panel-heading {
-  background-color: @panel-footer-bg;
-}
-
-.modal {
-  color: @text-color;
-
-  &-header,
+.panel {
+  &-heading,
   &-footer {
-    border-color: @gray;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  &-default {
+    .close {
+      color: @text-color;
+    }
+  }
+}
+
+.modal {
+  .close {
+    color: @text-color;
   }
 }
 

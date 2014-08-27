@@ -18,15 +18,17 @@
 }(this, function (exports, Backbone) {
 
     var Mission = Backbone.Model.extend({
-
       url: 'routine',
-
       defaults: {
         platformId: 0,
         payload: '',
         mission: 'freeFlight',
         status: 'not started',
-        active: false
+        failsafeBehavior: 'rtl',
+        active: false,
+        maxSpeed: 7, //  m/s
+        maxAltitude: 120, // meters
+        takeoffAltitude: 20 // meters
       },
 
       // Flag indicating if this client GUI is the operator of this mission.

@@ -41,6 +41,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                     this.$el.find('.connected').hide();
                     this.$el.find('.connecting').hide();
                     this.$el.find('.disconnected').show();
+                    this.$el.find('#connectionWidgetLoader').loader('play');
                     break;
 
                 case 'connecting':
