@@ -90,6 +90,7 @@ app.set('platforms', platforms);
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
 app.get('/checklist', routes.checklist);
+app.get('/unsupported', routes.unsupported);
 
 // Catchall/redirect for routes not otherwise handled, go home.
 app.use(function (req, res) {
