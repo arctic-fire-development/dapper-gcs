@@ -289,7 +289,7 @@ app.get('/drone/flyToPoint', function (req, res) {
 
 app.get('/drone/loiter', function (req, res) {
   logger.verbose('Setting LOITER mode...');
-  Q.fcall(quad.setLoiterMode)
+  Q.fcall(quad.guidedLoiter)
     .then(function () {
       res.send(200);
     })
