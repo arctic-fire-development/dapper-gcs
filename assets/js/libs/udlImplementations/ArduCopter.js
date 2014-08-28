@@ -4,6 +4,7 @@
 var udlInterface = require('../udlInterface.js'),
     mavlink = require('mavlink_ardupilotmega_v1.0'),
     Q = require('q'),
+    Qretry = require('qretry'),
     jspack = require('jspack').jspack,
     dgram = require('dgram'),
     _ = require('underscore');
@@ -230,13 +231,12 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmLoiterMode(msg) {
-        
+
         try {
-            
             if (msg.custom_mode == APM.custom_modes.LOITER) {
                 log.info('ArduCopter UDL: mode confirmed set to Loiter mode!');
-                protocol.removeListener('HEARTBEAT', confirmLoiterMode);
                 deferred.resolve();
+                protocol.removeListener('HEARTBEAT', confirmLoiterMode);
             } else {
                 log.debug('waiting for loiter, sent mode change request, currently custom_mode: %d', msg.custom_mode);
             }
@@ -256,17 +256,22 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
     log.info('ArduCopter UDL: setting Guided mode...');
 
     var deferred = Q.defer();
+    var guidedModeSetter = function() {
+        log.verbose('Attempting to set Guided mode in guidedModeSetter (qretry version)');
+        // Create message to request mode be set to Loiter
+        var set_mode = new mavlink.messages.set_mode(
+            1, // target system,
+            mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
+            APM.custom_modes.GUIDED
+        );
+        protocol.send(set_mode);
+        return deferred.promise;
 
-    // Create message to request mode be set to Loiter
-    var set_mode = new mavlink.messages.set_mode(
-        1, // target system,
-        mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        APM.custom_modes.GUIDED
-    );
+    }
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmGuidedMode(msg) {
-        
+
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_GUIDED) {
                 log.info('ArduCopter UDL: mode confirmed set to Guided mode!');
@@ -280,9 +285,13 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
         }
     });
 
-    protocol.send(set_mode);
-    return deferred.promise;
-
+    return new Qretry(guidedModeSetter,
+        {
+            maxRetry: 10,
+            interval: 100,
+            intervalMultiplicator: 1.1
+        }
+    );
 };
 
 ArduCopterUdl.prototype.rtl = function() {
@@ -300,7 +309,7 @@ ArduCopterUdl.prototype.rtl = function() {
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmRtlMode(msg) {
-        
+
         try {
             if (msg.custom_mode == APM.custom_modes.RTL) {
                 log.info('ArduCopter UDL: mode confirmed set to RTL mode!');
@@ -321,7 +330,7 @@ ArduCopterUdl.prototype.rtl = function() {
 
 ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
     log.info('ArduCopter UDL: changing altitude to %d...', alt);
-    
+
     var guided_mission_item = new mavlink.messages.mission_item(
         1, 1, // system ids
         0, // ?
@@ -337,17 +346,17 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
             .then(function(){
-                protocol.send(guided_mission_item);       
+                protocol.send(guided_mission_item);
             });
     } else {
-        protocol.send(guided_mission_item);    
+        protocol.send(guided_mission_item);
     }
 
 };
 
 ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
     log.info('ArduCopter UDL: flying to point...');
-    
+    var deferred = Q.defer();
     var guided_mission_item = new mavlink.messages.mission_item(
         1, 1, // system ids
         0, // seq#
@@ -365,15 +374,20 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         try {
             Q.fcall(this.setGuidedMode)
                 .then(function() {
+                    deferred.resolve();
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
-                    protocol.send(guided_mission_item);       
+                    protocol.send(guided_mission_item);
                 });
              } catch(e) {
+                console.log(e);
+                console.log(util.inspect(e.stack));
                 log.error(e);
             }
         } else {
-            protocol.send(guided_mission_item);    
+            deferred.resolve();
+            protocol.send(guided_mission_item);
         }
+        return deferred.promise;
 };
 
 ArduCopterUdl.prototype.getLatLon = function() {
