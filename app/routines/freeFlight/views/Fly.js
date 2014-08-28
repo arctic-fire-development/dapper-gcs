@@ -199,13 +199,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         flyToPoint: function(e) {
-            console.log('asked to fly to point');
-            console.log(e);
-            
+
             // Reject right-click for navigation, only when not touch event.
             if('undefined' !== typeof e.originalEvent.button && 0 !== e.originalEvent.button) {
-                console.log(e.originalEvent)
-                console.log('rejecting because not left mouse click')
                 e.originalEvent.preventDefault();
                 return false;
             }
@@ -264,14 +260,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         bindFlyToPoint: function() {
             if( false === this.mapEventsAreBound && true === this.model.isOperator ) {
-
-                // We want to avoid the use of right-click on the map for navigation.
-                // This does that.
-                //this.mapWidget.map.on('contextmenu', function() { alert('rightclick'); });
-
                 this.mapWidget.map.on('mouseup touchend', this.hoverAtPoint, this);
                 this.mapWidget.map.on('mousedown touchstart', this.flyToPoint, this);
-
                 this.mapEventsAreBound = true;
             }
         },
