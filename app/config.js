@@ -23,7 +23,8 @@ require.config({
         routefilter: "assets/bower/routefilter/dist/backbone.routefilter.min",
         bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
         fuelux: "assets/bower/fuelux/dist/js/fuelux",
-        moment: "assets/bower/moment/moment"
+        moment: "assets/bower/moment/moment",
+        modernizr: "assets/bower/modernizr/modernizr"
     },
     shim: {
         backbone: {

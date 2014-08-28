@@ -206,12 +206,16 @@ define([
             this.navigate('mission/planning', { trigger: true });
         },
 
-        // TODO GH#291 this is making extra copies of engineering views
+        // Simple flag to prevent re-rendering Engineering view.  Was GH#291.
+        hasRenderedEngineering: false,
         engineering: function() {
             this.showOnly('engineering');
-            this.engineeringView = new EngineeringView({
-                model: new Platform()
-            }).render();
+            if( false === this.hasRenderedEngineering ) {
+                this.engineeringView = new EngineeringView({
+                    model: new Platform()
+                }).render();
+                this.hasRenderedEngineering = true;
+            }
         },
 
         // TODO GH#96
