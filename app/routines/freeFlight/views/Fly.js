@@ -1,3 +1,5 @@
+'use strict';
+/* global console */
 define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'underscore',
 
     // Models
@@ -44,6 +46,12 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
+
+            this.myIcon = L.icon({
+                    iconUrl: '/images/target.png',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
+            });
         },
 
         showControls: function() {
@@ -74,7 +82,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         // Show the button with name className, hide others.
         showButton: function(className) {
             _.each(this.$el.find('button'), function(e) {
-                $e = $(e);
+                var $e = $(e);
                 if($e.hasClass(className)) {
                     $e.show();
                 } else {
@@ -116,14 +124,14 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // Swap the button text immediately for responsiveness
             this.$el.find('button.launch').html('Launching&hellip;');
             // Send a growl notification to all other connected clients
-            app.socket.emit("launching");
+            app.socket.emit('launching');
 
             // Swap the button text immediately for responsiveness, but disable it
             this.$el.find('button.launch').html('Launching&hellip;').attr('disabled', 'disabled');
 
             Q($.get('/drone/launch')).then(_.bind(function() {
 
-                // Swap buttons out, restore "Fly" text on launch button
+                // Swap buttons out, restore 'Fly' text on launch button
                 this.$el.find('button.launch').html('Fly').hide();
                 this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
 
@@ -191,41 +199,76 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         flyToPoint: function(e) {
-            this.targetMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.mapWidget.map);
+
+            // Reject right-click for navigation, only when not touch event.
+            if('undefined' !== typeof e.originalEvent.button && 0 !== e.originalEvent.button) {
+                e.originalEvent.preventDefault();
+                return false;
+            }
+
             $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+            var newPath = {
+                currentLat: this.model.platform.get('lat'),
+                currentLon: this.model.platform.get('lon'),
+                targetLat: e.latlng.lat,
+                targetLng: e.latlng.lng
+            };
+            app.socket.emit('drone:flyToPoint:start', newPath);
+
+            this.drawFlyToPoint(newPath);
+        },
+
+        drawFlyToPoint: function(newPath) {
+            // Don't draw another line if one's currently down.
+            if(this.targetMarker && this.targetLine) {
+                return;
+            }
+
+            this.targetMarker = L.marker([newPath.targetLat, newPath.targetLng], {
+                icon: this.myIcon
+            }).addTo(this.mapWidget.map);
             this.targetLine = L.polyline(
                 [
-                    L.latLng(e.latlng.lat, e.latlng.lng),
+                    L.latLng(newPath.targetLat, newPath.targetLng),
                     L.latLng(
-                        this.model.platform.get('lat'),
-                        this.model.platform.get('lon')
+                        newPath.currentLat,
+                        newPath.currentLon
                     )
                 ],
                 {
                     color: 'red'
                 }
             ).addTo(this.mapWidget.map);
+
         },
 
-        hoverAtPoint: function(e) {
+        hoverAtPoint: function() {
             $.get('/drone/loiter');
-            this.mapWidget.map.removeLayer(this.targetMarker);
-            this.mapWidget.map.removeLayer(this.targetLine);
+            app.socket.emit('drone:flyToPoint:stop');
+            this.drawHoverAtPoint();
+        },
+
+        drawHoverAtPoint: function() {
+            // Only remove if they're present.
+            if(this.targetMarker && this.targetLine) {
+                this.mapWidget.map.removeLayer(this.targetMarker);
+                this.mapWidget.map.removeLayer(this.targetLine);
+            }
+            this.targetMarker = undefined;
+            this.targetLine = undefined;
         },
 
         bindFlyToPoint: function() {
             if( false === this.mapEventsAreBound && true === this.model.isOperator ) {
-                this.mapWidget.map.on('mousedown', this.flyToPoint, this);
-                this.mapWidget.map.on('contextmenu', this.flyToPoint, this);
-                this.mapWidget.map.on('mouseup', this.hoverAtPoint, this);
+                this.mapWidget.map.on('mouseup touchend', this.hoverAtPoint, this);
+                this.mapWidget.map.on('mousedown touchstart', this.flyToPoint, this);
                 this.mapEventsAreBound = true;
             }
         },
 
         unbindFlyToPoint: function() {
-            this.mapWidget.map.off('mousedown', this.flyToPoint);
-            this.mapWidget.map.off('contextmenu', this.flyToPoint);
-            this.mapWidget.map.off('mouseup', this.hoverAtPoint);
+            this.mapWidget.map.off('mousedown touchstart', this.flyToPoint);
+            this.mapWidget.map.off('mouseup touchend', this.hoverAtPoint);
             this.mapEventsAreBound = false;
         },
 
@@ -242,7 +285,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // After the user releases the slider, reattach live updating
             // and do an immediate refresh.
             // Send a final alt adjustment to the current altitude.
-            this.altitudeWidget.slider.on('slideStop', _.bind(function(slideEvt) {
+            this.altitudeWidget.slider.on('slideStop', _.bind(function() {
                 $.get('/drone/loiter');
                 this.altitudeWidget.suspendSliderRender = false;
                 this.altitudeWidget.render();
@@ -263,8 +306,14 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.renderWidgets();
                 this.showControls(); // show or hide button depending on user role
                 this.bindGrowlNotifications();
+                this.bindMapGuiSocketUpdates();
             }, this));
 
+        },
+
+        bindMapGuiSocketUpdates: function() {
+            app.socket.on('drone:flyToPoint:start', _.bind(this.drawFlyToPoint, this));
+            app.socket.on('drone:flyToPoint:stop', _.bind(this.drawHoverAtPoint, this));
         },
 
         renderWidgets: function() {
@@ -339,12 +388,12 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.model.platform.on('change:custom_mode', function() {
                 var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
                 switch(mode) {
-                    case 0: message = "System is in stabilize mode."; break;
-                    case 3: message = "Performing takeoff&hellip;"; break;
-                    case 4: message = "Flying to location&hellip;"; break;
-                    case 5: message = "Hovering until further notice."; break;
-                    case 6: message = "Flying home and landing&hellip;", delay=10000, type='warning'; break;
-                    default: message = "Switching to custom_mode " + mode, delay=10000, type='danger';
+                    case 0: message = 'System is in stabilize mode.'; break;
+                    case 3: message = 'Performing takeoff&hellip;'; break;
+                    case 4: message = 'Flying to location&hellip;'; break;
+                    case 5: message = 'Hovering until further notice.'; break;
+                    case 6: message = 'Flying home and landing&hellip;', delay=10000, type='warning'; break;
+                    default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
                 }
 
                 app.growl(message, type, delay);

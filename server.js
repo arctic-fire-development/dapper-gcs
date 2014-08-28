@@ -276,20 +276,27 @@ app.get('/drone/flyToPoint', function (req, res) {
   var lat = parseFloat(req.query.lat);
   var lng = parseFloat(req.query.lng);
   logger.info('Flying to %d %d', lat, lng);
-  quad.flyToPoint(lat, lng, platform);
-  res.send(200);
+  Q.fcall(_.bind(quad.flyToPoint, quad), lat, lng, platform)
+    .then(function() {
+      res.send(200);
+    })
+    .catch(function(error) {
+      logger.error(error);
+    })
+    .done();
 
 });
 
 app.get('/drone/loiter', function (req, res) {
   logger.verbose('Setting LOITER mode...');
-  Q.fcall(quad.setLoiterMode)
+  Q.fcall(quad.guidedLoiter)
     .then(function () {
-      // TODO I don't think this promise is ever getting resolved, because I suspect this ack doesn't get sent.
-      // GH#221.  Hack below is just to send the 200 immediately.
       res.send(200);
-    });
-  res.send(200);
+    })
+    .catch(function(error) {
+      logger.error(error);
+    })
+    .done();
 });
 
 app.get('/drone/changeAltitude', function (req, res) {
