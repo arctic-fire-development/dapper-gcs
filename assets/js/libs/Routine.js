@@ -59,6 +59,14 @@ Routine.prototype = {
         log.info('Launching vehicle');
         socket.broadcast.emit('launching');
     });
+
+    socket.on('drone:flyToPoint:start', function(p) {
+      socket.broadcast.emit('drone:flyToPoint:start', p);
+    });
+
+    socket.on('drone:flyToPoint:stop', function() {
+      socket.broadcast.emit('drone:flyToPoint:stop');
+    });
   }
 };
 

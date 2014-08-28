@@ -4,6 +4,7 @@
 var udlInterface = require('../udlInterface.js'),
     mavlink = require('mavlink_ardupilotmega_v1.0'),
     Q = require('q'),
+    Qretry = require('qretry'),
     jspack = require('jspack').jspack,
     dgram = require('dgram'),
     _ = require('underscore');
@@ -95,6 +96,7 @@ ArduCopterUdl.prototype.arm = function() {
     log.info('ArduCopter UDL: arming ArduCopter...');
 
     var command_long = new mavlink.messages.command_long(
+        // GH#317 remove hardcoded refs to sysIDs
         1, // target system
         mavlink.MAV_COMP_ID_SYSTEM_CONTROL, // target_component
         mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
@@ -148,6 +150,7 @@ ArduCopterUdl.prototype.disarm = function() {
     log.info('ArduCopter UDL: disarming ArduCopter...');
 
     var command_long = new mavlink.messages.command_long(
+        // GH#317 remove hardcoded refs to sysIDs
         1, // target system
         mavlink.MAV_COMP_ID_SYSTEM_CONTROL, // target_component
         mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
@@ -207,6 +210,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
     }
 
     var set_mode = new mavlink.messages.set_mode(
+        // GH#317 remove hardcoded refs to sysIDs
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         APM.custom_modes.AUTO // magic number for guided mode!  APM-specific.
@@ -223,6 +227,7 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
     var deferred = Q.defer();
 
     var set_mode = new mavlink.messages.set_mode(
+        // GH#317 remove hardcoded refs to sysIDs
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         5 // magic number for copter Loiter mode!  APM-specific.
@@ -230,13 +235,12 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmLoiterMode(msg) {
-        
+
         try {
-            
             if (msg.custom_mode == APM.custom_modes.LOITER) {
                 log.info('ArduCopter UDL: mode confirmed set to Loiter mode!');
-                protocol.removeListener('HEARTBEAT', confirmLoiterMode);
                 deferred.resolve();
+                protocol.removeListener('HEARTBEAT', confirmLoiterMode);
             } else {
                 log.debug('waiting for loiter, sent mode change request, currently custom_mode: %d', msg.custom_mode);
             }
@@ -256,17 +260,22 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
     log.info('ArduCopter UDL: setting Guided mode...');
 
     var deferred = Q.defer();
+    var guidedModeSetter = function() {
+        log.verbose('Attempting to set Guided mode in guidedModeSetter (qretry version)');
+        // Create message to request mode be set to Loiter
+        var set_mode = new mavlink.messages.set_mode(
+            1, // target system,
+            mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
+            APM.custom_modes.GUIDED
+        );
+        protocol.send(set_mode);
+        return deferred.promise;
 
-    // Create message to request mode be set to Loiter
-    var set_mode = new mavlink.messages.set_mode(
-        1, // target system,
-        mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        APM.custom_modes.GUIDED
-    );
+    }
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmGuidedMode(msg) {
-        
+
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_GUIDED) {
                 log.info('ArduCopter UDL: mode confirmed set to Guided mode!');
@@ -280,9 +289,13 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
         }
     });
 
-    protocol.send(set_mode);
-    return deferred.promise;
-
+    return new Qretry(guidedModeSetter,
+        {
+            maxRetry: 10,
+            interval: 100,
+            intervalMultiplicator: 1.1
+        }
+    );
 };
 
 ArduCopterUdl.prototype.rtl = function() {
@@ -293,6 +306,7 @@ ArduCopterUdl.prototype.rtl = function() {
 
     // Create message to request mode be set to Loiter
     var set_mode = new mavlink.messages.set_mode(
+        // GH#317 remove hardcoded refs to sysIDs
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         APM.custom_modes.RTL
@@ -300,7 +314,7 @@ ArduCopterUdl.prototype.rtl = function() {
 
     // Attach listener to confirm that mode has been set to guided.
     protocol.on('HEARTBEAT', function confirmRtlMode(msg) {
-        
+
         try {
             if (msg.custom_mode == APM.custom_modes.RTL) {
                 log.info('ArduCopter UDL: mode confirmed set to RTL mode!');
@@ -321,8 +335,9 @@ ArduCopterUdl.prototype.rtl = function() {
 
 ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
     log.info('ArduCopter UDL: changing altitude to %d...', alt);
-    
+
     var guided_mission_item = new mavlink.messages.mission_item(
+        // GH#317 remove hardcoded refs to sysIDs
         1, 1, // system ids
         0, // ?
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
@@ -337,18 +352,47 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
             .then(function(){
-                protocol.send(guided_mission_item);       
+                protocol.send(guided_mission_item);
             });
     } else {
-        protocol.send(guided_mission_item);    
+        protocol.send(guided_mission_item);
     }
+
+};
+
+ArduCopterUdl.prototype.guidedLoiter = function() {
+    log.info('ArduCopter UDL: sending guided-loiter command...');
+    var deferred = Q.defer();
+
+    var guided_loiter_unlimited = new mavlink.messages.command_long(
+        // GH#317 remove hardcoded refs to sysIDs
+        1, // target system
+        mavlink.MAV_COMP_ID_SYSTEM_CONTROL, // target_component
+        mavlink.MAV_CMD_NAV_LOITER_UNLIM,
+        1, // confirmation, yes please!
+        0, 0, 0, 0, 0, 0, 0
+    );
+
+    var confirmedGuidedLoiter = function(command_ack) {
+        if(mavlink.MAV_MISSION_ACCEPTED === command_ack.type) {
+            deferred.resolve();
+        } else {
+            log.warn('Command for Guided-Loiter was rejected [%d]', command_ack.type);
+        }
+        deferred.reject();
+    }
+
+    protocol.once('MISSION_ACK', confirmedGuidedLoiter);
+    protocol.send(guided_loiter_unlimited);
+    return deferred.promise;
 
 };
 
 ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
     log.info('ArduCopter UDL: flying to point...');
-    
+    var deferred = Q.defer();
     var guided_mission_item = new mavlink.messages.mission_item(
+        // GH#317 remove hardcoded refs to sysIDs
         1, 1, // system ids
         0, // seq#
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
@@ -365,15 +409,20 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         try {
             Q.fcall(this.setGuidedMode)
                 .then(function() {
+                    deferred.resolve();
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
-                    protocol.send(guided_mission_item);       
+                    protocol.send(guided_mission_item);
                 });
              } catch(e) {
+                console.log(e);
+                console.log(util.inspect(e.stack));
                 log.error(e);
             }
         } else {
-            protocol.send(guided_mission_item);    
+            deferred.resolve();
+            protocol.send(guided_mission_item);
         }
+        return deferred.promise;
 };
 
 ArduCopterUdl.prototype.getLatLon = function() {
