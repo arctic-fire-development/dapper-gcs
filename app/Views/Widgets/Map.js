@@ -54,6 +54,9 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
 
             this.resizeMap();
 
+            // This will prevent right-clicking on the map popping a context menu, which isn't helpful here.
+            this.map.on('contextmenu', function(e) { e.preventDefault(); });
+
             // When home position is established, mark it on the map.
             this.model.on('armed', function() {
 
