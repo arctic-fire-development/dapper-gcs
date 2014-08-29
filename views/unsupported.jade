@@ -1,0 +1,21 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title= title
+    link(rel='stylesheet', href='/stylesheets/min.css')
+    link(rel='icon', type='image/png', href='/images/afdc.png')
+
+  body
+    .container
+      .row
+        .col-md-12
+          h1
+            span.glyphicon.glyphicon-thumbs-down
+            | &nbsp;Sorry, your browser is not supported.
+          p In order for this application to function, your browser must support:
+          ul
+            li LocalStorage API.  If you have private browsing turned on, try disabling that.
+            li WebSockets.

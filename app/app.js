@@ -4,8 +4,19 @@ define([
     "underscore",
     "backbone",
     "io",
+    "modernizr",
     "bootstrap-growl"
-], function($, _, Backbone, io, BS) {
+], function($, _, Backbone, io, Modernizr, BS) {
+
+    // Modernizr doesn't export via Requirejs, so we just reference it from the window object.
+    var Modernizr = window.Modernizr;
+
+    // Test for some required features to continue running the local app.
+    // Just check for falsy.
+    if(false == Modernizr.localstorage
+        || false == Modernizr.websockets) {
+        window.location = '/unsupported';
+    }
 
     // Create master socket.io instance
     var socket = io();

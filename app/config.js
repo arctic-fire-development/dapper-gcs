@@ -24,7 +24,8 @@ require.config({
         bootstrap: "assets/bower/bootstrap/dist/js/bootstrap",
         fuelux: "assets/bower/fuelux/dist/js/fuelux",
         moment: "assets/bower/moment/moment",
-        "leaflet-touch-extend": "assets/leaflet-touch-extend"
+        "leaflet-touch-extend": "assets/leaflet-touch-extend",
+        modernizr: "assets/bower/modernizr/modernizr"
     },
     shim: {
         backbone: {

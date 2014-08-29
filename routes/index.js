@@ -14,3 +14,9 @@ exports.checklist = function(req, res) {
         title: 'Drone Flight Equipment Checklist'
     });
 };
+
+exports.unsupported = function(req, res) {
+    res.render('unsupported', {
+        title: 'Unsupported browser'
+    });
+};
