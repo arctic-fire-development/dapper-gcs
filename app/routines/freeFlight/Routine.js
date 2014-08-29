@@ -74,7 +74,7 @@ define([
 
                 $('#loadParameters .disconnected').hide();
                 $('#loadParameters .connecting').show();
-                
+
             }, this));
         }
 
@@ -105,64 +105,71 @@ define([
 
         },
 
+        // Simple flag so we don't re-render the Fly view once it's been done, which causes the DOM/events to get
+        // redrawn and then confused when switching between Mission/Engineering views.
+        // Was GH#298.  More complex issues about managing client side application state still exist, though.
+        flightInProgress: false,
         fly: function() {
-            try{
+            if(false == this.flightInProgress) {
 
-                var flightCompletedDeferred = Q.defer();
-                var platform = this.platform; // to juggle context references
+                try {
 
-                // We keep some structures separate from the Backbone-managed attributes because
-                // we don't want to sync or persist them.
-                this.get('mission').platform = this.platform;
-                this.get('mission').connection = this.connection;
-                this.flyView = new FreeFlightFlyView({
-                    model: this.get('mission')
-                });
-                this.flyView.render();
+                    var flightCompletedDeferred = Q.defer();
+                    var platform = this.platform; // to juggle context references
 
-                // Hook up platform-based updates.
-                // The socket connection is established in the BaseRoutine/preflight code.
-                this.socket.on('platform', function(platformJson) {
-                    try {
-                        platform.set(platformJson);
-                    } catch(e) {
-                        //alert('Error in socket callback handler,' + e);
-                        console.log(e);
-                        //throw(e);
-                    }
-                }, this);
+                    // We keep some structures separate from the Backbone-managed attributes because
+                    // we don't want to sync or persist them.
+                    this.get('mission').platform = this.platform;
+                    this.get('mission').connection = this.connection;
+                    this.flyView = new FreeFlightFlyView({
+                        model: this.get('mission')
+                    });
+                    this.flyView.render();
+                    this.flightInProgress = true;
 
-                this.socket.on('operator:promoted', _.bind(function(operator) {
-
-                    // TODO GH#219, improve ID management here.
-                    if(app.socket.io.engine.id === operator) {
-                        this.get('mission').isOperator = true;
+                    // Hook up platform-based updates.
+                    // The socket connection is established in the BaseRoutine/preflight code.
+                    this.socket.on('platform', function(platformJson) {
                         try {
-                            this.flyView.render();
+                            platform.set(platformJson);
                         } catch(e) {
+                            //alert('Error in socket callback handler,' + e);
                             console.log(e);
+                            //throw(e);
                         }
-                    } else {
-                        console.log('Got promotion event for someone else');
-                    }
+                    }, this);
 
-                }, this));
+                    this.socket.on('operator:promoted', _.bind(function(operator) {
 
-                this.socket.on('operator:demoted', _.bind(function() {
-                    if( false !== this.get('mission').isOperator ) {
-                        try {
-                            this.get('mission').isOperator = false;
-                            this.flyView.render();
-                        } catch(e) {
-                            console.log(e)
+                        // TODO GH#219, improve ID management here.
+                        if(app.socket.io.engine.id === operator) {
+                            this.get('mission').isOperator = true;
+                            try {
+                                this.flyView.render();
+                            } catch(e) {
+                                console.log(e);
+                            }
+                        } else {
+                            console.log('Got promotion event for someone else');
                         }
-                    }
-                }, this));
 
-            } catch(e) {
-                console.log(e);
+                    }, this));
+
+                    this.socket.on('operator:demoted', _.bind(function() {
+                        if( false !== this.get('mission').isOperator ) {
+                            try {
+                                this.get('mission').isOperator = false;
+                                this.flyView.render();
+                            } catch(e) {
+                                console.log(e)
+                            }
+                        }
+                    }, this));
+
+                } catch(e) {
+                    console.log(e);
+                }
             }
-
             //return flightCompletedDeferred.promise;
         }
 
