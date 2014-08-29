@@ -32,7 +32,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         render: function() {
 
             if( false == this.hasRendered ) {
-            
+
                 this.$el.html(this.template());
 
                 // Altitude slider is disabled to start with.
@@ -50,7 +50,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 this.hasRendered = true;
 
             }
-            
+
             this.$el.find('#altitudeWidgetValue').text(this.model.get('relative_alt'));
             if( false === this.suspendSliderRender) {
                 this.slider.slider('setValue', this.model.get('relative_alt'));
