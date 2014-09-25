@@ -31,10 +31,12 @@
           a#equipmentChecklist.btn.btn-info Show equipment checklist
         .form-group
           p You can choose an area and download maps for flights where you don't have an internet connection.
-          button#mapDownloader.btn.btn-info Download maps
+          button#mapDownloader.btn.btn-info.btn-info(type="button", data-toggle="modal", data-target="#mapCacheLoaderModal") Download Maps
 
   .row
     .col-md-12
       form(role="form")
         div.form-group
           a.pull-right.continue.btn.btn-primary.btn-lg Continue to preflight
+
+#mapCacheLoader

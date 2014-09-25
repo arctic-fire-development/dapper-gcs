@@ -117,7 +117,7 @@ ArduCopterUdl.prototype.arm = function() {
     });
 
     // More troubleshooting.  Some messages that come back from the APM
-    // as status text, rather than direct failures.  TODO see if this is always true / research.
+    // as status text, rather than direct failures.  TODO GH#356, see if this is always true / research.
     protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
         if( msg.severity == mavlink.MAV_SEVERITY_ERROR ) {
             log.debug('Arming rejected: %s', msg.text);

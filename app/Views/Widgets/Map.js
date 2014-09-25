@@ -28,8 +28,6 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
 
             // create a map in the "map" div, set the view to a given place and zoom
             this.map = L.map('mapWidget', {
-                minZoom: 1,
-                maxZoom: 18,
                 zoomControl: false,
                 scrollWheelZoom: false,
                 tap: true,
@@ -37,11 +35,13 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
             }).setView([64.9, -147.1], 18);
 
             new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
-
-            var bing = new L.BingLayer("ArSmVTJNY8ZXaAjsxCHf989sG9OqZW3Qf0t1SAdM43Rn9pZpFyWU1jfYv_FFQlLO", {
-                zIndex: 0
-            });
-            this.map.addLayer(bing);
+            var wms = new L.tileLayer.wms('http://localhost:8080/service', {
+                layers: 'bing',
+                format: 'image/png',
+                transparent: true,
+                attribution: false
+            })
+            this.map.addLayer(wms);
 
             // Resize to fill the screen; respond to screen size change events.
             $('#mapWidget').height($(window).height());

@@ -1,4 +1,5 @@
-define(['backbone', 'JST'], function(Backbone, templates) {
+define(['backbone', 'JST',
+    'routines/components/Views/MapCacheLoader'], function(Backbone, templates, MapCacheLoaderView) {
 
     var Planning = Backbone.View.extend({
 
@@ -48,6 +49,8 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             $('#equipmentChecklist').click(function() {
                 window.open('/checklist', 'Equipment Checklist');
             });
+            this.mapDownloader = new MapCacheLoaderView();
+            this.mapDownloader.render();
             this.metersToFeet();
             return this;
         }
