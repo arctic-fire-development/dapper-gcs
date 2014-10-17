@@ -35,7 +35,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
             }).setView([64.9, -147.1], 18);
 
             new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
-            var wms = new L.tileLayer.wms('http://localhost:8080/service', {
+            var wms = new L.tileLayer.wms(appConfig.mapProxyUrl, {
                 layers: 'bing',
                 format: 'image/png',
                 transparent: true,

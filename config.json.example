@@ -4,6 +4,10 @@
     "gcsComponent" : 1
   },
 
+  "mapproxy": {
+    "url":"http://gcs.local:8080/service"
+  },
+
   "connection" : {
     "type": "tcp",
     "timeout": {
