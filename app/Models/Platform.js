@@ -61,6 +61,7 @@ From mavlink.RADIO_STATUS:
         // Also note the volume of event handlers being bound here, that's an emergent pattern, should
         // be considered with #122.
         initialize: function() {
+
             _.bindAll(this, 'set');
             this.on('change:fix_type', function() {
                 if(this.hasGpsFix()) {

@@ -173,6 +173,16 @@ Assuming you're able to get the [SITL guide on this page](http://dev.ardupilot.c
  4. Start the ground station: ```grunt && nodemon server.js```
  5. Open a web page to ```localhost:3000```
 
+### Installing offline tile cache system
+
+ 1. ```sudo pip install MapProxy```
+ 2. To launch the cache:
+
+```javascript
+cd /path/to/repo
+mapproxy-util serve-develop --debug etc/bing.yaml
+```
+
 ### Testing
 
 #### Configuration on Jenkins
