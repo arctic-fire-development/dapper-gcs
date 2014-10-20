@@ -259,6 +259,9 @@ app.get('/drone/launch', function (req, res) {
       .then(function () {
         res.send(200);
       })
+      .then(function(){
+        logger.info('vehicle has launched')
+      })
       .done(); // calling 'done' should rethrow any uncaught errors in the promise chain.
 
   }
@@ -271,6 +274,9 @@ app.get('/drone/disarm', function (req, res) {
   quad.disarm()
     .then(function () {
       res.send(200);
+    })
+    .then(function(){
+      logger.info('vehicle is disarmed')
     });
 });
 
