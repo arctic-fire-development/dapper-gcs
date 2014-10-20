@@ -86,6 +86,7 @@ app.configure('development', function () {
 });
 
 app.set('platforms', platforms);
+app.set('config', nconf);
 
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
