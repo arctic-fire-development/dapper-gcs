@@ -1,0 +1,28 @@
+services:
+    demo:
+    tms:
+    wmts:
+    wms:
+        srs: ['EPSG:3857']
+        image_formats: ['image/jpeg', 'image/png']
+
+layers:
+  - name:            bing
+    title:           Bing Maps
+    sources:         [bing_cache]
+
+caches:
+    bing_cache:
+        grids:       [global_mercator]
+        sources:     [bing_source]
+
+sources:
+    bing_source:
+        type:        tile
+        url:         http://ecn.t3.tiles.virtualearth.net/tiles/a%(quadkey)s.jpeg?g=2868
+        grid:        global_mercator
+
+grids:
+    global_mercator:
+        base:        GLOBAL_WEBMERCATOR
+        num_levels:  24
