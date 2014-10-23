@@ -138,7 +138,8 @@ From mavlink.RADIO_STATUS:
         // and the user is likely to interact with it?"
         isInUserControllableFlight: function() {
             if(
-                this.get('custom_mode') === 4 // Guided mode
+                this.get('custom_mode') === 2 // ALT_HOLD mode
+                || this.get('custom_mode') === 4 // Guided mode
                 || this.get('custom_mode') === 5 // Loiter mode
             ) {
                 return true;
