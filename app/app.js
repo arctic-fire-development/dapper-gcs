@@ -5,8 +5,9 @@ define([
     "backbone",
     "io",
     "modernizr",
-    "bootstrap-growl"
-], function($, _, Backbone, io, Modernizr, BS) {
+    "bootstrap-growl",
+    "moment"
+], function($, _, Backbone, io, Modernizr, BS, moment) {
 
     // Modernizr doesn't export via Requirejs, so we just reference it from the window object.
     var Modernizr = window.Modernizr;
@@ -33,10 +34,7 @@ define([
         socket: socket,
 
         growl: function(message, type, delay) {
-            date = new Date();
-            date.toLocaleTimeString("en-GB");
-
-            message = date.toLocaleTimeString() + " " + message;
+            message = moment().format('h:mm:ss' + " " + message;
             type = type || 'info';
             delay = delay || 6000; // ms
 
