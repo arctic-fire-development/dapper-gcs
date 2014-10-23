@@ -13,6 +13,7 @@ var udlInterface = require('../udlInterface.js'),
 // Only the modes that we use are defined here; add others as required.
 var APM = {
     custom_modes: {
+        ALT_HOLD: 2,
         AUTO: 3,
         GUIDED: 4,
         LOITER: 5,
@@ -221,6 +222,37 @@ ArduCopterUdl.prototype.setAutoMode = function() {
 
 };
 
+ArduCopterUdl.prototype.setAltHoldMode = function() {
+    log.info('ArduCopter UDL: setting Alt Hold mode...');
+    var deferred = Q.defer();
+
+    var set_mode = new mavlink.messages.set_mode(
+        // GH#317 remove hardcoded refs to sysIDs
+        1, // target system,
+        mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
+        APM.custom_modes.ALT_HOLD // magic number for copter Alt_Hold mode!  APM-specific.
+    );
+
+    // Attach listener to confirm that mode has been set to guided.
+    protocol.on('HEARTBEAT', function confirmAlt_HoldMode(msg) {
+
+        try {
+            if (msg.custom_mode == APM.custom_modes.ALT_HOLD) {
+                log.info('ArduCopter UDL: mode confirmed set to Alt_Hold mode!');
+                deferred.resolve();
+                protocol.removeListener('HEARTBEAT', confirmAlt_HoldMode);
+            } else {
+                log.debug('waiting for alt_hold, sent mode change request, currently custom_mode: %d', msg.custom_mode);
+            }
+
+        } catch (e) {
+            log.error('Uncaught exception in ArduCopterUdl.setAlt_HoldMode', e);
+        }
+    });
+
+    protocol.send(set_mode);
+    return deferred;
+};
 
 ArduCopterUdl.prototype.setLoiterMode = function() {
     log.info('ArduCopter UDL: setting Loiter mode...');
@@ -230,7 +262,7 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
         // GH#317 remove hardcoded refs to sysIDs
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        5 // magic number for copter Loiter mode!  APM-specific.
+        APM.custom_modes.LOITER // magic number for copter Loiter mode!  APM-specific.
     );
 
     // Attach listener to confirm that mode has been set to guided.
@@ -413,16 +445,15 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
                     protocol.send(guided_mission_item);
                 });
-             } catch(e) {
-                console.log(e);
-                console.log(util.inspect(e.stack));
-                log.error(e);
-            }
-        } else {
-            deferred.resolve();
-            protocol.send(guided_mission_item);
+        } catch(e) {
+            log.error('Uncaught exception in ArduCopterUdl.flyToPoint', e);
+            log.error(util.inspect(e.stack))
         }
-        return deferred.promise;
+    } else {
+        deferred.resolve();
+        protocol.send(guided_mission_item);
+    }
+    return deferred.promise;
 };
 
 ArduCopterUdl.prototype.getLatLon = function() {

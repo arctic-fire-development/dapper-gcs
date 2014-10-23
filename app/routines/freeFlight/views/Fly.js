@@ -389,10 +389,12 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
                 switch(mode) {
                     case 0: message = 'System is in stabilize mode.'; break;
+                    case 2: message = 'System is in Alt_Hold mode.'; break;
                     case 3: message = 'Performing takeoff&hellip;'; break;
                     case 4: message = 'Flying to location&hellip;'; break;
                     case 5: message = 'Hovering until further notice.'; break;
                     case 6: message = 'Flying home and landing&hellip;', delay=10000, type='warning'; break;
+                    case 9: message = 'System is Landing'; break;
                     default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
                 }
 
