@@ -33,7 +33,10 @@ define([
         socket: socket,
 
         growl: function(message, type, delay) {
+            date = new Date();
+            date.toLocaleTimeString("en-GB");
 
+            message = date.toLocaleTimeString() + " " + message;
             type = type || 'info';
             delay = delay || 6000; // ms
 
