@@ -50,6 +50,8 @@ git submodule init
 git submodule update
 npm install
 bower install
+mkdir logs
+mkdir tmp
 grunt
 ```
 
