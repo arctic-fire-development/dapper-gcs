@@ -49,6 +49,7 @@
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-develop": "~0.4.0",
+    "grunt-githooks": "^0.3.1",
     "grunt-jsbeautifier": "^0.2.7",
     "grunt-simple-mocha": "",
     "grunt-svgmin": "",
