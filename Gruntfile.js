@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                     mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "none",
+                    optimize: "uglify2",
                     findNestedDependencies: true, // for dynamic local includes
                     generateSourceMaps: true,
                     preserveLicenseComments: false, // so we can use source maps
