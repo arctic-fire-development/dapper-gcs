@@ -1,0 +1,8 @@
+bash-completion
+vim
+nodejs
+npm
+build-essential
+gpsd
+gpsd-clients
+avahi-daemon

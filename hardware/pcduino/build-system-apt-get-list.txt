@@ -1,0 +1,8 @@
+build-essential
+gcc-arm-linux-gnueabihf
+g++-arm-linux-gnueabihf
+gparted
+libncurses5-dev
+git
+u-boot-tools
+libusb-1.0.0-dev
