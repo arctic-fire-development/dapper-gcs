@@ -24,6 +24,46 @@ module.exports = function(grunt) {
             }
         },
 
+        "jsbeautifier": {
+            files: ["app/**/*.js", "routes/**/*.js", "views/**/*.js"],
+            options: {
+                //config: "path/to/configFile",
+                html: {
+                    braceStyle: "collapse",
+                    indentChar: " ",
+                    indentScripts: "keep",
+                    indentSize: 4,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    unformatted: ["a", "sub", "sup", "b", "i", "u"],
+                    wrapLineLength: 0
+                },
+                css: {
+                    indentChar: " ",
+                    indentSize: 4
+                },
+                js: {
+                    braceStyle: "collapse",
+                    breakChainedMethods: false,
+                    e4x: false,
+                    evalCode: false,
+                    indentChar: " ",
+                    indentLevel: 0,
+                    indentSize: 4,
+                    indentWithTabs: false,
+                    jslintHappy: false,
+                    keepArrayIndentation: false,
+                    keepFunctionIndentation: false,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    spaceBeforeConditional: true,
+                    spaceInParen: false,
+                    unescapeStrings: false,
+                    wrapLineLength: 0
+                }
+            }
+        },
+
         bower_install: {
             install: {
                 options: {
@@ -194,6 +234,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-jsbeautifier');
 
     // Conflict with the bower-requirejs 'bower' task if not renamed.
     grunt.loadNpmTasks('grunt-bower-task');
@@ -209,6 +250,6 @@ module.exports = function(grunt) {
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'svgmin', 'cssmin', 'develop', 'watch']);
+    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'jsbeautifier', 'requirejs', 'copy',  'less', 'svgmin', 'cssmin', 'develop', 'watch']);
 
 };
