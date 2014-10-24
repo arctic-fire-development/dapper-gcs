@@ -1,0 +1,7 @@
+If dtc is available on the target, possible to ”unpack” the
+Device Tree using:
+dtc -I fs /sys/firmware/devicetree/base
+
+
+sudo apt-get install i2c-tools
+sudo i2cset -f -y 0 0x34 0x35 0xA3
