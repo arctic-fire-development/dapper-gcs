@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         },
 
         "jsbeautifier": {
-            files: ["Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
+            files: ["!assets/js/libs/bootstrap-slider/**", "Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
             options: {
                 //config: "path/to/configFile",
                 html: {
