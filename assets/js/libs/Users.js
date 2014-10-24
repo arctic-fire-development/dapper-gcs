@@ -50,7 +50,7 @@ Users.prototype.handleNewConnection = function(socket, next) {
 
     // TODO GH#199 implement authentication here
     // For now we just use this to ensure we're not getting spammed by a single client.
-    if( _.has(connections, socket.id)) {
+    if (_.has(connections, socket.id)) {
         log.debug('Connection %s already exists in pool, rejecting connection attempt', socket.id);
         next(new Error('SocketIO connection already exists for this ID.'));
     } else {
@@ -67,16 +67,16 @@ Users.prototype.handleNewConnection = function(socket, next) {
 Users.prototype.assignOperator = function(socket) {
     var connectionsOrderedByTimestamp = _.sortBy(connections, 'timestamp');
 
-    switch(_.size(connections)) {
+    switch (_.size(connections)) {
         case 0:
             log.warn('No active connections present.');
             break;
 
-        // If only one connection exists, that person is the operator.
-        // Pick the longest-connected client and promote it to operator.
+            // If only one connection exists, that person is the operator.
+            // Pick the longest-connected client and promote it to operator.
         case 1: // fallthrough -- code for 1..n other connections should be identical here.
         default:
-            if( operator !== connectionsOrderedByTimestamp[0].socket.id ) {
+            if (operator !== connectionsOrderedByTimestamp[0].socket.id) {
                 operator = connectionsOrderedByTimestamp[0].socket.id;
                 connections[operator].socket.emit('operator:promoted', operator);
                 log.info('Promoting connection ID %s to operator', operator);
