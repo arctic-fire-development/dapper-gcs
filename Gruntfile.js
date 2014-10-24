@@ -8,7 +8,21 @@ module.exports = function(grunt) {
         // The Jade task must be run prior to this task, because the Backbone views
         // reference templates via require().
         requirejs: {
-            compile: {
+            dev: {
+                options: {
+                    logLevel: 0,
+                    baseUrl: "./app/",
+                    mainConfigFile: "./app/config.js",
+                    out: "public/javascripts/required.js",
+                    name: "main",
+                    optimize: "none",
+                    findNestedDependencies: true, // for dynamic local includes
+                    generateSourceMaps: true,
+                    preserveLicenseComments: false, // so we can use source maps
+                    useStrict: true
+                }
+            },
+            optimize: {
                 options: {
                     logLevel: 0,
                     baseUrl: "./app/",
@@ -17,8 +31,7 @@ module.exports = function(grunt) {
                     name: "main",
                     optimize: "uglify2",
                     findNestedDependencies: true, // for dynamic local includes
-                    generateSourceMaps: true,
-                    preserveLicenseComments: false, // so we can use source maps
+                    generateSourceMaps: false,
                     useStrict: true
                 }
             }
@@ -209,6 +222,7 @@ module.exports = function(grunt) {
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'svgmin', 'cssmin', 'develop', 'watch']);
+    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
+    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy',  'less', 'svgmin', 'cssmin']);
 
 };
