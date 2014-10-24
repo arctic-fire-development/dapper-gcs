@@ -43,7 +43,7 @@ MavParam.prototype.set = function(name, value) {
 
     // Guard if active promise for the given key.
     // Todo: enhance to also match key/value?
-    if( _.has(promises, name )) {
+    if (_.has(promises, name)) {
         log.warn('Duplicate parameter set request sent for [' + name + '], currently active and unresolved.');
         return;
     }
@@ -60,7 +60,7 @@ MavParam.prototype.set = function(name, value) {
 
     // Listen for verified parameters.
     var paramVerifier = _.bind(function(message) {
-        if(name == message.param_id) {
+        if (name == message.param_id) {
             deferreds[name].resolve();
             delete deferreds[name];
             delete promises[name];
@@ -69,8 +69,7 @@ MavParam.prototype.set = function(name, value) {
         }
     }, this);
 
-    promises[name] = new Qretry(paramSetter,
-    {
+    promises[name] = new Qretry(paramSetter, {
         maxRetry: 5,
         interval: 100,
         intervalMultiplicator: 1.1
@@ -86,7 +85,7 @@ MavParam.prototype.get = function(name) {
 
     var parameterVerifier = _.bind(function(msg) {
         log.silly('Verifying parameter match between requested [%s] and received [%s]', name, msg.param_id);
-        if(name === msg.param_id) {
+        if (name === msg.param_id) {
             mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
             log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
             deferred.resolve(msg.param_value);
@@ -109,9 +108,9 @@ MavParam.prototype.get = function(name) {
 // ]
 MavParam.prototype.loadParameters = function(parameters) {
 
-    if(_.isEmpty(parameters)) {
-      log.error('Empty param list provided to loadParameters()');
-      throw new Error('Empty param list provided to loadParameters()');
+    if (_.isEmpty(parameters)) {
+        log.error('Empty param list provided to loadParameters()');
+        throw new Error('Empty param list provided to loadParameters()');
     }
 
     var promises = [];

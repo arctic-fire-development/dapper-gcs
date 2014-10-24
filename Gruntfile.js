@@ -37,6 +37,46 @@ module.exports = function(grunt) {
             }
         },
 
+        "jsbeautifier": {
+            files: ["!assets/js/libs/bootstrap-slider/**", "Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
+            options: {
+                //config: "path/to/configFile",
+                html: {
+                    braceStyle: "collapse",
+                    indentChar: " ",
+                    indentScripts: "keep",
+                    indentSize: 4,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    unformatted: ["a", "sub", "sup", "b", "i", "u"],
+                    wrapLineLength: 0
+                },
+                css: {
+                    indentChar: " ",
+                    indentSize: 4
+                },
+                js: {
+                    braceStyle: "collapse",
+                    breakChainedMethods: false,
+                    e4x: false,
+                    evalCode: false,
+                    indentChar: " ",
+                    indentLevel: 0,
+                    indentSize: 4,
+                    indentWithTabs: false,
+                    jslintHappy: false,
+                    keepArrayIndentation: false,
+                    keepFunctionIndentation: false,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    spaceBeforeConditional: true,
+                    spaceInParen: false,
+                    unescapeStrings: false,
+                    wrapLineLength: 0
+                }
+            }
+        },
+
         bower_install: {
             install: {
                 options: {
@@ -89,7 +129,7 @@ module.exports = function(grunt) {
 
             all: {
                 files: ['./app/**/*.js', './spec/**/*.js'],
-                tasks: ['requirejs', 'develop'],
+                tasks: ['requirejs', 'jsbeautifier', 'develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
@@ -197,7 +237,13 @@ module.exports = function(grunt) {
             server: {
                 file: 'server.js'
             }
+        },
+
+      githooks: {
+        all: {
+          'pre-commit': 'jsbeautifier'
         }
+      }
     });
 
     // Load additional tasks.
@@ -207,6 +253,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-jsbeautifier');
+    grunt.loadNpmTasks('grunt-githooks');
 
     // Conflict with the bower-requirejs 'bower' task if not renamed.
     grunt.loadNpmTasks('grunt-bower-task');

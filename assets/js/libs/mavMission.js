@@ -88,7 +88,7 @@ function missionRequestHandler(missionItemRequest) {
     log.debug('Sending mission item packet', missionItems[missionItemRequest.seq]);
 
     // If the requested mission item isn't present, bail
-    if( _.isUndefined(missionItems[missionItemRequest.seq])) {
+    if (_.isUndefined(missionItems[missionItemRequest.seq])) {
         log.error('APM asked to send undefined mission packet [#%d]', missionItemRequest.seq, missionItems);
         throw new Error('APM asked to send undefined mission packet');
     }
@@ -166,13 +166,13 @@ MavMission.prototype.fetchFromPlatform = function() {
     mavlinkParser.on('MISSION_ITEM', function handleMissionItem(msg) {
         log.debug('Got mission item at index = %d', index);
 
-        if(index !== msg.seq) {
+        if (index !== msg.seq) {
             log.error('Mismatch between mission item requested and received.');
         }
 
         index++;
         missionItems[msg.seq] = msg;
-        if(index < count) {
+        if (index < count) {
             // Send next request
             sendMissionRequest(index);
         } else {
@@ -206,7 +206,7 @@ MavMission.prototype.clearMission = function() {
 
     var deferred = Q.defer();
     mavlinkParser.once('MISSION_ACK', function verifyClearMission(msg) {
-        if(msg.type == mavlink.MAV_MISSION_ACCEPTED) {
+        if (msg.type == mavlink.MAV_MISSION_ACCEPTED) {
             log.verbose('Mission items confirmed cleared by APM.');
             deferred.resolve();
         } else {
@@ -256,7 +256,7 @@ MavMission.prototype.getMissionItems = function() {
 // Given lat/lon, build a two-item mission that takes off and hovers.
 // Returns an array of mission items.
 MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
-    if(!lat || !lon || !alt) {
+    if (!lat || !lon || !alt) {
         log.error('Lat [%d], lon [%d], alt [%d] zero or undefined in buildTakeoffThenHoverMission', lat, lon, alt);
         throw new Error('Lat, Lon, or Altitude were zero/undefined when asked to build takeoff mission');
     }
@@ -311,9 +311,9 @@ MavMission.prototype.writeToQgcFormat = function(filename) {
 
         _.each(missionItems, function(item) {
             var qgcMissionItem = [
-                item.seq,    // sequence number
-                item.current,    // current
-                item.frame,    // coordinate frame
+                item.seq, // sequence number
+                item.current, // current
+                item.frame, // coordinate frame
                 item.command,
                 item.param1,
                 item.param2,
@@ -328,10 +328,10 @@ MavMission.prototype.writeToQgcFormat = function(filename) {
         });
 
         fs.writeFile(filename, qgcMissionItems.join('\n'), function(err) {
-            if(err) log.error('Error writing QGC format waypoints, %s', err);
+            if (err) log.error('Error writing QGC format waypoints, %s', err);
         });
 
-    } catch(e) {
+    } catch (e) {
         log.error(e);
     }
 };
