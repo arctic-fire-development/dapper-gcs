@@ -34,7 +34,7 @@ define([
         socket: socket,
 
         growl: function(message, type, delay) {
-            message = '<div class="growl_ts">' + moment().format('h:mm:ss') + '</div><div class="growl_msg">' + message + '</div>';
+            message = '<div class="growl_ts">' + moment().format('h:mm:ss') + '</div><div>' + message + '</div>';
             type = type || 'info';
             delay = delay || 6000; // ms
 
