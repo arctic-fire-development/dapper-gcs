@@ -27,7 +27,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         },
         updateMission: function() {
             var payload = '';
-            if( payloadSelection = this.$el.find('#payloadSelection')[0] ) {
+            if (payloadSelection = this.$el.find('#payloadSelection')[0]) {
                 payload = payloadSelection.value;
             }
             this.model.set({

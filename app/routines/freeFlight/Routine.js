@@ -54,54 +54,56 @@ define([
             // Upload specific parameters if SITL.
             // We need this ONLY if we're flying SITL.
             // Upload specific parameters if defined in parameters file
-            if( false !== appConfig.platforms[this.get('mission').get('platformId')].parameters ) {
+            if (false !== appConfig.platforms[this.get('mission').get('platformId')].parameters) {
 
-               this.on('change:connected', _.bind(function(model) {
+                this.on('change:connected', _.bind(function(model) {
 
-                var parametersLoaded = _.bind(function() {
-                        this.set( { 'paramsLoaded':true });
+                    var parametersLoaded = _.bind(function() {
+                        this.set({
+                            'paramsLoaded': true
+                        });
                         parametersUploadedDeferred.resolve();
                         $('#loadParameters .connecting').hide();
                         $('#loadParameters .connected').show();
-                }, this);
+                    }, this);
 
-                Q($.get('/drone/params/load')).then(_.bind(function(data) {
-                    parametersLoaded();
-                }, function(xhr) {
-                    // on failure
-                    console.log(xhr);
+                    Q($.get('/drone/params/load')).then(_.bind(function(data) {
+                        parametersLoaded();
+                    }, function(xhr) {
+                        // on failure
+                        console.log(xhr);
+                    }, this));
+
+                    $('#loadParameters .disconnected').hide();
+                    $('#loadParameters .connecting').show();
+
                 }, this));
+            }
 
-                $('#loadParameters .disconnected').hide();
-                $('#loadParameters .connecting').show();
+            // // Upload mission plan
+            // KEEPING IN as refactoring swamp for near-term changes to support correct workflow.
+            // this.on('change:paramsLoaded', _.bind(function() {
 
-            }, this));
-        }
+            //     var missionLoaded = _.bind(function() {
+            //             $('#loadMission .connecting').hide();
+            //             $('#loadMission .connected').show();
+            //             this.set( { 'missionLoaded':true });
+            //             missionUploadedDeferred.resolve();
+            //     }, this);
 
-        // // Upload mission plan
-        // KEEPING IN as refactoring swamp for near-term changes to support correct workflow.
-        // this.on('change:paramsLoaded', _.bind(function() {
+            //         Q($.get('/drone/mission/load')).then(_.bind(function(data) {
+            //             missionLoaded();
+            //         }, function(xhr) {
+            //             // on failure
+            //             console.log(xhr);
+            //         }, this));
 
-        //     var missionLoaded = _.bind(function() {
-        //             $('#loadMission .connecting').hide();
-        //             $('#loadMission .connected').show();
-        //             this.set( { 'missionLoaded':true });
-        //             missionUploadedDeferred.resolve();
-        //     }, this);
+            //         $('#loadMission .disconnected').hide();
+            //         $('#loadMission .connecting').show();
 
-        //         Q($.get('/drone/mission/load')).then(_.bind(function(data) {
-        //             missionLoaded();
-        //         }, function(xhr) {
-        //             // on failure
-        //             console.log(xhr);
-        //         }, this));
-                
-        //         $('#loadMission .disconnected').hide();
-        //         $('#loadMission .connecting').show();
-            
-        // }, this));
+            // }, this));
 
-        return preflightCompletedDeferred.promise;
+            return preflightCompletedDeferred.promise;
 
         },
 
@@ -110,7 +112,7 @@ define([
         // Was GH#298.  More complex issues about managing client side application state still exist, though.
         flightInProgress: false,
         fly: function() {
-            if(false == this.flightInProgress) {
+            if (false == this.flightInProgress) {
 
                 try {
 
@@ -132,7 +134,7 @@ define([
                     this.socket.on('platform', function(platformJson) {
                         try {
                             platform.set(platformJson);
-                        } catch(e) {
+                        } catch (e) {
                             //alert('Error in socket callback handler,' + e);
                             console.log(e);
                             //throw(e);
@@ -142,11 +144,11 @@ define([
                     this.socket.on('operator:promoted', _.bind(function(operator) {
 
                         // TODO GH#219, improve ID management here.
-                        if(app.socket.io.engine.id === operator) {
+                        if (app.socket.io.engine.id === operator) {
                             this.get('mission').isOperator = true;
                             try {
                                 this.flyView.render();
-                            } catch(e) {
+                            } catch (e) {
                                 console.log(e);
                             }
                         } else {
@@ -156,17 +158,17 @@ define([
                     }, this));
 
                     this.socket.on('operator:demoted', _.bind(function() {
-                        if( false !== this.get('mission').isOperator ) {
+                        if (false !== this.get('mission').isOperator) {
                             try {
                                 this.get('mission').isOperator = false;
                                 this.flyView.render();
-                            } catch(e) {
+                            } catch (e) {
                                 console.log(e)
                             }
                         }
                     }, this));
 
-                } catch(e) {
+                } catch (e) {
                     console.log(e);
                 }
             }

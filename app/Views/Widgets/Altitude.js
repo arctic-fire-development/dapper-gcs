@@ -31,14 +31,14 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         },
         render: function() {
 
-            if( false == this.hasRendered ) {
+            if (false == this.hasRendered) {
 
                 this.$el.html(this.template());
 
                 // Altitude slider is disabled to start with.
                 this.slider = this.$el.find('#altitudeSlider');
                 this.slider.slider({
-                    reversed:true,
+                    reversed: true,
                     enabled: false,
                     max: this.maxAltitude,
                     min: 0,
@@ -52,7 +52,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             }
 
             this.$el.find('#altitudeWidgetValue').text(this.model.get('relative_alt'));
-            if( false === this.suspendSliderRender) {
+            if (false === this.suspendSliderRender) {
                 this.slider.slider('setValue', this.model.get('relative_alt'));
             }
 
