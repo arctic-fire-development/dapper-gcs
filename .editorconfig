@@ -7,7 +7,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-# Indentiation
-[*.{css,html,js,json,py,styl}]
+# Indentation
+[*.{css,js,less,json,jade}]
 indent_style = space
 indent_size = 4
