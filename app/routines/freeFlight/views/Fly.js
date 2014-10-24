@@ -388,11 +388,11 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.model.platform.on('change:custom_mode', function() {
                 var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
                 switch(mode) {
-                    case 0: message = 'System is in stabilize mode.'; break;
-                    case 3: message = 'Performing takeoff&hellip;'; break;
+                    case 0: message = 'System is in Stabilize mode.'; break;
+                    case 3: message = 'Listening to GCS commands&hellip;'; break;
                     case 4: message = 'Flying to location&hellip;'; break;
                     case 5: message = 'Hovering until further notice.'; break;
-                    case 6: message = 'Flying home and landing&hellip;', delay=10000, type='warning'; break;
+                    case 6: message = 'Flying home to land&hellip;', delay=10000, type='warning'; break;
                     default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
                 }
 
