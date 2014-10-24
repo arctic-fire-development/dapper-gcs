@@ -5,7 +5,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         el: '#global',
         template: templates['app/Templates/globalGui'],
         events: {
-            'click #gotoFly' : 'gotoFly'
+            'click #gotoFly': 'gotoFly'
         },
         render: function() {
             this.$el.html(this.template);
@@ -28,11 +28,13 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         },
 
         gotoFly: function() {
-            app.router.navigate('mission/fly', { trigger: true });
+            app.router.navigate('mission/fly', {
+                trigger: true
+            });
         },
 
-        bindGrowlNotifications: function(){
-            app.socket.on('launching', function(){
+        bindGrowlNotifications: function() {
+            app.socket.on('launching', function() {
                 app.growl('Launching');
             });
         }

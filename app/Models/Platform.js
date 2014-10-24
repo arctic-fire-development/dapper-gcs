@@ -15,43 +15,43 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
             voltage_battery: 0, // volts
             current_battery: 0 //amps
 
-/*
-We leave all items undefined and require that the client code using this model enforce its own handling.
-This is because the defaults are _unknown_ until they're set from real data from a UAV, and it's misleading
-to assign them defaults.
+            /*
+            We leave all items undefined and require that the client code using this model enforce its own handling.
+            This is because the defaults are _unknown_ until they're set from real data from a UAV, and it's misleading
+            to assign them defaults.
 
-For convenience/reference, items that will be set/used by client code are enumerated below, with references back to
-the MAVLink messages that set them.
+            For convenience/reference, items that will be set/used by client code are enumerated below, with references back to
+            the MAVLink messages that set them.
 
-From mavlink.GLOBAL_POSITION_INT:
-These values are interpolated/smoothed, unlike the gps_raw_int below:
-    lat: float [degrees]
-    lon: float [degrees]
-    alt: absolute altitude wrt WGS84 [meters]
-    relative_alt: relative altitude from where system was armed.  how is this set, barometer? [unit ?]  GH#255
+            From mavlink.GLOBAL_POSITION_INT:
+            These values are interpolated/smoothed, unlike the gps_raw_int below:
+                lat: float [degrees]
+                lon: float [degrees]
+                alt: absolute altitude wrt WGS84 [meters]
+                relative_alt: relative altitude from where system was armed.  how is this set, barometer? [unit ?]  GH#255
 
-From mavlink.GPS_RAW_INT:
-    fix_type: 0, 1 = none, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
-    satellites_visible: integer, # of satellites
-    eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
+            From mavlink.GPS_RAW_INT:
+                fix_type: 0, 1 = none, 2 = 2d fix, 3 = 3d fix.  Doesn't imply a _good_ positional fix.
+                satellites_visible: integer, # of satellites
+                eph: meters, corresponds to "hdop", horizontal dispersion of position -- basically, accuracy.  < 2 needed for GPS flight.
 
-From mavlink.SYS_STATUS:
-    voltage_battery: [volts]
-    current_battery: [Amps] note: autopilot reports this as 10*milliAmps, so must divide by 10,000 to get Amps in ?
-    battery_remaining: % Remaining battery energy in percent
-    drop_rate_comm: % Communication drops in percent
+            From mavlink.SYS_STATUS:
+                voltage_battery: [volts]
+                current_battery: [Amps] note: autopilot reports this as 10*milliAmps, so must divide by 10,000 to get Amps in ?
+                battery_remaining: % Remaining battery energy in percent
+                drop_rate_comm: % Communication drops in percent
 
-From mavlink.VFR_HUD:
-    groundspeed: kph
-    heading: compass direction [degrees]
+            From mavlink.VFR_HUD:
+                groundspeed: kph
+                heading: compass direction [degrees]
 
-From mavlink.RADIO_STATUS:
-    rssi: ? units ? meaning ?
-    remrssi: ? units ? meaning ?
-    rxerrors: ? units ? meaning ?
-    rxfixed: ? units ? meaning ?
+            From mavlink.RADIO_STATUS:
+                rssi: ? units ? meaning ?
+                remrssi: ? units ? meaning ?
+                rxerrors: ? units ? meaning ?
+                rxfixed: ? units ? meaning ?
 
-*/
+            */
 
         },
 
@@ -64,28 +64,28 @@ From mavlink.RADIO_STATUS:
 
             _.bindAll(this, 'set');
             this.on('change:fix_type', function() {
-                if(this.hasGpsFix()) {
+                if (this.hasGpsFix()) {
                     this.trigger('gps:fix_established');
-                } else{
+                } else {
                     this.trigger('gps:fix_lost');
                 }
             }, this);
 
             // Hook up event bindings when system is armed/disarmed
             this.on('change:armed', function() {
-                if(true === this.get('armed')) {
+                if (true === this.get('armed')) {
                     this.trigger('armed');
-                } else if(false === this.get('armed')) {
+                } else if (false === this.get('armed')) {
                     this.trigger('disarmed');
                 } else {
-                    throw('System in unclear state regarding armed/disarmed!')
+                    throw ('System in unclear state regarding armed/disarmed!')
                 }
             }, this);
 
             // Managed armed/disarmed, and set home location too.
             this.on('change:base_mode', function() {
                 // GH#122.  Replace 128 with an abstraction to the appropriate mavlink mapping.
-                if(128 & this.get('base_mode')) {
+                if (128 & this.get('base_mode')) {
                     // This means the system is armed.  When the APM Quad arms, then it also
                     // sets its home location.
                     this.set({
@@ -101,7 +101,7 @@ From mavlink.RADIO_STATUS:
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
                 // Again GH#122.
-                if(5 == this.get('custom_mode')) { // Loiter mode.
+                if (5 == this.get('custom_mode')) { // Loiter mode.
                     this.trigger('mode:hover');
                 }
             }, this);
@@ -109,24 +109,40 @@ From mavlink.RADIO_STATUS:
             this.on('change:system_status', function() {
                 var status;
                 // TODO: See GH#122 and MAV_STATE enum.
-                switch(this.get('system_status')) {
-                    case 1: status = 'booting'; break;
-                    case 2: status = 'calibrating'; break;
-                    case 3: status = 'standby'; break;
-                    case 4: status = 'active'; break;
-                    case 5: status = 'critical'; break;
-                    case 6: status = 'emergency'; break;
-                    case 7: status = 'shutdown'; break;
-                    default: status = 'unknown'; break;
+                switch (this.get('system_status')) {
+                    case 1:
+                        status = 'booting';
+                        break;
+                    case 2:
+                        status = 'calibrating';
+                        break;
+                    case 3:
+                        status = 'standby';
+                        break;
+                    case 4:
+                        status = 'active';
+                        break;
+                    case 5:
+                        status = 'critical';
+                        break;
+                    case 6:
+                        status = 'emergency';
+                        break;
+                    case 7:
+                        status = 'shutdown';
+                        break;
+                    default:
+                        status = 'unknown';
+                        break;
                 }
-                this.trigger('status:'+status);
+                this.trigger('status:' + status);
             }, this);
             this.on('change:battery_remaining', function() {
-                if(this.get('battery_remaining') <= 10) {
+                if (this.get('battery_remaining') <= 10) {
                     this.trigger('battery:low');
-                } else if(this.get('battery_remaining') <= 25) {
+                } else if (this.get('battery_remaining') <= 25) {
                     this.trigger('battery:quarter');
-                } else if(this.get('battery_remaining') <= 50) {
+                } else if (this.get('battery_remaining') <= 50) {
                     this.trigger('battery:half');
                 }
             }, this);
@@ -137,7 +153,7 @@ From mavlink.RADIO_STATUS:
         // The intent of this one is to answer, "Is the craft in a mode where it's flying
         // and the user is likely to interact with it?"
         isInUserControllableFlight: function() {
-            if(
+            if (
                 this.get('custom_mode') === 4 // Guided mode
                 || this.get('custom_mode') === 5 // Loiter mode
             ) {
@@ -147,7 +163,7 @@ From mavlink.RADIO_STATUS:
         },
         // GH#122
         isRtl: function() {
-            if( this.get('custom_mode') === 6) { // RTL mode
+            if (this.get('custom_mode') === 6) { // RTL mode
                 return true;
             }
             return false;
@@ -178,11 +194,11 @@ From mavlink.RADIO_STATUS:
         // that is available, but we don't want to display it the same way to the user (i.e. useless precision).
         cleanup: function(attrs) {
 
-            if('relative_alt' in attrs) {
+            if ('relative_alt' in attrs) {
                 attrs.relative_alt = this.parseAltitude(attrs.relative_alt);
             }
 
-            if('alt' in attrs) {
+            if ('alt' in attrs) {
                 attrs.alt = this.parseAltitude(attrs.alt);
             }
 
@@ -193,9 +209,11 @@ From mavlink.RADIO_STATUS:
             alt = parseFloat(alt);
 
             // If we don't have a real value, keep it undefined instead of getting stuck with NaN.
-            if(_.isNaN(alt)) { return undefined; }
+            if (_.isNaN(alt)) {
+                return undefined;
+            }
 
-            if(alt < 0) {
+            if (alt < 0) {
                 alt = Math.ceil(alt);
             } else {
                 alt = Math.floor(alt);
@@ -211,8 +229,7 @@ From mavlink.RADIO_STATUS:
         hasGpsFix: function() {
             return (
                 this.get('fix_type') >= 2 // 2 + greater means has x/y fix.  See MAVLink spec for this, GPS_RAW_INT
-                && _.isNumber(this.get('lat')) && this.get('lat') != 0
-                && _.isNumber(this.get('lon')) && this.get('lon') != 0
+                && _.isNumber(this.get('lat')) && this.get('lat') != 0 && _.isNumber(this.get('lon')) && this.get('lon') != 0
             );
         },
 
@@ -222,12 +239,12 @@ From mavlink.RADIO_STATUS:
             var deferred = Q.defer();
 
             // Return immediately if we do presently have GPS fix.
-            if( true === this.hasGpsFix()) {
+            if (true === this.hasGpsFix()) {
                 deferred.resolve();
             }
 
             var checkGps = _.bind(function() {
-                if(true === this.hasGpsFix()) {
+                if (true === this.hasGpsFix()) {
                     clearInterval(interval);
                     deferred.resolve(true);
                 }
@@ -244,12 +261,11 @@ From mavlink.RADIO_STATUS:
         isFlying: function() {
             var deferred = Q.defer();
             var checkStatus = _.bind(function() {
-                if( this.get('system_status') == 4 && this.get('relative_alt') > 1 ) {
+                if (this.get('system_status') == 4 && this.get('relative_alt') > 1) {
                     clearInterval(interval);
                     deferred.resolve(true); // yep, flying as best we can tell
                 } else if (
-                    'undefined' !== typeof(this.get('system_status'))
-                    && 'undefined' !== typeof(this.get('relative_alt'))
+                    'undefined' !== typeof(this.get('system_status')) && 'undefined' !== typeof(this.get('relative_alt'))
                 ) {
                     // If these values are both numbers but they don't match our criteria for flight,
                     // then let's assume not flying.
