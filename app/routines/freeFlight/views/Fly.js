@@ -393,7 +393,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                     case 4: message = 'Flying to location&hellip;'; break;
                     case 5: message = 'Hovering until further notice.'; break;
                     case 6: message = 'Flying home to land&hellip;', delay=10000, type='warning'; break;
-                    case 9: message = 'Landing&hellip;', delay=10000, type='warning'; break;
                     default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
                 }
 
