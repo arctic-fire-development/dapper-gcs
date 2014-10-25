@@ -395,27 +395,16 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // Bind notifications to change events on the platform
             this.model.platform.on('change:custom_mode', function() {
-                var message, type = 'info',
-                    delay = 6000,
-                    mode = this.model.platform.get('custom_mode');
-                switch (mode) {
-                    case 0:
-                        message = 'System is in stabilize mode.';
-                        break;
-                    case 3:
-                        message = 'Performing takeoff&hellip;';
-                        break;
-                    case 4:
-                        message = 'Flying to location&hellip;';
-                        break;
-                    case 5:
-                        message = 'Hovering until further notice.';
-                        break;
-                    case 6:
-                        message = 'Flying home and landing&hellip;', delay = 10000, type = 'warning';
-                        break;
-                    default:
-                        message = 'Switching to custom_mode ' + mode, delay = 10000, type = 'danger';
+                var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
+                switch(mode) {
+                    case appConfig.APM.custom_modes.STABILIZE: message = 'Drone is in stabilize mode.'; break;
+                    case appConfig.APM.custom_modes.ALT_HOLD: message = 'Drone is in altitude hold mode.'; break;
+                    case appConfig.APM.custom_modes.AUTO: message = 'Drone is controlled by Routine.ly&hellip;'; break;
+                    case appConfig.APM.custom_modes.GUIDED: message = 'Going to location&hellip;'; break;
+                    case appConfig.APM.custom_modes.LOITER: message = 'Hovering until further notice.'; break;
+                    case appConfig.APM.custom_modes.RTL: message = 'Going to home position and landing&hellip;', delay=10000, type='warning'; break;
+                    case appConfig.APM.custom_modes.LAND: message = 'Drone is landing in place, please watch closely, failsafe has probably engaged', delay=10000, type='warning'; break;
+                    default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
                 }
 
                 app.growl(message, type, delay);

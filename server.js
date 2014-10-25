@@ -84,8 +84,10 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
+// Shunt client configs into place.  Rendered in the route.  Not ideal (#122)
 app.set('platforms', platforms);
 app.set('config', nconf);
+app.set('APM', APM);
 
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);
