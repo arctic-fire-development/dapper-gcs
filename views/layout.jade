@@ -14,6 +14,7 @@ html(lang='en')
 			// Interpolate some server-side configs into the client setup.
 			var appConfig = appConfig || {};
 			appConfig.platforms = !{JSON.stringify(platforms)};
+			appConfig.APM = !{JSON.stringify(APM)};
 			appConfig.mapProxyUrl = "#{mapProxyUrl}";
 
 	body.fuelux

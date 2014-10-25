@@ -101,7 +101,7 @@ From mavlink.RADIO_STATUS:
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
                 // Again GH#122.
-                if(5 == this.get('custom_mode')) { // Loiter mode.
+                if(appConfig.APM.custom_modes.LOITER == this.get('custom_mode')) { // Loiter mode.
                     this.trigger('mode:hover');
                 }
             }, this);
@@ -110,14 +110,9 @@ From mavlink.RADIO_STATUS:
                 var status;
                 // TODO: See GH#122 and MAV_STATE enum.
                 switch(this.get('system_status')) {
-                    case 1: status = 'booting'; break;
-                    case 2: status = 'calibrating'; break;
-                    case 3: status = 'standby'; break;
-                    case 4: status = 'active'; break;
-                    case 5: status = 'critical'; break;
-                    case 6: status = 'emergency'; break;
-                    case 7: status = 'shutdown'; break;
-                    default: status = 'unknown'; break;
+                    case appConfig.APM.system_status.STANDBY: status = 'standby'; break;
+                    case appConfig.APM.system_status.ACTIVE: status = 'active'; break;
+                    default: status = 'Unknown/unregistered system status (' + this.get('system_status') + ')'; break;
                 }
                 this.trigger('status:'+status);
             }, this);
@@ -138,9 +133,9 @@ From mavlink.RADIO_STATUS:
         // and the user is likely to interact with it?"
         isInUserControllableFlight: function() {
             if(
-                this.get('custom_mode') === 2 // ALT_HOLD mode
-                || this.get('custom_mode') === 4 // Guided mode
-                || this.get('custom_mode') === 5 // Loiter mode
+                this.get('custom_mode') === appConfig.APM.custom_modes.ALT_HOLD
+                || this.get('custom_mode') === appConfig.APM.custom_modes.GUIDED
+                || this.get('custom_mode') === appConfig.APM.custom_modes.LOITER
             ) {
                 return true;
             }
@@ -148,7 +143,7 @@ From mavlink.RADIO_STATUS:
         },
         // GH#122
         isRtl: function() {
-            if( this.get('custom_mode') === 6) { // RTL mode
+            if( this.get('custom_mode') === appConfig.APM.custom_modes.RTL) {
                 return true;
             }
             return false;
