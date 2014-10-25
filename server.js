@@ -18,6 +18,7 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
   fs = require('fs'),
   MavMission = require('./assets/js/libs/mavMission.js'),
   quadUdl = require('./assets/js/libs/udlImplementations/ArduCopter.js'),
+  APM = require('./assets/js/libs/udlImplementations/ArduCopter.js').APM,
   platforms = require('./assets/js/libs/platforms.js'),
   _ = require('underscore'),
   Users = require('./assets/js/libs/Users.js'),
@@ -86,8 +87,10 @@ app.configure('development', function () {
   app.use(express.errorHandler());
 });
 
+// Shunt client configs into place.  Rendered in the route.  Not ideal (#122)
 app.set('platforms', platforms);
 app.set('config', nconf);
+app.set('APM', APM);
 
 // Only one route which kicks off the client Bootstrap app.
 app.get('/', routes.index);

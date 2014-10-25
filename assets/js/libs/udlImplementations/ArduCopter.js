@@ -13,6 +13,7 @@ var udlInterface = require('../udlInterface.js'),
 // Only the modes that we use are defined here; add others as required.
 var APM = {
     custom_modes: {
+        STABILIZE: 0,
         ALT_HOLD: 2,
         AUTO: 3,
         GUIDED: 4,
@@ -467,3 +468,4 @@ ArduCopterUdl.prototype.getLatLon = function() {
 };
 
 module.exports = ArduCopterUdl;
+module.exports.APM = APM;
