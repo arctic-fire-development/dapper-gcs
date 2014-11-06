@@ -167,27 +167,11 @@ This will require:
     - `ubuntu@arm:~$ cgps`
     - you should see a table output with something updating roughly every second
 
-16. turn off the damned governor
-    - `sudo vim /etc/init.d/ondemand`
-    - edit ondemand to be performance
-        ```bash
-        *ondemand*)
-            GOVERNOR="performance"  # <---- originally was "ondemand"
-            break
-        ```
-    - `sudo reboot`
-    - verify it took hold
-        - ```sudo cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq```
-            - ```1000000```
-        - ```sudo cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor```
-            - ```performance```
-        - notice CPU frequency is 1000Mhz and governor is set to performance
-
-17. hostapd
+15. hostapd
     - [follow these instructions from adafruit](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software)
         - [custom build hostapd from here](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/compiling-hostapd)
         - will need to `sudo apt-get install unzip`
-18. turn off apache
+16. turn off apache
     - `sudo update-rc.d -f apache2 disable`
     - `sudo reboot`
     - `sudo ps -aux | grep apache | grep -v grep`
