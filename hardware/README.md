@@ -64,19 +64,36 @@ This will require:
     ```
 
 5. configure ethernet
-    - ```sudo nano /etc/network/interfaces```
+    - `sudo nano /etc/network/interfaces`
 
         ```bash
         auto eth0
         allow-hotplug eth0
         iface eth0 inet dhcp
+
+        allow hotplug wlan0
+        auto wlan0
+        iface wlan0 inet static
+          address 192.168.42.1
+          netmask 255.255.255.0
+          gateway 192.168.42.1
+          dns-search local
+          dns-nameservers 192.168.42.1
+        ```
+    - `sudo vim /etc/nsswitch.conf`
+
+        ```bash
+        hosts:          files mdns4_minimal mdns4 dns
         ```
 
 6. set hostname
-    - ```sudo nano /etc/hostname```
+    - `sudo nano /etc/hostname`
         - gcs or gcs0001
-    - ```sudo nano /etc/hosts```
-        - same as above
+    - `sudo nano /etc/hosts`
+        - ```bash
+            127.0.0.1       localhost
+            192.168.42.1    gcs gcs.local
+            ```
 
 7. configure avahi-daemon
     - ```sudo apt-get install avahi-daemon```
@@ -171,6 +188,22 @@ This will require:
     - [follow these instructions from adafruit](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software)
         - [custom build hostapd from here](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/compiling-hostapd)
         - will need to `sudo apt-get install unzip`
+        - configure /etc/dhcp/dhcpd.conf
+            - ```bash
+            subnet 192.168.42.0 netmask 255.255.255.0 {
+              range 192.168.42.10 192.168.42.100;
+              option broadcast-address 192.168.42.255;
+              option subnet-mask 255.255.255.0;
+              option routers 192.168.42.1;
+              default-lease-time 600;
+              max-lease-time 7200;
+              option domain-name "local";
+              option domain-name-servers 192.168.42.1;
+              host gcs {
+                fixed-address 192.168.42.1;
+              }
+            }
+            ```
 16. turn off apache
     - `sudo update-rc.d -f apache2 disable`
     - `sudo reboot`
