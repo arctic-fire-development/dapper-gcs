@@ -14,7 +14,7 @@ This will require:
     - installing ubuntu on the uSD card
 
 1. Download the eMMC Flasher image
-    - [BBB-eMMC-flasher-ubuntu-14.04-console-armhf-2014-08-13-2gb](http://rcn-ee.net/deb/flasher/trusty/BBB-eMMC-flasher-ubuntu-14.04-console-armhf-2014-08-13-2gb.img.xz)
+    - [BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb](http://rcn-ee.net/deb/flasher/trusty/BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb.img.xz)
     - install to a micro SD card
     - insert micro SD card into unpowered BBB
     - hold the USER/BOOT button and apply power to BBB
@@ -23,7 +23,7 @@ This will require:
     - unpower BBB and remove micro SD card
 
 2. Download the regular uSD image
-    - [ubuntu-14.04-console-armhf-2014-08-13](https://rcn-ee.net/deb/rootfs/trusty/ubuntu-14.04-console-armhf-2014-08-13.tar.xz)
+    - [ubuntu-14.04.1-console-armhf-2014-10-29](https://rcn-ee.net/deb/rootfs/trusty/ubuntu-14.04.1-console-armhf-2014-10-29.tar.xz)
     - install to a micro SD card
         - For OS X: [Pi Filler](http://ivanx.com/raspberrypi/)
         - on ubuntu vm:
