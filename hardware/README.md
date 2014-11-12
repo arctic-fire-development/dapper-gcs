@@ -16,6 +16,7 @@ This will require:
 1. Download the eMMC Flasher image
     - [BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb](http://rcn-ee.net/deb/flasher/trusty/BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb.img.xz)
     - install to a micro SD card
+        - `sudo xz -cd BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb.img.xz > /dev/sdb`
     - insert micro SD card into unpowered BBB
     - hold the USER/BOOT button and apply power to BBB
         - LEDs will begin blinking
@@ -32,7 +33,7 @@ This will require:
             - `sudo fdisk -l`
                 - look for where the uSD card is, eg /dev/sdb
             - `sudo ./setup_sdcard.sh --mmc /dev/sdb --dtb beaglebone`
-            - grab a sandwhich
+            - grab a sandwich
     - insert micro SD card into unpowered BBB
     - apply power to BBB (do NOT hold the USER/BOOT button)
         - LEDs will begin blinking
