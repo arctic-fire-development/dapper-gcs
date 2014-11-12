@@ -237,13 +237,7 @@ module.exports = function(grunt) {
             server: {
                 file: 'server.js'
             }
-        },
-
-      githooks: {
-        all: {
-          'pre-commit': 'jsbeautifier'
         }
-      }
     });
 
     // Load additional tasks.
@@ -272,5 +266,5 @@ module.exports = function(grunt) {
     // because the Backbone views require templates.
     grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
     grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy',  'less', 'svgmin', 'cssmin']);
-
+    grunt.registerTask('tidy', ['jsbeautifier'])
 };
