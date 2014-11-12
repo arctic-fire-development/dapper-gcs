@@ -37,6 +37,10 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             app.socket.on('launching', function() {
                 app.growl('Launching');
             });
+
+            app.socket.on('STATUSTEXT', function(statustext) {
+                app.growl(statustext);
+            });
         }
 
     });
