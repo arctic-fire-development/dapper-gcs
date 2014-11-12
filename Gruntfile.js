@@ -105,14 +105,37 @@ module.exports = function(grunt) {
         // Oddballs and/or image assets belong here.
         copy: {
             main: {
-                files: [
-                    {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
-                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg', '**/*.gif'], dest: 'public/images/'},
-                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
-                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'},
-                    {expand: true, cwd: 'app/assets/bower/fuelux/fonts', src: '*', dest: 'public/fonts/'},
-                    {expand: true, cwd: 'assets/fonts/', src: '**/*.woff', dest: 'public/fonts/'}
-                ]
+                files: [{
+                    expand: true,
+                    cwd: 'app/assets/bower/requirejs/',
+                    src: 'require.js',
+                    dest: 'public/javascripts/'
+                }, {
+                    expand: true,
+                    cwd: 'assets/images/',
+                    src: ['**/*.png', '**/*.jpg', '**/*.gif'],
+                    dest: 'public/images/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/bootstrap/fonts',
+                    src: '*',
+                    dest: 'public/fonts/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/leaflet-dist/images',
+                    src: '*',
+                    dest: 'public/images/leaflet/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/fuelux/fonts',
+                    src: '*',
+                    dest: 'public/fonts/'
+                }, {
+                    expand: true,
+                    cwd: 'assets/fonts/',
+                    src: '**/*.woff',
+                    dest: 'public/fonts/'
+                }]
             }
         },
 
@@ -137,8 +160,8 @@ module.exports = function(grunt) {
             },
 
             server_js: {
-              files: ['config.json', 'assets/js/libs/**/*.js'],
-                tasks: [ 'develop'],
+                files: ['config.json', 'assets/js/libs/**/*.js'],
+                tasks: ['develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
@@ -228,7 +251,7 @@ module.exports = function(grunt) {
                     src: ['**/*.svg'], // Actual pattern(s) to match.
                     dest: 'public/images', // Destination path prefix.
                     ext: '.min.svg' // Dest filepaths will have this extension.
-                    // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
+                        // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
                 }]
             }
         },
@@ -239,11 +262,11 @@ module.exports = function(grunt) {
             }
         },
 
-      githooks: {
-        all: {
-          'pre-commit': 'jsbeautifier'
+        githooks: {
+            all: {
+                'pre-commit': 'jsbeautifier'
+            }
         }
-      }
     });
 
     // Load additional tasks.
@@ -271,6 +294,6 @@ module.exports = function(grunt) {
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
     grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
-    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy',  'less', 'svgmin', 'cssmin']);
+    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy', 'less', 'svgmin', 'cssmin']);
 
 };
