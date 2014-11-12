@@ -101,7 +101,7 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
             this.on('change:custom_mode', function() {
                 this.trigger('custom_mode');
                 // Again GH#122.
-                if(appConfig.APM.custom_modes.LOITER == this.get('custom_mode')) { // Loiter mode.
+                if (appConfig.APM.custom_modes.LOITER == this.get('custom_mode')) { // Loiter mode.
                     this.trigger('mode:hover');
                 }
             }, this);
@@ -109,10 +109,16 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
             this.on('change:system_status', function() {
                 var status;
                 // TODO: See GH#122 and MAV_STATE enum.
-                switch(this.get('system_status')) {
-                    case appConfig.APM.system_status.STANDBY: status = 'standby'; break;
-                    case appConfig.APM.system_status.ACTIVE: status = 'active'; break;
-                    default: status = 'Unknown/unregistered system status (' + this.get('system_status') + ')'; break;
+                switch (this.get('system_status')) {
+                    case appConfig.APM.system_status.STANDBY:
+                        status = 'standby';
+                        break;
+                    case appConfig.APM.system_status.ACTIVE:
+                        status = 'active';
+                        break;
+                    default:
+                        status = 'Unknown/unregistered system status (' + this.get('system_status') + ')';
+                        break;
                 }
                 this.trigger('status:' + status);
             }, this);
@@ -132,10 +138,8 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
         // The intent of this one is to answer, "Is the craft in a mode where it's flying
         // and the user is likely to interact with it?"
         isInUserControllableFlight: function() {
-            if(
-                this.get('custom_mode') === appConfig.APM.custom_modes.ALT_HOLD
-                || this.get('custom_mode') === appConfig.APM.custom_modes.GUIDED
-                || this.get('custom_mode') === appConfig.APM.custom_modes.LOITER
+            if (
+                this.get('custom_mode') === appConfig.APM.custom_modes.ALT_HOLD || this.get('custom_mode') === appConfig.APM.custom_modes.GUIDED || this.get('custom_mode') === appConfig.APM.custom_modes.LOITER
             ) {
                 return true;
             }
@@ -143,7 +147,7 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
         },
         // GH#122
         isRtl: function() {
-            if( this.get('custom_mode') === appConfig.APM.custom_modes.RTL) {
+            if (this.get('custom_mode') === appConfig.APM.custom_modes.RTL) {
                 return true;
             }
             return false;
