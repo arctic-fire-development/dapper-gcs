@@ -15,6 +15,7 @@ define(['backbone', 'JST',
         events: {
             'click .continue': 'continue',
             'change input': 'updateParameters',
+            'change select': 'updateParameters',
             'change input[name="maxAltitude"]': 'metersToFeet',
             'change input[name="takeoffAltitude"]': 'metersToFeet'
         },
