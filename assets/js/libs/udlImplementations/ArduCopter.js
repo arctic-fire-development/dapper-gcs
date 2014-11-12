@@ -413,7 +413,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
                     protocol.send(guided_mission_item);
                 });
-        } catch(e) {
+        } catch (e) {
             log.error('Uncaught exception in ArduCopterUdl.flyToPoint', e);
             log.error(util.inspect(e.stack))
         }
