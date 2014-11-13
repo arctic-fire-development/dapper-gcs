@@ -120,11 +120,11 @@ UavConnection.prototype.startLogging = function() {
     var logTime = moment().format('-MM-DD-YYYY-HH-mm-ss');
     receivedBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:receivedBinary') + logTime);
     receivedBinaryLog.on('error', function(err) {
-        log.error(err);
+        log.error('unable to log received binary mavlink stream: ' + err);
     });
     sentBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:sentBinary') + logTime);
     sentBinaryLog.on('error', function(err) {
-        log.error(err);
+        log.error('unable to log sent binary mavlink stream: ' + err);
     });
 
 };
@@ -150,10 +150,14 @@ UavConnection.prototype.heartbeat = function() {
 
     timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
     this.emit(this.state);
-
+    this.emit('heartbeat');
     this.invokeState(this.state);
     log.heartbeat('time since last heartbeat: %d', timeSinceLastHeartbeat);
 };
+
+UavConnection.prototype.getTimeSinceLastHeartbeat = function() {
+    return timeSinceLastHeartbeat;
+}
 
 // Convenience function to make the meaning of the awkward syntax more clear.
 UavConnection.prototype.invokeState = function() {
@@ -192,7 +196,7 @@ UavConnection.prototype.updateHeartbeat = function() {
             this.changeState('connected');
         }
     } catch (e) {
-        log.error(util.inspect(e));
+        log.error('error when updating heartbeat: ' + util.inspect(e));
         throw (e);
     }
 };
@@ -257,7 +261,7 @@ UavConnection.prototype.disconnected = function() {
                 );
 
                 connection.on('error', function(err) {
-                    log.error(err);
+                    log.error('error establishing serial connection: ' + err);
                 });
 
                 // Once the connection is opened, move to a connecting state
