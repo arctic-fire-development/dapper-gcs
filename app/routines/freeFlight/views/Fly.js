@@ -380,9 +380,14 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 switch (this.model.connection.get('notification')) {
                     case 'lost':
                         message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type = 'warning';
+                        $('#lostDroneConnection').modal({
+                            backdrop: 'static', // forbid dismiss by click
+                            keyboard: false // forbid dismiss by escape
+                        });
                         break;
                     case 'regained':
                         message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type = 'success';
+                        $('#lostDroneConnection').modal('hide');
                         break;
                     default:
                         message = 'Connection notification not understood: ' + this.model.connection.get('notification'), type = 'danger';
