@@ -446,7 +446,7 @@ function bindClientEventBridge() {
 
     mavlinkParser.on('STATUSTEXT', function(message) {
         io.emit('STATUSTEXT', message.text);
-        logger.info('STATUSTEXT: ' + util.inspect(message));
+        logger.info('status text from APM: ' + util.inspect(message.text));
     });
 
     uavConnectionManager.on('disconnected', function() {
