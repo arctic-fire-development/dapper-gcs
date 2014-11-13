@@ -16,6 +16,7 @@ define([
     // Models
     'Models/Mission',
     'Models/Platform',
+    'Models/Connection',
 
     // Dependent views
     'Views/GlobalGui',
@@ -28,6 +29,7 @@ define([
 
     Mission,
     Platform,
+    Connection,
 
     GlobalGuiView,
     HomeView,
@@ -241,6 +243,7 @@ define([
                 this.engineeringView = new EngineeringView({
                     model: new Platform()
                 }).render();
+
                 this.hasRenderedEngineering = true;
             }
         },
