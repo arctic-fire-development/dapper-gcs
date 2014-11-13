@@ -445,6 +445,11 @@ function bindClientEventBridge() {
         io.emit('platform', platform);
     });
 
+    mavlinkParser.on('STATUSTEXT', function(message) {
+        io.emit('STATUSTEXT', message.text);
+        logger.info('STATUSTEXT: ' + util.inspect(message));
+    });
+
     uavConnectionManager.on('disconnected', function() {
         connection = _.extend(connection, {
             status: uavConnectionManager.getState(),
