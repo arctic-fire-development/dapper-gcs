@@ -1,7 +1,7 @@
 'use strict';
 /*globals define */
 
-define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app'], function($, Backbone, _, io, templates, app) {
+define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app', 'Models/Connection'], function($, Backbone, _, io, templates, app, Connection) {
 
     // Hack!  Just to get this in place.
     var mavlink = {};
@@ -29,18 +29,25 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app'], function($, Bac
         template: templates['app/Templates/engineering'],
 
         initialize: function() {
-            _.bindAll(this, 'render', 'updatePlatform');
+            _.bindAll(this, 'render', 'updatePlatform', 'updateConnection');
             this.listenTo(this.model, 'change', this.render);
+            this.connection = new Connection();
+            this.listenTo(this.connection, 'change', this.render);
             this.startConnection();
         },
         startConnection: function() {
             this.socket = app.socket;
             this.socket.emit('startConnection');
             this.socket.on('platform', this.updatePlatform);
+            this.socket.on('linkStatus', this.updateConnection);
         },
 
         updatePlatform: function(platformData) {
             this.model.set(platformData);
+        },
+
+        updateConnection: function(connectionData) {
+            this.connection.set(connectionData);
         },
 
         render: function() {
@@ -71,8 +78,10 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app'], function($, Bac
             // Render scaffolding, filling in the gaps as provided
             this.$el.html(this.template(_.extend(this.model.toJSON(), {
                 voltage_battery: this.model.get('voltage_battery').toFixed(2),
-                current_battery: this.model.get('current_battery').toFixed(2)
+                current_battery: this.model.get('current_battery').toFixed(2),
+                time_since_last_heartbeat: this.connection.get('time_since_last_heartbeat')
             })));
+
 
             $('#modeSummary').html(_.template(
                 '<span class="mode <%= mode %>"><%= mode %></span> <%= manual %> <span class="<%= armed %>"><%= armed %></span>', {

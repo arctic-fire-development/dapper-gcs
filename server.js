@@ -340,7 +340,6 @@ function exitHandler(options, err) {
 
     if (err) {
         logger.error(util.inspect(err));
-        console.log(util.inspect(err));
     }
 
     if (options.exit) process.exit();
@@ -447,7 +446,7 @@ function bindClientEventBridge() {
 
     mavlinkParser.on('STATUSTEXT', function(message) {
         io.emit('STATUSTEXT', message.text);
-        logger.info('STATUSTEXT: ' + util.inspect(message));
+        logger.info('status text from APM: ' + util.inspect(message.text));
     });
 
     uavConnectionManager.on('disconnected', function() {
@@ -479,11 +478,22 @@ function bindClientEventBridge() {
             notification: 'lost'
         });
         io.emit('linkStatus', connection);
+        logger.debug('lost comms, platform.rssi: ' + platform.rssi);
+
     });
 
     uavConnectionManager.on('connection:regained', function() {
         connection = _.extend(connection, {
             notification: 'regained'
+        });
+        io.emit('linkStatus', connection);
+        logger.debug('regained lost comms, platform.rssi: ' + platform.rssi);
+    });
+
+    uavConnectionManager.on('heartbeat', function() {
+        connection = _.extend(connection, {
+            status: uavConnectionManager.getState(),
+            time_since_last_heartbeat: (uavConnectionManager.getTimeSinceLastHeartbeat() / 1000).toFixed(2)
         });
         io.emit('linkStatus', connection);
     });

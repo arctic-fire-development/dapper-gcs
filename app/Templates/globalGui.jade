@@ -17,3 +17,15 @@
 				p
 					img(src="images/lolinternet.gif")
 				p The connection to the GCS server was lost.  Refresh your browser window.
+
+#lostDroneConnection.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to drone
+			.modal-body
+				p
+					img(src="images/drones_on_leash.jpg")
+				p The connection to the drone was lost, and no commands from the GCS will be received.
+				p Attempting automatic reconnection. This window will disappear once re-established.
+				p If this window stays up for more than 5 seconds, please get your RC and be prepared to bring the drone back.
