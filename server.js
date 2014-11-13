@@ -446,9 +446,6 @@ function bindClientEventBridge() {
     });
 
     mavlinkParser.on('STATUSTEXT', function(message) {
-        //platform = _.extend(platform, {
-        //    statustext: message.text
-        //});
         io.emit('STATUSTEXT', message.text);
         logger.info('STATUSTEXT: ' + util.inspect(message));
     });
