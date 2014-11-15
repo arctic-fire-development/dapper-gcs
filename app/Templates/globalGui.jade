@@ -8,6 +8,18 @@
 			.modal-footer
 				button#gotoFly.btn.btn-primary(data-dismiss="modal") Join routine as observer
 
+#routineEndedModalOverride.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;A routine has ended
+			.modal-body
+				p A routine has ended.
+			.modal-footer
+				button#gotoPostRoutine.btn.btn-primary(data-dismiss="modal") Ready for Post Routine?
+				button#gotoFly.btn.btn-primary(data-dismiss="modal") Go Back?
+
+
 #lostServerConnection.modal
 	.modal-dialog
 		.modal-content

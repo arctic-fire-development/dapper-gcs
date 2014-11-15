@@ -20,7 +20,8 @@ define([
     // Dependent views
     'routines/freeFlight/views/Planning',
     'routines/freeFlight/views/Preflight',
-    'routines/freeFlight/views/Fly'
+    'routines/freeFlight/views/Fly',
+    'routines/freeFlight/views/PostRoutine'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
@@ -29,7 +30,8 @@ define([
     BaseRoutine,
     PlanningView,
     PreflightView,
-    FreeFlightFlyView
+    FreeFlightFlyView,
+    PostRoutineView
 ) {
 
     var Routine = BaseRoutine.extend({
@@ -126,6 +128,7 @@ define([
                     this.flyView = new FreeFlightFlyView({
                         model: this.get('mission')
                     });
+                    this.flyView.deferred = flightCompletedDeferred;
                     this.flyView.render();
                     this.flightInProgress = true;
 
@@ -135,9 +138,7 @@ define([
                         try {
                             platform.set(platformJson);
                         } catch (e) {
-                            //alert('Error in socket callback handler,' + e);
                             console.log(e);
-                            //throw(e);
                         }
                     }, this);
 
@@ -172,8 +173,17 @@ define([
                     console.log(e);
                 }
             }
-            //return flightCompletedDeferred.promise;
-        }
+            return flightCompletedDeferred.promise;
+        },
+
+        postRoutine: function() {
+            var deferred = Q.defer();
+            var postRoutineView = new PostRoutineView({
+                model: this.get('mission'),
+                deferred: deferred
+            }).render();
+            return deferred.promise;
+        },
 
     });
 

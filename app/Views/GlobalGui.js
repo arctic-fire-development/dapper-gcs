@@ -20,6 +20,13 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             });
         },
 
+        renderRoutineEndedModalOverride: function() {
+            $('#routineEndedModalOverride').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
         renderLostServerConnection: function() {
             $('#lostServerConnection').modal({
                 backdrop: 'static', // forbid dismiss by click

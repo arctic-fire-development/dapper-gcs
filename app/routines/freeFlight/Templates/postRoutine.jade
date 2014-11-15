@@ -1,0 +1,94 @@
+#freeFlightPostFlight.col-md-12
+  h2 Post&ndash;flight steps
+  .row
+    .col-md-6
+      h3 Outcomes &amp; notes
+      ul.list-group.checklist
+
+        li.list-group-item.manual
+          span.txt Was the flight a success?
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="success" id="success_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="success" id="success_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightSuccessDescription")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
+
+      form(role="form")
+        div.form-group
+          label(for="flightLogNotes") Flight Log Notes
+          input(type="textarea", class="form-control", id="flightLogNotes", name="flightLogNotes", placeholder="Enter flight notes here")
+          p.help-block Note any anomalies that occurred during the routine.
+
+    .col-md-6
+      h3 Checklist
+      ul.list-group.checklist
+
+      li.list-group-item.manual
+        span.txt Vehicle condition inspected?
+        .groupWrapper
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="damage" id="damage_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="damage" id="damage_yes"/> Yes
+          button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightSuccessDescription")
+            span.glyphicon.glyphicon-question-sign
+        .clearfix
+
+      li.list-group-item.manual
+        span.txt Site cleanup and teardown?
+        .groupWrapper
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="damage" id="damage_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="damage" id="damage_yes"/> Yes
+          button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightSuccessDescription")
+            span.glyphicon.glyphicon-question-sign
+        .clearfix
+
+      li.list-group-item.manual
+        span.txt Payload data bagged and tagged?
+        .groupWrapper
+          .btn-group(data-toggle="buttons")
+            label.btn.btn-danger.btn-sm.active
+              <input checked type="radio" name="damage" id="damage_no"/> No
+            label.btn.btn-success.btn-sm
+              <input type="radio" name="damage" id="damage_yes"/> Yes
+          button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightSuccessDescription")
+            span.glyphicon.glyphicon-question-sign
+        .clearfix
+
+      h3 Other actions
+      form(role="form")
+        .form-group
+          p Save this flight configuration as a template for future flights?
+          a#equipmentChecklist.btn.btn-info Save template
+
+  .row
+    .col-md-12
+      form(role="form")
+        div.form-group
+          a.pull-right.continue.btn.btn-primary.btn-lg Finish
+
+#postFlightSuccessDescription.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-thumbs-up"></span><span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Was the flight successful?
+      .modal-body
+        p Was this a successful flight?
+          | We'll use your answer here to suggest additional troubleshooting steps if the flight didn't go well.
+
+        ul
+          li Did the drone collect the data you were after?
+          li Did the drone demonstrate erratic behavior?
+          li Was there a crash or other unexpected flight issues?
+          li Did you forget to bring any critical equipment?
+
+      .modal-footer
+        button.btn.btn-primary(data-dismiss="modal") Done

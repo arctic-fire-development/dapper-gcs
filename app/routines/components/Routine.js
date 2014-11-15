@@ -17,7 +17,8 @@ define([
     // Dependent views
     'routines/freeFlight/views/Planning',
     'routines/freeFlight/views/Preflight',
-    'routines/freeFlight/views/Fly'
+    'routines/freeFlight/views/Fly',
+    'routines/freeFlight/views/PostRoutine'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
@@ -25,7 +26,8 @@ define([
     Connection,
     PlanningView,
     PreflightView,
-    FlyView) {
+    FlyView,
+    PostRoutineView) {
 
     var Routine = Backbone.Model.extend({
 
@@ -36,7 +38,7 @@ define([
         },
 
         initialize: function() {
-            _.bindAll(this, 'planning', 'preflight', 'fly');
+            _.bindAll(this, 'planning', 'preflight', 'fly', 'postroutine');
             this.socket = app.socket;
             this.connection = new Connection();
             this.platform = new Platform();
@@ -78,6 +80,7 @@ define([
                 }, this));
             } catch (e) {
                 console.log(e);
+                throw (e);
             }
 
         },
@@ -85,10 +88,9 @@ define([
         // For children to implement.
         fly: function() {},
 
-        postflight: function() {
-            alert('postflight');
-            return true;
-        }
+        //For children to implement.
+        postroutine: function() {}
+
     });
 
     return Routine;
