@@ -9,7 +9,7 @@
 			button.home.btn.btn-block.btn-success.btn-lg(style="display: none") <span class="glyphicon glyphicon-home"></span>  Home
 			button.stop.btn.btn-block.btn-warning.btn-lg(style="display: none") <span class="glyphicon glyphicon-stop"></span>  Stop
 
-		button.post-routine.btn.btn-block.btn-primary-lg Post Routine
+		button.postRoutine.btn.btn-block.btn-primary-lg Post Routine
 
 	.col-md-10
 		div#mapWidget
@@ -17,3 +17,14 @@
 #waitForGps.alert.alert-info
 	<div class="loader" data-initialize="loader" id="myLoader"></div>
 	p Waiting for GPS fix before rendering map&hellip;
+
+#postRoutineConfirmation.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-logout"></span>&nbsp;&nbsp;Finish Routine
+			.modal-body
+				p Explanation of what the action means
+			.modal-footer
+				button.confirmPostRoutine.btn.btn-primary(data-dismiss="modal") Ready for Post Routine?
+				button.btn.btn-primary(data-dismiss="modal") Return to Flight

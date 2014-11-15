@@ -39,11 +39,13 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         events: {
             'click button.launch': 'launch',
             'click button.home': 'home',
-            'click button.stop': 'stop'
+            'click button.stop': 'stop',
+            'click button.postRoutine': 'postRoutineConfirmation',
+            'click button.confirmPostRoutine': 'endRoutine'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postRoutineConfirmation', 'endRoutine',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
 
@@ -117,6 +119,17 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.altitudeWidget.enable();
                 this.bindFlyToPoint();
             }, this));
+        },
+
+        postRoutineConfirmation: function() {
+            $('#postRoutineConfirmation').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
+        endRoutine: function() {
+            this.deferred.resolve();
         },
 
         launch: function() {

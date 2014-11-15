@@ -288,6 +288,6 @@ module.exports = function(grunt) {
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
     grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
-    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy',  'less', 'svgmin', 'cssmin']);
+    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy', 'less', 'svgmin', 'cssmin']);
     grunt.registerTask('tidy', ['jsbeautifier'])
 };

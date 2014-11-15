@@ -29,13 +29,14 @@
   "udp" : {
     "port" : 14550
   },
-  
+
   "sitl" : {
     "active" : false,
     "host" : "172.16.76.100",
-    "port" : 5501
+    "port" : 5501,
+    "bypassGps": false
   },
-  
+
   "serial" : {
     "device" : "/dev/tty.usbserial-A900XUV3",
     "baudrate" : 57600
@@ -53,5 +54,5 @@
       "slave" : "/var/lib/jenkins/dev/slave"
     }
   }
-  
+
 }

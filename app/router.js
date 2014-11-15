@@ -47,6 +47,7 @@ define([
             'mission/planning': 'planning',
             'mission/preflight': 'preflight',
             'mission/fly': 'fly',
+            'mission/postRoutine': 'postRoutine',
             'engineering': 'engineering',
             'mission/current': 'resumeCurrentMissionStep'
         },
@@ -102,7 +103,7 @@ define([
         },
 
         handleRoutineEnded: function() {
-
+            console.log('o hai again');
         },
 
         handleOperatorPromotion: function() {
@@ -222,14 +223,37 @@ define([
                 status: 'fly',
                 active: true
             });
-            this.routine.fly();
+            this.routine.fly().then(_.bind(function() {
+                this.navigate('mission/postRoutine', {
+                    trigger: true
+                });
+            }, this));
+        },
+
+        postRoutine: function() {
+            // Alert all clients that a routine is about to end.
+            this.socket.emit('routine:ended');
+
+            this.showOnly('flightWizard');
+            $('#flightWizard').wizard('selectedItem', {
+                step: 5
+            });
+            this.mission.set({
+                status: 'postroutine',
+                active: false
+            });
+            this.routine.postRoutine().then(_.bind(function() {
+                this.navigate('', {
+                    trigger: true
+                });
+            }, this));
         },
 
         // TODO GH#290 This handles the menu item, so it needs to dispatch you to the current state (flight, planning, etc).
         // Well... maybe not.  This gets called when, for example, user clicks on Continue button during Select phase.
         // Not sure if this is just some bit rot or what...?
         mission: function() {
-            this.showOnly('wizard');
+            this.showOnly('flightWizard');
             this.navigate('mission/planning', {
                 trigger: true
             });
