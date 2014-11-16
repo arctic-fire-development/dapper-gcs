@@ -129,7 +129,11 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         endRoutine: function() {
-            this.deferred.resolve();
+            try {
+                this.deferred.resolve();
+            } catch (e) {
+                console.log(e);
+            }
         },
 
         launch: function() {
