@@ -177,7 +177,10 @@ define([
         },
 
         postRoutine: function() {
+
             var deferred = Q.defer();
+            this.flightInProgress = false;
+
             var postRoutineView = new PostRoutineView({
                 model: this.get('mission'),
                 deferred: deferred
