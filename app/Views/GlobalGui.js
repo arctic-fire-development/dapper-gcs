@@ -6,7 +6,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         template: templates['app/Templates/globalGui'],
         events: {
             'click #gotoFly': 'gotoFly',
-            'click #gotoHome' : 'gotoHome'
+            'click #gotoHome': 'gotoHome'
         },
         render: function() {
             this.$el.html(this.template);
