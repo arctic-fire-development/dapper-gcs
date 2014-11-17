@@ -16,6 +16,7 @@
     "routefilter": "~0.2.1",
     "socket.io-client": "~1.0.6",
     "fuelux": "~3.0.0",
-    "modernizr": "~2.8.3"
+    "modernizr": "~2.8.3",
+    "seiyria-bootstrap-slider": "~4.2"
   }
 }
