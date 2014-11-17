@@ -236,7 +236,7 @@ module.exports = function(grunt) {
                         "build/less.css",
                         "assets/css/**/*.css",
                         "app/assets/bower/leaflet-dist/leaflet.css",
-                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css",
+                        "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css",
                         "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]
                 }
