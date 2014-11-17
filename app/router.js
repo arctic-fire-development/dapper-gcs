@@ -47,7 +47,7 @@ define([
             'mission/planning': 'planning',
             'mission/preflight': 'preflight',
             'mission/fly': 'fly',
-            'mission/postRoutine': 'postRoutine',
+            'mission/postflight': 'postflight',
             'engineering': 'engineering',
             'mission/current': 'resumeCurrentMissionStep'
         },
@@ -103,7 +103,9 @@ define([
         },
 
         handleRoutineEnded: function() {
-            console.log('o hai again');
+            if (true !== this.mission.isOperator) {
+                this.globalGuiView.renderRoutineEndedModalOverride();
+            }
         },
 
         handleOperatorPromotion: function() {
@@ -224,13 +226,13 @@ define([
                 active: true
             });
             this.routine.fly().then(_.bind(function() {
-                this.navigate('mission/postRoutine', {
+                this.navigate('mission/postflight', {
                     trigger: true
                 });
             }, this));
         },
 
-        postRoutine: function() {
+        postflight: function() {
             // Alert all clients that a routine is about to end.
             this.socket.emit('routine:ended');
 
@@ -242,7 +244,7 @@ define([
                 status: 'postroutine',
                 active: false
             });
-            this.routine.postRoutine().then(_.bind(function() {
+            this.routine.postflight().then(_.bind(function() {
                 this.navigate('', {
                     trigger: true
                 });

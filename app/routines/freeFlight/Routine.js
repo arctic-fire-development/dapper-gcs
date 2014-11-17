@@ -21,7 +21,7 @@ define([
     'routines/freeFlight/views/Planning',
     'routines/freeFlight/views/Preflight',
     'routines/freeFlight/views/Fly',
-    'routines/freeFlight/views/PostRoutine'
+    'routines/freeFlight/views/Postflight'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
@@ -31,7 +31,7 @@ define([
     PlanningView,
     PreflightView,
     FreeFlightFlyView,
-    PostRoutineView
+    PostflightView
 ) {
 
     var Routine = BaseRoutine.extend({
@@ -176,12 +176,12 @@ define([
             return flightCompletedDeferred.promise;
         },
 
-        postRoutine: function() {
+        postflight: function() {
 
             var deferred = Q.defer();
             this.flightInProgress = false;
 
-            var postRoutineView = new PostRoutineView({
+            var postflightView = new PostflightView({
                 model: this.get('mission'),
                 deferred: deferred
             }).render();

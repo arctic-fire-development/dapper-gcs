@@ -18,7 +18,7 @@ define([
     'routines/freeFlight/views/Planning',
     'routines/freeFlight/views/Preflight',
     'routines/freeFlight/views/Fly',
-    'routines/freeFlight/views/PostRoutine'
+    'routines/freeFlight/views/Postflight'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
@@ -27,7 +27,7 @@ define([
     PlanningView,
     PreflightView,
     FlyView,
-    PostRoutineView) {
+    PostflightView) {
 
     var Routine = Backbone.Model.extend({
 

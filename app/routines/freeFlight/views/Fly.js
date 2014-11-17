@@ -40,12 +40,12 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             'click button.launch': 'launch',
             'click button.home': 'home',
             'click button.stop': 'stop',
-            'click button.postRoutine': 'postRoutineConfirmation',
-            'click button.confirmPostRoutine': 'endRoutine'
+            'click button.postflight': 'postflightConfirmation',
+            'click button.confirmPostflight': 'endRoutine'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postRoutineConfirmation', 'endRoutine',
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postflightConfirmation', 'endRoutine',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
 
@@ -121,8 +121,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             }, this));
         },
 
-        postRoutineConfirmation: function() {
-            $('#postRoutineConfirmation').modal({
+        postflightConfirmation: function() {
+            $('#postflightConfirmation').modal({
                 backdrop: 'static', // forbid dismiss by click
                 keyboard: false // forbid dismiss by escape
             });
