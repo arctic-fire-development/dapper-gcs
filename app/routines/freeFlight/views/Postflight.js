@@ -2,7 +2,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
     var Postflight = Backbone.View.extend({
 
-        el: '#postroutine',
+        el: '#postflight',
         template: templates['app/routines/freeFlight/Templates/postflight'],
 
         // Pull in options for automatic assignment of properties.
