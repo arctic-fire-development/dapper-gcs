@@ -57,7 +57,7 @@ Routine.prototype = {
 
         // When a routine is ended, signal other clients.
         socket.on('routine:ended', function() {
-            console.log('emitting routine:ended from server side');
+            log.info('Routine is ending...');
             socket.broadcast.emit('routine:ended');
         });
 
