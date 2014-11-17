@@ -38,7 +38,7 @@ module.exports = function(grunt) {
         },
 
         "jsbeautifier": {
-            files: ["Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js","!./assets/js/libs/bootstrap-slider/**",],
+            files: ["Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
             options: {
                 //config: "path/to/configFile",
                 html: {
@@ -152,7 +152,7 @@ module.exports = function(grunt) {
 
             all: {
                 files: ['./app/**/*.js', './spec/**/*.js'],
-                tasks: ['requirejs', 'jsbeautifier', 'develop'],
+                tasks: ['requirejs', 'develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
