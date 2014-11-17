@@ -38,7 +38,7 @@ define([
         },
 
         initialize: function() {
-            _.bindAll(this, 'planning', 'preflight', 'fly', 'postroutine');
+            _.bindAll(this, 'planning', 'preflight', 'fly', 'postflight');
             this.socket = app.socket;
             this.connection = new Connection();
             this.platform = new Platform();
@@ -89,7 +89,7 @@ define([
         fly: function() {},
 
         //For children to implement.
-        postroutine: function() {}
+        postflight: function() {}
 
     });
 

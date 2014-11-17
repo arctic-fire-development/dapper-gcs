@@ -241,7 +241,7 @@ define([
                 step: 5
             });
             this.mission.set({
-                status: 'postroutine',
+                status: 'postflight',
                 active: false
             });
             this.routine.postflight().then(_.bind(function() {
