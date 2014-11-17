@@ -27,8 +27,9 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         checkIfPostflightCompleted: function() {
 
             // Hinky but gets the job done for the moment.  Probably, let's do better before submitting the code.
-            if (4 !== this.$el.find('.checklist .manual .btn-success.active').length || this.$el.find('#flightLogNotes').value == '') {
-                this.$el.find('.continue').html('Flight log notes and checklist not completed, continue anyway?').removeClass('btn-primary').addClass('btn-default');
+            if (4 !== this.$el.find('.checklist .manual .btn-success.active').length
+                || this.$el.find('#flightLogNotes').value == '' ) {
+                this.$el.find('.continue').html('Flight log notes or checklist not completed, continue anyway?').removeClass('btn-primary').addClass('btn-default');
                 this.forceContinue = true;
             } else {
                 this.options.deferred.resolve();
