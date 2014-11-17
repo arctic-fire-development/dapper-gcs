@@ -1,31 +1,42 @@
 #routineStartedModalOverride.modal
-	.modal-dialog
-		.modal-content
-			.modal-header
-				h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;A routine has started
-			.modal-body
-				p A routine is now being performed.
-			.modal-footer
-				button#gotoFly.btn.btn-primary(data-dismiss="modal") Join routine as observer
+    .modal-dialog
+        .modal-content
+            .modal-header
+                h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;A routine has started
+            .modal-body
+                p A routine is now being performed.
+            .modal-footer
+                button#gotoFly.btn.btn-primary(data-dismiss="modal") Join routine as observer
+
+#routineEndedModalOverride.modal
+    .modal-dialog
+        .modal-content
+            .modal-header
+                h4.modal-title <span class="glyphicon glyphicon-send"></span>&nbsp;&nbsp;This routine has ended
+            .modal-body
+                p This routine has ended.
+                p This could be a good time to ask the pilot if there&rsquo;s any post-flight steps you can assist with!
+            .modal-footer
+                button#gotoFly.btn.btn-primary(data-dismiss="modal") Continue back to home screen
 
 #lostServerConnection.modal
-	.modal-dialog
-		.modal-content
-			.modal-header
-				h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to server
-			.modal-body
-				p
-					img(src="images/lolinternet.gif")
-				p The connection to the GCS server was lost.  Refresh your browser window.
+    .modal-dialog
+        .modal-content
+            .modal-header
+                h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to server
+            .modal-body
+                p
+                    img(src="images/lolinternet.gif")
+                p The connection to the GCS server was lost.  Refresh your browser window.
 
 #lostDroneConnection.modal
-	.modal-dialog
-		.modal-content
-			.modal-header
-				h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to drone
-			.modal-body
-				p
-					img(src="images/drones_on_leash.jpg")
-				p The connection to the drone was lost, and no commands from the GCS will be received.
-				p Attempting automatic reconnection. This window will disappear once re-established.
-				p If this window stays up for more than 5 seconds, please get your RC and be prepared to bring the drone back.
+    .modal-dialog
+        .modal-content
+            .modal-header
+                h4.modal-title <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Lost connection to drone
+            .modal-body
+                p
+                    img(src="images/drones_on_leash.jpg")
+                p The connection to the drone was lost, and no commands from the GCS will be received.
+                p Attempting automatic reconnection. This window will disappear once re-established.
+                p If this window stays up for more than 5 seconds, please get your RC and be prepared to bring the drone back.

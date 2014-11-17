@@ -39,11 +39,13 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         events: {
             'click button.launch': 'launch',
             'click button.home': 'home',
-            'click button.stop': 'stop'
+            'click button.stop': 'stop',
+            'click button.postflight': 'postflightConfirmation',
+            'click button.confirmPostflight': 'endRoutine'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postflightConfirmation', 'endRoutine',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
 
@@ -81,7 +83,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         // Show the button with name className, hide others.
         showButton: function(className) {
-            _.each(this.$el.find('button'), function(e) {
+            _.each(this.$el.find('button:not(.postflight)'), function(e) {
                 var $e = $(e);
                 if ($e.hasClass(className)) {
                     $e.show();
@@ -117,6 +119,21 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.altitudeWidget.enable();
                 this.bindFlyToPoint();
             }, this));
+        },
+
+        postflightConfirmation: function() {
+            $('#postflightConfirmation').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
+        endRoutine: function() {
+            try {
+                this.deferred.resolve();
+            } catch (e) {
+                console.log(e);
+            }
         },
 
         launch: function() {

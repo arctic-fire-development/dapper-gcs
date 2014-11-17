@@ -7,7 +7,8 @@ exports.index = function(req, res) {
         title: 'DapperGCS',
         platforms: req.app.get('platforms'),
         mapProxyUrl: req.app.get('config').get('mapproxy:url'),
-        APM: req.app.get('APM')
+        APM: req.app.get('APM'),
+        bypassGps: req.app.get('config').get('sitl:bypassGps')
     });
 };
 

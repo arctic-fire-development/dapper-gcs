@@ -38,7 +38,7 @@ module.exports = function(grunt) {
         },
 
         "jsbeautifier": {
-            files: ["!assets/js/libs/bootstrap-slider/**", "Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
+            files: ["Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
             options: {
                 //config: "path/to/configFile",
                 html: {
@@ -152,7 +152,7 @@ module.exports = function(grunt) {
 
             all: {
                 files: ['./app/**/*.js', './spec/**/*.js'],
-                tasks: ['requirejs', 'jsbeautifier', 'develop'],
+                tasks: ['requirejs', 'develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
@@ -236,7 +236,7 @@ module.exports = function(grunt) {
                         "build/less.css",
                         "assets/css/**/*.css",
                         "app/assets/bower/leaflet-dist/leaflet.css",
-                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css",
+                        "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css",
                         "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]
                 }
@@ -288,6 +288,6 @@ module.exports = function(grunt) {
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
     grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
-    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy',  'less', 'svgmin', 'cssmin']);
+    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy', 'less', 'svgmin', 'cssmin']);
     grunt.registerTask('tidy', ['jsbeautifier'])
 };

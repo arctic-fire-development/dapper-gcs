@@ -211,6 +211,9 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
         // getting values but they're set to zero (may only occur in SITL).
         // This may not be a complete set of criteria, but it's close.
         hasGpsFix: function() {
+            if (appConfig.bypassGps) {
+                return true;
+            }
             return (
                 this.get('fix_type') >= 2 // 2 + greater means has x/y fix.  See MAVLink spec for this, GPS_RAW_INT
                 && _.isNumber(this.get('lat')) && this.get('lat') != 0 && _.isNumber(this.get('lon')) && this.get('lon') != 0
