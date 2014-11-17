@@ -1,9 +1,9 @@
 define(['backbone', 'JST'], function(Backbone, templates) {
 
-    var PostRoutine = Backbone.View.extend({
+    var Postflight = Backbone.View.extend({
 
         el: '#postroutine',
-        template: templates['app/routines/freeFlight/Templates/postRoutine'],
+        template: templates['app/routines/freeFlight/Templates/postflight'],
 
         // Pull in options for automatic assignment of properties.
         initialize: function(options) {
@@ -27,14 +27,14 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
-            $('#postRoutineChecklist').click(function() {
-                window.open('/postRoutineChecklist', 'Post Routine Checklist');
+            $('#postflightChecklist').click(function() {
+                window.open('/postflightChecklist', 'Post Routine Checklist');
             });
             return this;
         }
 
     });
 
-    return PostRoutine;
+    return Postflight;
 
 });

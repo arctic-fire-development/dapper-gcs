@@ -23,9 +23,3 @@ exports.unsupported = function(req, res) {
         title: 'Unsupported browser'
     });
 };
-
-exports.postroutinechecklist = function(req, res) {
-    res.render('postroutinechecklist', {
-        title: 'Post Routine Checklist'
-    });
-};
