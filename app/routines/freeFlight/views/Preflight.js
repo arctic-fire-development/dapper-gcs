@@ -25,7 +25,6 @@ define(['backbone', 'JST',
 
         continue: function(e) {
             e.preventDefault(); // prevent any other odd navigation from happening!
-            var hasChecked;
 
             if (true === this.forceContinue) {
                 this.options.deferred.resolve();
