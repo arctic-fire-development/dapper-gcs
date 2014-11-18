@@ -1,0 +1,10 @@
+#pathPlannerModal.modal(data-keyboard="false", data-backdrop="static")
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Draw a flight path
+      .modal-body
+        p Use the map below to zoom into the area you're going to fly.  As you zoom and pan, tiles are saved for offline use.
+        #pathPlannerMapWidget(style="height: 500px")
+      .modal-footer
+        button.close.btn.btn-primary(data-dismiss="modal") Save and continue
