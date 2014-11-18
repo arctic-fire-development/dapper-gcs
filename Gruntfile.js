@@ -29,7 +29,7 @@ module.exports = function(grunt) {
                     mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "uglify2",
+                    optimize: "none",
                     findNestedDependencies: true, // for dynamic local includes
                     generateSourceMaps: false,
                     useStrict: true
@@ -143,7 +143,7 @@ module.exports = function(grunt) {
 
             templates: {
                 files: ['./app/Templates/**/*.jade', './app/routines/**/*.jade'],
-                tasks: ['jade', 'requirejs', 'develop'],
+                tasks: ['jade', 'requirejs:dev', 'develop'],
                 options: {
                     interrupt: true,
                     nospawn: true

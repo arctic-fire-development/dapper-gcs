@@ -56,7 +56,7 @@ var platforms = [{
     name: 'ArduCopter (SITL)',
     type: 'quadcopter',
     payloads: [],
-    missions: ['Free Flight'],
+    missions: ['Free Flight', 'Paths'],
     id: 0,
     parameters: sitlCopterParams,
     defaults: {
@@ -68,10 +68,7 @@ var platforms = [{
     payloads: ['GoPro'],
     missions: [
         'Free flight',
-        'Search and rescue',
-        'Infrastructure inspection',
-        'High-resolution mapping',
-        'Digital elevation model'
+        'Paths'
     ],
     id: 1,
     parameters: false,
