@@ -13,6 +13,8 @@ var udlInterface = require('../udlInterface.js'),
 // Only the modes that we use are defined here; add others as required.
 var APM = {
     custom_modes: {
+        STABILIZE: 0,
+        ALT_HOLD: 2,
         AUTO: 3,
         GUIDED: 4,
         LOITER: 5,
@@ -110,7 +112,7 @@ ArduCopterUdl.prototype.arm = function() {
     // So we need to examine the command ack relative to this arming request and be prepared
     // to handle edge cases around it.
     protocol.on('COMMAND_ACK', function verifyArmingAck(msg) {
-        if( msg.result !== 0 ) {
+        if (msg.result !== 0) {
             log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
             throw new Error('Result of COMMAND_ACK for arming failed');
         }
@@ -119,7 +121,7 @@ ArduCopterUdl.prototype.arm = function() {
     // More troubleshooting.  Some messages that come back from the APM
     // as status text, rather than direct failures.  TODO GH#356, see if this is always true / research.
     protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
-        if( msg.severity == mavlink.MAV_SEVERITY_ERROR ) {
+        if (msg.severity == mavlink.MAV_SEVERITY_ERROR) {
             log.debug('Arming rejected: %s', msg.text);
             throw new Error('Arming rejected due to status text message error');
         }
@@ -164,7 +166,7 @@ ArduCopterUdl.prototype.disarm = function() {
     // So we need to examine the command ack relative to this arming request and be prepared
     // to handle edge cases around it.
     protocol.on('COMMAND_ACK', function verifyDisarmingAck(msg) {
-        if( msg.result != 0 ) {
+        if (msg.result != 0) {
             log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
             throw new Error('Result of COMMAND_ACK for disarming failed');
         }
@@ -176,7 +178,7 @@ ArduCopterUdl.prototype.disarm = function() {
     protocol.on('HEARTBEAT', function verifyDisarmed(msg) {
         log.verbose('heartbeat.base_mode: %d', msg.base_mode);
         try {
-            if (0  === (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
+            if (0 === (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY)) {
                 protocol.removeListener('HEARTBEAT', verifyDisarmed);
                 deferred.resolve();
             } else {
@@ -230,7 +232,7 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
         // GH#317 remove hardcoded refs to sysIDs
         1, // target system,
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
-        5 // magic number for copter Loiter mode!  APM-specific.
+        APM.custom_modes.LOITER // magic number for copter Loiter mode!  APM-specific.
     );
 
     // Attach listener to confirm that mode has been set to guided.
@@ -289,13 +291,11 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
         }
     });
 
-    return new Qretry(guidedModeSetter,
-        {
-            maxRetry: 10,
-            interval: 100,
-            intervalMultiplicator: 1.1
-        }
-    );
+    return new Qretry(guidedModeSetter, {
+        maxRetry: 10,
+        interval: 100,
+        intervalMultiplicator: 1.1
+    });
 };
 
 ArduCopterUdl.prototype.rtl = function() {
@@ -347,11 +347,11 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         platform.lat, platform.lon, alt
     );
 
-    if(platform.custom_mode != APM.custom_modes.GUIDED) {
+    if (platform.custom_mode != APM.custom_modes.GUIDED) {
         // Need to set guided mode first.
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
-            .then(function(){
+            .then(function() {
                 protocol.send(guided_mission_item);
             });
     } else {
@@ -374,7 +374,7 @@ ArduCopterUdl.prototype.guidedLoiter = function() {
     );
 
     var confirmedGuidedLoiter = function(command_ack) {
-        if(mavlink.MAV_MISSION_ACCEPTED === command_ack.type) {
+        if (mavlink.MAV_MISSION_ACCEPTED === command_ack.type) {
             deferred.resolve();
         } else {
             log.warn('Command for Guided-Loiter was rejected [%d]', command_ack.type);
@@ -403,7 +403,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
 
     log.verbose('Flying to %d %d %d', lat, lon, platform.relative_alt);
 
-    if(platform.custom_mode != APM.custom_modes.GUIDED) {
+    if (platform.custom_mode != APM.custom_modes.GUIDED) {
         // Need to set guided mode first.
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         try {
@@ -413,16 +413,15 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
                     protocol.send(guided_mission_item);
                 });
-             } catch(e) {
-                console.log(e);
-                console.log(util.inspect(e.stack));
-                log.error(e);
-            }
-        } else {
-            deferred.resolve();
-            protocol.send(guided_mission_item);
+        } catch (e) {
+            log.error('Uncaught exception in ArduCopterUdl.flyToPoint', e);
+            log.error(util.inspect(e.stack))
         }
-        return deferred.promise;
+    } else {
+        deferred.resolve();
+        protocol.send(guided_mission_item);
+    }
+    return deferred.promise;
 };
 
 ArduCopterUdl.prototype.getLatLon = function() {
@@ -436,3 +435,4 @@ ArduCopterUdl.prototype.getLatLon = function() {
 };
 
 module.exports = ArduCopterUdl;
+module.exports.APM = APM;

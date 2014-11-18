@@ -120,11 +120,11 @@ UavConnection.prototype.startLogging = function() {
     var logTime = moment().format('-MM-DD-YYYY-HH-mm-ss');
     receivedBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:receivedBinary') + logTime);
     receivedBinaryLog.on('error', function(err) {
-        log.error(err);
+        log.error('unable to log received binary mavlink stream: ' + err);
     });
     sentBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:sentBinary') + logTime);
     sentBinaryLog.on('error', function(err) {
-        log.error(err);
+        log.error('unable to log sent binary mavlink stream: ' + err);
     });
 
 };
@@ -150,10 +150,14 @@ UavConnection.prototype.heartbeat = function() {
 
     timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
     this.emit(this.state);
-
+    this.emit('heartbeat');
     this.invokeState(this.state);
     log.heartbeat('time since last heartbeat: %d', timeSinceLastHeartbeat);
 };
+
+UavConnection.prototype.getTimeSinceLastHeartbeat = function() {
+    return timeSinceLastHeartbeat;
+}
 
 // Convenience function to make the meaning of the awkward syntax more clear.
 UavConnection.prototype.invokeState = function() {
@@ -162,7 +166,7 @@ UavConnection.prototype.invokeState = function() {
 
 UavConnection.prototype.start = function() {
 
-    if(true === started) {
+    if (true === started) {
         log.warn('Asked to start connection manager, but connection already started, refused.');
         return;
     }
@@ -186,14 +190,14 @@ UavConnection.prototype.updateHeartbeat = function() {
         lastHeartbeat = Date.now();
 
         // When we get a heartbeat, switch back to connected state.
-        if(false === isConnected) {
+        if (false === isConnected) {
             isConnected = true;
             timeSinceLastHeartbeat = 0; // fake this so we don't flicker between connected/connecting
             this.changeState('connected');
         }
-    } catch(e) {
-        log.error(util.inspect(e));
-        throw(e);
+    } catch (e) {
+        log.error('error when updating heartbeat: ' + util.inspect(e));
+        throw (e);
     }
 };
 
@@ -204,7 +208,7 @@ UavConnection.prototype.updateHeartbeat = function() {
 // "connected" state.
 UavConnection.prototype.sendHeartbeat = function() {
     var heartbeatMessage;
-    if(!heartbeatMessage) {
+    if (!heartbeatMessage) {
         heartbeatMessage = new mavlink.messages.heartbeat(
             mavlink.MAV_TYPE_GCS, // type                      : Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM) (uint8_t)
             mavlink.MAV_AUTOPILOT_INVALID, // autopilot                 : Autopilot type / class. defined in MAV_AUTOPILOT ENUM (uint8_t)
@@ -257,7 +261,7 @@ UavConnection.prototype.disconnected = function() {
                 );
 
                 connection.on('error', function(err) {
-                    log.error(err);
+                    log.error('error establishing serial connection: ' + err);
                 });
 
                 // Once the connection is opened, move to a connecting state
@@ -292,7 +296,7 @@ UavConnection.prototype.disconnected = function() {
                 // throw an exception, which may not be what is expected in the surrounding code.
                 connection.on('error', function(e) {
                     // Don't spam the error log.  May want to expand this logic for everywhere in this code, too.
-                    if(lastError != e.code ) {
+                    if (lastError != e.code) {
                         log.error('[UavConnection] TCP connection error message: ' + e);
                     }
                     lastError = e.code;
@@ -314,7 +318,9 @@ UavConnection.prototype.connecting = function() {
 
         isConnected = false;
 
-        log.silly('establishing MAVLink connection...', { ifAttach: attachDataEventListener} );
+        log.silly('establishing MAVLink connection...', {
+            ifAttach: attachDataEventListener
+        });
 
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
@@ -340,13 +346,15 @@ UavConnection.prototype.connecting = function() {
                 // misalignment.
                 mavParam.get('SYSID_THISMAV')
                     .then(_.bind(function(sysid_thismav) {
-                        if(sysid_thismav !== uavSysId) {
+                        if (sysid_thismav !== uavSysId) {
                             log.warn('UAV parameter SYSID_THISMAV does not match heartbeat srcSystem! %d %d', sysid_thismav, uavSysId);
                         } else {
                             log.debug('Confirmed, SYSID_THISMAV matches heartbeat.srcSystem OK');
                         }
                     }, this))
-                    .fail(function(e) { log.error(util.inspect(e)); });
+                    .fail(function(e) {
+                        log.error(util.inspect(e));
+                    });
 
             });
 
@@ -365,11 +373,13 @@ UavConnection.prototype.connecting = function() {
                 .then(_.bind(function(sysid_mygcs) {
                     gcsSysId = sysid_mygcs;
                     log.debug('Got GCS sysid %d', sysid_mygcs);
-                    if(gcsSysId !== config.get('identities:gcsId')) {
+                    if (gcsSysId !== config.get('identities:gcsId')) {
                         log.error('GCS ID mismatch between UAV and local GCS.');
                     }
                 }, this))
-                .fail(function(e) { log.error(util.inspect(e)); });
+                .fail(function(e) {
+                    log.error(util.inspect(e));
+                });
         }
 
         // Don't do this twice.
@@ -378,7 +388,7 @@ UavConnection.prototype.connecting = function() {
         // Are we in a hard lost-link condition and need to re-establish the port?
         if (
             timeSinceLastHeartbeat > config.get('connection:timeout:hard')
-            ) {
+        ) {
 
             log.warn('Hard loss of link, returning to Disconnected state in UavConnection');
             attachDataEventListener = true;
@@ -428,14 +438,14 @@ UavConnection.prototype.handleDataEvent = function(message) {
 // Helper method to request the data stream, needs to be bound in this scope to avoid being called often.
 UavConnection.prototype.requestDataStream = _.once(function() {
     var request = new mavlink.messages.request_data_stream(
-            uavSysId, // target system
-            uavComponentId, // target component
-            mavlink.MAV_DATA_STREAM_ALL, // get all data streams
-            config.get('connection:updateIntervals:streamHz'), // rate, Hz
-            1 // start sending this stream (0=stop)
-        );
-        log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
-        protocol.send(request);
+        uavSysId, // target system
+        uavComponentId, // target component
+        mavlink.MAV_DATA_STREAM_ALL, // get all data streams
+        config.get('connection:updateIntervals:streamHz'), // rate, Hz
+        1 // start sending this stream (0=stop)
+    );
+    log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
+    protocol.send(request);
 });
 
 UavConnection.prototype.startSendingHeartbeats = _.once(function() {
@@ -453,7 +463,7 @@ UavConnection.prototype.connected = function() {
     sendHeartbeatInterval = this.startSendingHeartbeats();
 
     // If connection has been regained, signal the client.
-    if(true === lostConnection) {
+    if (true === lostConnection) {
         log.info('Connection re-established from lost state.');
         lostConnection = false;
         this.emit('connection:regained');
@@ -462,8 +472,7 @@ UavConnection.prototype.connected = function() {
     // Have we lost link?  True if we're timing out and have connected previously.
     if (
         (
-            timeSinceLastHeartbeat > config.get('connection:timeout:soft')
-            || true === _.isNaN(timeSinceLastHeartbeat)
+            timeSinceLastHeartbeat > config.get('connection:timeout:soft') || true === _.isNaN(timeSinceLastHeartbeat)
         ) && true === hasConnected
     ) {
         this.emit('connection:lost');
@@ -501,7 +510,7 @@ UavConnection.prototype.sendAsGcs = function(message) {
     this.write(buf);
     // TODO GH#195 -- we need to move this code by refactoring the Mavlink JS generator
     protocol.seq = (protocol.seq + 1) % 255;
-    protocol.total_packets_sent +=1;
+    protocol.total_packets_sent += 1;
     protocol.total_bytes_sent += buf.length;
 };
 

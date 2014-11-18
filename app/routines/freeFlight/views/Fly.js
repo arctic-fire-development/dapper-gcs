@@ -37,25 +37,27 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         mapEventsAreBound: false,
 
         events: {
-            'click button.launch' : 'launch',
-            'click button.home' : 'home',
-            'click button.stop' : 'stop'
+            'click button.launch': 'launch',
+            'click button.home': 'home',
+            'click button.stop': 'stop',
+            'click button.postflight': 'postflightConfirmation',
+            'click button.confirmPostflight': 'endRoutine'
         },
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop',
+            _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postflightConfirmation', 'endRoutine',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
                 'regenerateGuiState');
 
             this.myIcon = L.icon({
-                    iconUrl: '/images/target.png',
-                    iconSize: [50, 50],
-                    iconAnchor: [25, 25]
+                iconUrl: '/images/target.png',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
             });
         },
 
         showControls: function() {
-            if(true === this.model.isOperator) {
+            if (true === this.model.isOperator) {
                 this.$el.find('#controls').show();
             } else {
                 this.$el.find('#controls').hide();
@@ -64,7 +66,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         enableAltitudeSlider: function() {
 
-            if(true === this.model.isOperator) {
+            if (true === this.model.isOperator) {
                 this.altitudeWidget.enable();
             } else {
                 this.altitudeWidget.disable();
@@ -72,7 +74,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         enableFlyToPoint: function() {
-            if(true === this.model.isOperator) {
+            if (true === this.model.isOperator) {
                 this.bindFlyToPoint();
             } else {
                 this.unbindFlyToPoint();
@@ -81,9 +83,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         // Show the button with name className, hide others.
         showButton: function(className) {
-            _.each(this.$el.find('button'), function(e) {
+            _.each(this.$el.find('button:not(.postflight)'), function(e) {
                 var $e = $(e);
-                if($e.hasClass(className)) {
+                if ($e.hasClass(className)) {
                     $e.show();
                 } else {
                     $e.hide();
@@ -117,6 +119,21 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 this.altitudeWidget.enable();
                 this.bindFlyToPoint();
             }, this));
+        },
+
+        postflightConfirmation: function() {
+            $('#postflightConfirmation').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
+        endRoutine: function() {
+            try {
+                this.deferred.resolve();
+            } catch (e) {
+                console.log(e);
+            }
         },
 
         launch: function() {
@@ -162,7 +179,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 // Regenerate GUI state from operator/platform status
                 this.model.platform.confirmHaveGpsFix().then(this.regenerateGuiState);
 
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
             return this;
@@ -175,15 +192,14 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.unbindFlyToPoint();
 
             this.model.platform.isFlying().then(_.bind(function(ifFlying) {
-                if(false === ifFlying) return;
+                if (false === ifFlying) return;
 
-                if(this.model.platform.isRtl()) {
+                if (this.model.platform.isRtl()) {
                     // show stop button
                     this.showButton('stop');
                 } else if (
-                    this.model.platform.isInUserControllableFlight()
-                    || true // see below for why
-                    ) {
+                    this.model.platform.isInUserControllableFlight() || true // see below for why
+                ) {
                     // Show the RTL button, enable flight controls.  The reason we explicitly check for known flight
                     // states, then proceed to ignore the comparison with an || true, is because
                     // there may be other states that the craft can get into that aren't expected
@@ -201,12 +217,15 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         flyToPoint: function(e) {
 
             // Reject right-click for navigation, only when not touch event.
-            if('undefined' !== typeof e.originalEvent.button && 0 !== e.originalEvent.button) {
+            if ('undefined' !== typeof e.originalEvent.button && 0 !== e.originalEvent.button) {
                 e.originalEvent.preventDefault();
                 return false;
             }
 
-            $.get('/drone/flyToPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+            $.get('/drone/flyToPoint', {
+                lat: e.latlng.lat,
+                lng: e.latlng.lng
+            });
             var newPath = {
                 currentLat: this.model.platform.get('lat'),
                 currentLon: this.model.platform.get('lon'),
@@ -220,7 +239,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         drawFlyToPoint: function(newPath) {
             // Don't draw another line if one's currently down.
-            if(this.targetMarker && this.targetLine) {
+            if (this.targetMarker && this.targetLine) {
                 return;
             }
 
@@ -234,8 +253,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                         newPath.currentLat,
                         newPath.currentLon
                     )
-                ],
-                {
+                ], {
                     color: 'red'
                 }
             ).addTo(this.mapWidget.map);
@@ -250,7 +268,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         drawHoverAtPoint: function() {
             // Only remove if they're present.
-            if(this.targetMarker && this.targetLine) {
+            if (this.targetMarker && this.targetLine) {
                 this.mapWidget.map.removeLayer(this.targetMarker);
                 this.mapWidget.map.removeLayer(this.targetLine);
             }
@@ -259,7 +277,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         bindFlyToPoint: function() {
-            if( false === this.mapEventsAreBound && true === this.model.isOperator ) {
+            if (false === this.mapEventsAreBound && true === this.model.isOperator) {
                 this.mapWidget.map.on('mouseup touchend', this.hoverAtPoint, this);
                 this.mapWidget.map.on('mousedown touchstart', this.flyToPoint, this);
                 this.mapEventsAreBound = true;
@@ -279,7 +297,9 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // and send updated altitude requests to the UAV.
             this.altitudeWidget.slider.on('slide', _.bind(function(slideEvt) {
                 this.altitudeWidget.suspendSliderRender = true;
-                $.get('/drone/changeAltitude', { alt: slideEvt.value });
+                $.get('/drone/changeAltitude', {
+                    alt: slideEvt.value
+                });
             }, this));
 
             // After the user releases the slider, reattach live updating
@@ -355,7 +375,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 // Must configure/render this only after the map has been rendered.
                 this.platformWidget.map = this.mapWidget.map;
                 this.platformWidget.render();
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
                 console.log(e.stack);
             }
@@ -374,10 +394,21 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.model.connection.on('change:notification', function() {
 
                 var message, type;
-                switch(this.model.connection.get('notification')) {
-                    case 'lost': message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type='warning'; break;
-                    case 'regained': message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type='success'; break;
-                    default: message = 'Connection notification not understood: ' + this.model.connection.get('notification'), type='danger'; break;
+                switch (this.model.connection.get('notification')) {
+                    case 'lost':
+                        message = '<span class="glyphicon glyphicon-signal"></span> Connection lost, trying to reconnect&hellip;', type = 'warning';
+                        $('#lostDroneConnection').modal({
+                            backdrop: 'static', // forbid dismiss by click
+                            keyboard: false // forbid dismiss by escape
+                        });
+                        break;
+                    case 'regained':
+                        message = '<span class="glyphicon glyphicon-signal"></span> Connection restored.', type = 'success';
+                        $('#lostDroneConnection').modal('hide');
+                        break;
+                    default:
+                        message = 'Connection notification not understood: ' + this.model.connection.get('notification'), type = 'danger';
+                        break;
                 }
 
                 app.growl(message);
@@ -386,14 +417,33 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // Bind notifications to change events on the platform
             this.model.platform.on('change:custom_mode', function() {
-                var message, type='info', delay = 6000, mode = this.model.platform.get('custom_mode');
-                switch(mode) {
-                    case 0: message = 'System is in stabilize mode.'; break;
-                    case 3: message = 'Performing takeoff&hellip;'; break;
-                    case 4: message = 'Flying to location&hellip;'; break;
-                    case 5: message = 'Hovering until further notice.'; break;
-                    case 6: message = 'Flying home and landing&hellip;', delay=10000, type='warning'; break;
-                    default: message = 'Switching to custom_mode ' + mode, delay=10000, type='danger';
+                var message, type = 'info',
+                    delay = 6000,
+                    mode = this.model.platform.get('custom_mode');
+                switch (mode) {
+                    case appConfig.APM.custom_modes.STABILIZE:
+                        message = 'Drone is in stabilize mode.';
+                        break;
+                    case appConfig.APM.custom_modes.ALT_HOLD:
+                        message = 'Drone is in altitude hold mode.';
+                        break;
+                    case appConfig.APM.custom_modes.AUTO:
+                        message = 'Drone is controlled by Routine.ly&hellip;';
+                        break;
+                    case appConfig.APM.custom_modes.GUIDED:
+                        message = 'Going to location&hellip;';
+                        break;
+                    case appConfig.APM.custom_modes.LOITER:
+                        message = 'Hovering until further notice.';
+                        break;
+                    case appConfig.APM.custom_modes.RTL:
+                        message = 'Going to home position and landing&hellip;', delay = 10000, type = 'warning';
+                        break;
+                    case appConfig.APM.custom_modes.LAND:
+                        message = 'Drone is landing in place, please watch closely, failsafe has probably engaged', delay = 10000, type = 'warning';
+                        break;
+                    default:
+                        message = 'Switching to custom_mode ' + mode, delay = 10000, type = 'danger';
                 }
 
                 app.growl(message, type, delay);
@@ -422,10 +472,10 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // GPS notifications
             var gpsIcon = '<span class="glyphicon glyphicon-map-marker"></span>';
-            this.model.platform.on('gps:fix_established', function(){
+            this.model.platform.on('gps:fix_established', function() {
                 app.growl(gpsIcon + ' GPS fix established', 'info');
             }, this);
-            this.model.platform.on('gps:fix_lost', function(){
+            this.model.platform.on('gps:fix_lost', function() {
                 app.growl(gpsIcon + ' GPS fix lost', 'warning');
             }, this);
 

@@ -5,7 +5,8 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         el: '#global',
         template: templates['app/Templates/globalGui'],
         events: {
-            'click #gotoFly' : 'gotoFly'
+            'click #gotoFly': 'gotoFly',
+            'click #gotoHome': 'gotoHome'
         },
         render: function() {
             this.$el.html(this.template);
@@ -20,6 +21,13 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             });
         },
 
+        renderRoutineEndedModalOverride: function() {
+            $('#routineEndedModalOverride').modal({
+                backdrop: 'static', // forbid dismiss by click
+                keyboard: false // forbid dismiss by escape
+            });
+        },
+
         renderLostServerConnection: function() {
             $('#lostServerConnection').modal({
                 backdrop: 'static', // forbid dismiss by click
@@ -28,12 +36,24 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
         },
 
         gotoFly: function() {
-            app.router.navigate('mission/fly', { trigger: true });
+            app.router.navigate('mission/fly', {
+                trigger: true
+            });
         },
 
-        bindGrowlNotifications: function(){
-            app.socket.on('launching', function(){
+        gotoHome: function() {
+            app.router.navigate('', {
+                trigger: true
+            });
+        },
+
+        bindGrowlNotifications: function() {
+            app.socket.on('launching', function() {
                 app.growl('Launching');
+            });
+
+            app.socket.on('STATUSTEXT', function(statustext) {
+                app.growl(statustext);
             });
         }
 

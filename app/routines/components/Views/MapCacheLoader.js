@@ -6,7 +6,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
         template: templates['app/routines/components/Templates/MapCacheLoader'],
 
         events: {
-            'click .close' : 'close'
+            'click .close': 'close'
         },
 
         updateParameters: function(e) {
@@ -32,7 +32,9 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 attributionControl: false
             }).setView([64.9, -147.1], 4);
 
-            new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
+            new L.Control.Zoom({
+                position: 'topright'
+            }).addTo(this.map);
             var wms = new L.tileLayer.wms(appConfig.mapProxyUrl, {
                 layers: 'bing',
                 format: 'image/png',
@@ -41,7 +43,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
             })
             this.map.addLayer(wms);
 
-            $('#mapCacheLoaderModal').on('shown.bs.modal', _.bind(function (e) {
+            $('#mapCacheLoaderModal').on('shown.bs.modal', _.bind(function(e) {
                 this.map.invalidateSize(false);
             }, this));
 

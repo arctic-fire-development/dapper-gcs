@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         // The Jade task must be run prior to this task, because the Backbone views
         // reference templates via require().
         requirejs: {
-            compile: {
+            dev: {
                 options: {
                     logLevel: 0,
                     baseUrl: "./app/",
@@ -20,6 +20,59 @@ module.exports = function(grunt) {
                     generateSourceMaps: true,
                     preserveLicenseComments: false, // so we can use source maps
                     useStrict: true
+                }
+            },
+            optimize: {
+                options: {
+                    logLevel: 0,
+                    baseUrl: "./app/",
+                    mainConfigFile: "./app/config.js",
+                    out: "public/javascripts/required.js",
+                    name: "main",
+                    optimize: "uglify2",
+                    findNestedDependencies: true, // for dynamic local includes
+                    generateSourceMaps: false,
+                    useStrict: true
+                }
+            }
+        },
+
+        "jsbeautifier": {
+            files: ["Gruntfile.js", "server.js", "assets/js/libs/**/*.js", "app/**/*.js", "routes/**/*.js", "views/**/*.js"],
+            options: {
+                //config: "path/to/configFile",
+                html: {
+                    braceStyle: "collapse",
+                    indentChar: " ",
+                    indentScripts: "keep",
+                    indentSize: 4,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    unformatted: ["a", "sub", "sup", "b", "i", "u"],
+                    wrapLineLength: 0
+                },
+                css: {
+                    indentChar: " ",
+                    indentSize: 4
+                },
+                js: {
+                    braceStyle: "collapse",
+                    breakChainedMethods: false,
+                    e4x: false,
+                    evalCode: false,
+                    indentChar: " ",
+                    indentLevel: 0,
+                    indentSize: 4,
+                    indentWithTabs: false,
+                    jslintHappy: false,
+                    keepArrayIndentation: false,
+                    keepFunctionIndentation: false,
+                    maxPreserveNewlines: 10,
+                    preserveNewlines: true,
+                    spaceBeforeConditional: true,
+                    spaceInParen: false,
+                    unescapeStrings: false,
+                    wrapLineLength: 0
                 }
             }
         },
@@ -52,14 +105,37 @@ module.exports = function(grunt) {
         // Oddballs and/or image assets belong here.
         copy: {
             main: {
-                files: [
-                    {expand: true, cwd: 'app/assets/bower/requirejs/', src: 'require.js', dest: 'public/javascripts/'},
-                    {expand: true, cwd: 'assets/images/', src: ['**/*.png', '**/*.jpg', '**/*.gif'], dest: 'public/images/'},
-                    {expand: true, cwd: 'app/assets/bower/bootstrap/fonts', src: '*', dest: 'public/fonts/'},
-                    {expand: true, cwd: 'app/assets/bower/leaflet-dist/images', src: '*', dest: 'public/images/leaflet/'},
-                    {expand: true, cwd: 'app/assets/bower/fuelux/fonts', src: '*', dest: 'public/fonts/'},
-                    {expand: true, cwd: 'assets/fonts/', src: '**/*.woff', dest: 'public/fonts/'}
-                ]
+                files: [{
+                    expand: true,
+                    cwd: 'app/assets/bower/requirejs/',
+                    src: 'require.js',
+                    dest: 'public/javascripts/'
+                }, {
+                    expand: true,
+                    cwd: 'assets/images/',
+                    src: ['**/*.png', '**/*.jpg', '**/*.gif'],
+                    dest: 'public/images/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/bootstrap/fonts',
+                    src: '*',
+                    dest: 'public/fonts/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/leaflet-dist/images',
+                    src: '*',
+                    dest: 'public/images/leaflet/'
+                }, {
+                    expand: true,
+                    cwd: 'app/assets/bower/fuelux/fonts',
+                    src: '*',
+                    dest: 'public/fonts/'
+                }, {
+                    expand: true,
+                    cwd: 'assets/fonts/',
+                    src: '**/*.woff',
+                    dest: 'public/fonts/'
+                }]
             }
         },
 
@@ -84,8 +160,8 @@ module.exports = function(grunt) {
             },
 
             server_js: {
-              files: ['config.json', 'assets/js/libs/**/*.js'],
-                tasks: [ 'develop'],
+                files: ['config.json', 'assets/js/libs/**/*.js'],
+                tasks: ['develop'],
                 options: {
                     interrupt: false,
                     nospawn: true
@@ -160,7 +236,7 @@ module.exports = function(grunt) {
                         "build/less.css",
                         "assets/css/**/*.css",
                         "app/assets/bower/leaflet-dist/leaflet.css",
-                        "assets/js/libs/bootstrap-slider/css/bootstrap-slider.css",
+                        "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css",
                         "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]
                 }
@@ -175,7 +251,7 @@ module.exports = function(grunt) {
                     src: ['**/*.svg'], // Actual pattern(s) to match.
                     dest: 'public/images', // Destination path prefix.
                     ext: '.min.svg' // Dest filepaths will have this extension.
-                    // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
+                        // ie: optimise img/src/branding/logo.svg and store it in img/branding/logo.min.svg
                 }]
             }
         },
@@ -194,6 +270,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-jsbeautifier');
+    grunt.loadNpmTasks('grunt-githooks');
 
     // Conflict with the bower-requirejs 'bower' task if not renamed.
     grunt.loadNpmTasks('grunt-bower-task');
@@ -209,6 +287,7 @@ module.exports = function(grunt) {
     // Task registration.
     // Jade must be compiled to templates before the requirejs task can run,
     // because the Backbone views require templates.
-    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs', 'copy',  'less', 'svgmin', 'cssmin', 'develop', 'watch']);
-
+    grunt.registerTask('default', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:dev', 'copy', 'less', 'svgmin', 'cssmin', 'develop', 'watch']);
+    grunt.registerTask('release', ['clean', 'bower_install', 'bower', 'jade', 'requirejs:optimize', 'copy', 'less', 'svgmin', 'cssmin']);
+    grunt.registerTask('tidy', ['jsbeautifier'])
 };

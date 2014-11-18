@@ -12,9 +12,12 @@ html(lang='en')
 		script.
 
 			// Interpolate some server-side configs into the client setup.
+			// For development mode, consider setting bypassGps to "true"
 			var appConfig = appConfig || {};
 			appConfig.platforms = !{JSON.stringify(platforms)};
+			appConfig.APM = !{JSON.stringify(APM)};
 			appConfig.mapProxyUrl = "#{mapProxyUrl}";
+			appConfig.bypassGps = #{bypassGps}
 
 	body.fuelux
 		nav#main-navbar.navbar.navbar-default(role="navigation")
