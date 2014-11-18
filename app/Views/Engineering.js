@@ -26,7 +26,7 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app', 'Models/Connecti
     var EngineeringView = Backbone.View.extend({
 
         el: '#engineering',
-        template: templates['app/Templates/engineering'],
+        template: templates['app/Templates/Engineering'],
 
         initialize: function() {
             _.bindAll(this, 'render', 'updatePlatform', 'updateConnection');
