@@ -18,6 +18,9 @@
     "fuelux": "~3.0.0",
     "modernizr": "~2.8.3",
     "seiyria-bootstrap-slider": "~4.2",
-    "leaflet.freedraw": "~1.1.1"
+    "leaflet.freedraw": "~1.1.1",
+    "d3": "~3.4.13",
+    "evispa-timo-jsclipper": "*",
+    "concavehull": "~0.1.2"
   }
 }

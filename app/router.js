@@ -12,6 +12,7 @@ define([
     'bootstrap-growl',
 
     'routines/freeFlight/Routine',
+    'routines/paths/Routine',
 
     // Models
     'Models/Mission',
@@ -26,6 +27,7 @@ define([
 ], function(app, _, Backbone, $, require, rf, BG,
 
     RoutineFreeFlight,
+    RoutinePaths,
 
     Mission,
     Platform,
@@ -62,11 +64,6 @@ define([
                 socket: this.socket
             });
             this.mission.fetch();
-
-            var Routine = require(this.getRoutineName());
-            this.routine = new Routine({
-                mission: this.mission
-            });
 
             this.globalGuiView = new GlobalGuiView().render();
 
@@ -180,7 +177,13 @@ define([
             this.selectView.render();
         },
 
+        // By the time we enter the Planning phase, we've got enough info to construct the right routine.
         planning: function() {
+
+            var Routine = require(this.getRoutineName());
+            this.routine = new Routine({
+                mission: this.mission
+            });
 
             this.showOnly('flightWizard');
             $('#flightWizard').wizard('selectedItem', {
@@ -274,12 +277,14 @@ define([
             }
         },
 
-        // TODO GH#96
+        // TODO GH#96.  Needs a real plugin architecture!
         getRoutineName: function() {
 
-            // Pending real plugin architecture, hardcode to free flight mode.
-            return routineName = 'routines/freeFlight/Routine';
-
+            if ( 'Paths' === this.mission.get('mission') ) {
+                return routineName = 'routines/paths/Routine';
+            } else {
+                return routineName = 'routines/freeFlight/Routine';
+            }
         }
 
     });
