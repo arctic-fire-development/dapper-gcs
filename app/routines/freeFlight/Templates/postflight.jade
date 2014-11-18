@@ -1,0 +1,141 @@
+#freeFlightPostFlight.col-md-12
+  h2 Post&ndash;flight steps
+  .row
+    .col-md-6
+      h3 Outcomes &amp; notes
+      ul.list-group.checklist
+
+        li.list-group-item.manual
+          span.txt Was the flight a success?
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="success" id="success_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="success" id="success_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightSuccessDescription")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
+
+      form(role="form")
+        div.form-group
+          label(for="flightLogNotes") Flight Log Notes
+          textarea("textarea", rows="4", class="form-control", id="flightLogNotes", name="flightLogNotes", placeholder="What happened during this flight?")
+          p.help-block These notes are saved for your records.
+
+    .col-md-6
+      h3 Checklist
+      ul.list-group.checklist
+
+          li.list-group-item.manual
+            span.txt Vehicle condition inspected?
+            .groupWrapper
+              .btn-group(data-toggle="buttons")
+                label.btn.btn-danger.btn-sm.active
+                  <input checked type="radio" name="damage" id="damage_no"/> No
+                label.btn.btn-success.btn-sm
+                  <input type="radio" name="damage" id="damage_yes"/> Yes
+              button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightVehicleInspection")
+                span.glyphicon.glyphicon-question-sign
+            .clearfix
+
+          li.list-group-item.manual
+            span.txt Site cleanup and teardown?
+            .groupWrapper
+              .btn-group(data-toggle="buttons")
+                label.btn.btn-danger.btn-sm.active
+                  <input checked type="radio" name="damage" id="damage_no"/> No
+                label.btn.btn-success.btn-sm
+                  <input type="radio" name="damage" id="damage_yes"/> Yes
+              button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightCleanup")
+                span.glyphicon.glyphicon-question-sign
+            .clearfix
+
+          li.list-group-item.manual
+            span.txt Payload data bagged and tagged?
+            .groupWrapper
+              .btn-group(data-toggle="buttons")
+                label.btn.btn-danger.btn-sm.active
+                  <input checked type="radio" name="damage" id="damage_no"/> No
+                label.btn.btn-success.btn-sm
+                  <input type="radio" name="damage" id="damage_yes"/> Yes
+              button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#postFlightData")
+                span.glyphicon.glyphicon-question-sign
+            .clearfix
+
+  .row
+    .col-md-12
+      form(role="form")
+        div.form-group
+          a.pull-right.continue.btn.btn-primary.btn-lg Finish
+
+#postFlightSuccessDescription.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;<span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;&nbsp;Was the flight successful?
+      .modal-body
+        p Was this a successful flight?
+          | We'll use your answer here to suggest additional troubleshooting steps if the flight didn't go well.
+
+        ul
+          li Did the drone collect the data you were after?
+          li Did the drone demonstrate erratic behavior?
+          li Was there a crash or other unexpected flight issues?
+          li Did you forget to bring any critical equipment?
+
+      .modal-footer
+        button.btn.btn-primary(data-dismiss="modal") Done
+
+#postFlightVehicleInspection.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-search"></span>&nbsp;&nbsp;Post-flight vehicle inspection
+      .modal-body
+        p Inspecting the vehicle after a flight can identify things to be fixed before doing new flights, and
+            | help planning for ordering replacement parts early.
+        ul
+          li Are any propellers loose?
+          li Do all motors turn smoothly when rotated?
+          li Are there any loose parts or rattles when the machine is shaken?
+          li Did the machine get wet at all?
+
+      .modal-footer
+        button.btn.btn-primary(data-dismiss="modal") Done
+
+#postFlightCleanup.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-trash"></span>&nbsp;&nbsp;Teardown &amp; cleanup
+      .modal-body
+        p Leaving a clean flight site and not forgetting any tools in the field is always a good thing.
+
+        ul
+          li Are all items packed out for the flight accounted for and packed back in?
+          li Is the site clean, trash collected, ground control points collected?
+
+      .modal-footer
+        button.btn.btn-primary(data-dismiss="modal") Done
+
+#postFlightData.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-camera"></span>&nbsp;&nbsp;Post-flight data management
+      .modal-body
+        p Before calling a flight finished, it&rsquo;s a good idea to get a general sense that the data you collected
+            | matches your expectations.  And, taking a few extra steps to ensure the data is in a known location can
+            | save a lot of time.
+
+        ul
+          li Do a quick review/preview of the data by viewing some of the images/video.  Is anything obviously wrong?
+          li Is the data backed up?  Doing an on-site copy of the data to a backup laptop or hard drive can reduce the risk of data loss.  The time
+            | it takes to do a post-flight data backup is less expensive than having to redo the flights.
+          li Do you know where all SD cards, USB sticks and other portable storage media are?  The goal is to make sure that
+            | the data doesn't drive off in the truck loaded with the drone and the camera, while another person needed to
+            | get the data to do work.
+
+      .modal-footer
+        button.btn.btn-primary(data-dismiss="modal") Done

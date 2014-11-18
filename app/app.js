@@ -5,16 +5,16 @@ define([
     "backbone",
     "io",
     "modernizr",
-    "bootstrap-growl"
-], function($, _, Backbone, io, Modernizr, BS) {
+    "bootstrap-growl",
+    "moment"
+], function($, _, Backbone, io, Modernizr, BS, moment) {
 
     // Modernizr doesn't export via Requirejs, so we just reference it from the window object.
     var Modernizr = window.Modernizr;
 
     // Test for some required features to continue running the local app.
     // Just check for falsy.
-    if(false == Modernizr.localstorage
-        || false == Modernizr.websockets) {
+    if (false == Modernizr.localstorage || false == Modernizr.websockets) {
         window.location = '/unsupported';
     }
 
@@ -23,7 +23,7 @@ define([
 
     // TODO GH#180 Wrap this up in a debugging context flag
     // It defines the log level of socket.io.  Consider using same library for our own code?
-    localStorage.debug='';
+    localStorage.debug = '';
 
     // Provide a global location to place configuration settings and module
     // creation.
@@ -33,14 +33,17 @@ define([
         socket: socket,
 
         growl: function(message, type, delay) {
-
+            message = '<div class="growl_ts">' + moment().format('h:mm:ss') + '</div><div>' + message + '</div>';
             type = type || 'info';
             delay = delay || 6000; // ms
 
             $.bootstrapGrowl(message, {
                 ele: 'body', // which element to append to
                 type: type, // (null, 'info', 'danger', 'success')
-                offset: {from: 'top', amount: 60}, // 'top', or 'bottom'
+                offset: {
+                    from: 'top',
+                    amount: 60
+                }, // 'top', or 'bottom'
                 align: 'right', // ('left', 'right', or 'center')
                 width: 250, // (integer, or 'auto')
                 delay: delay, // Time while the message will be displayed. It's not equivalent to the *demo* timeOut!

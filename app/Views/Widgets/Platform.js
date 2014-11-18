@@ -18,7 +18,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone,
 
             var LatLng = new L.LatLng(lat, lon);
 
-            if(false === this.hasRendered) {
+            if (false === this.hasRendered) {
 
                 this.myIcon = L.icon({
                     iconUrl: '/images/quadcopter.png',
@@ -37,7 +37,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone,
                 this.hasRendered = true;
             }
 
-            var m = new L.CircleMarker(LatLng).setRadius(10);
+            var m = new L.circle(LatLng).setRadius(this.model.get('hdop'));
             this.breadcrumb.unshift(m);
 
             if (this.breadcrumb.length > 50) {

@@ -34,7 +34,9 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
                 attributionControl: false
             }).setView([64.9, -147.1], 18);
 
-            new L.Control.Zoom( {position: 'topright' }).addTo(this.map);
+            new L.Control.Zoom({
+                position: 'topright'
+            }).addTo(this.map);
             var wms = new L.tileLayer.wms(appConfig.mapProxyUrl, {
                 layers: 'bing',
                 format: 'image/png',
@@ -55,7 +57,9 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
             this.resizeMap();
 
             // This will prevent right-clicking on the map popping a context menu, which isn't helpful here.
-            this.map.on('contextmenu', function(e) { e.preventDefault(); });
+            this.map.on('contextmenu', function(e) {
+                e.preventDefault();
+            });
 
             // When home position is established, mark it on the map.
             this.model.on('armed', function() {

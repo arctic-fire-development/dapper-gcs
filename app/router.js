@@ -16,6 +16,7 @@ define([
     // Models
     'Models/Mission',
     'Models/Platform',
+    'Models/Connection',
 
     // Dependent views
     'Views/GlobalGui',
@@ -28,25 +29,27 @@ define([
 
     Mission,
     Platform,
+    Connection,
 
     GlobalGuiView,
     HomeView,
     SelectView,
     EngineeringView
 
-    ) {
+) {
 
     var Router = Backbone.Router.extend({
 
         routes: {
             '': 'home',
-            'select' : 'select',
-            'mission' : 'mission',
-            'mission/planning' : 'planning',
-            'mission/preflight' : 'preflight',
-            'mission/fly' : 'fly',
-            'engineering' : 'engineering',
-            'mission/current' : 'resumeCurrentMissionStep'
+            'select': 'select',
+            'mission': 'mission',
+            'mission/planning': 'planning',
+            'mission/preflight': 'preflight',
+            'mission/fly': 'fly',
+            'mission/postflight': 'postflight',
+            'engineering': 'engineering',
+            'mission/current': 'resumeCurrentMissionStep'
         },
 
         initialize: function() {
@@ -55,7 +58,9 @@ define([
 
             this.socket = app.socket;
 
-            this.mission = new Mission({}, { socket: this.socket });
+            this.mission = new Mission({}, {
+                socket: this.socket
+            });
             this.mission.fetch();
 
             var Routine = require(this.getRoutineName());
@@ -92,18 +97,20 @@ define([
         },
 
         handleRoutineStarted: function() {
-            if( true !== this.mission.isOperator ) {
+            if (true !== this.mission.isOperator) {
                 this.globalGuiView.renderRoutineStartedModalOverride();
             }
         },
 
         handleRoutineEnded: function() {
-
+            if (true !== this.mission.isOperator) {
+                this.globalGuiView.renderRoutineEndedModalOverride();
+            }
         },
 
         handleOperatorPromotion: function() {
             // Only deal if this is a change.
-            if(false === this.mission.isOperator)  {
+            if (false === this.mission.isOperator) {
                 this.mission.isOperator = true;
                 $('#indicators li.isOperator').show();
                 $('#indicators li.isObserver').hide();
@@ -113,7 +120,7 @@ define([
 
         handleOperatorDemotion: function() {
             // Only squawk if this is a change.
-            if(true === this.mission.isOperator) {
+            if (true === this.mission.isOperator) {
                 this.mission.isOperator = false;
                 $('#indicators li.isOperator').hide();
                 $('#indicators li.isObserver').show();
@@ -130,22 +137,30 @@ define([
         // Pass the name of the div to show, others are hidden for 'navigation' :)
         showOnly: function(name) {
             var panes = ['home', 'flightWizard', 'fly', 'engineering'];
-            _.each( _.reject(panes, function(div){ return div === name; }) , function(e){ $('#' + e).hide(); });
-            $('#'+name).show();
+            _.each(_.reject(panes, function(div) {
+                return div === name;
+            }), function(e) {
+                $('#' + e).hide();
+            });
+            $('#' + name).show();
         },
 
         // Set the active top-level bootstrap item.
         setActiveMenu: function(menu) {
             $('#navbar ul.navbar-nav li').each(function() {
-                (menu == $(this).data('name')) ? $(this).addClass('active') : $(this).removeClass('active');
+                (menu == $(this).data('name')) ? $(this).addClass('active'): $(this).removeClass('active');
             });
         },
 
         resumeCurrentMissionStep: function() {
-            if('not started' !== this.mission.get('status')) {
-                this.navigate('mission/'+this.mission.get('status'), { trigger: true });
+            if ('not started' !== this.mission.get('status')) {
+                this.navigate('mission/' + this.mission.get('status'), {
+                    trigger: true
+                });
             } else {
-                this.navigate('plan', { trigger: true });
+                this.navigate('plan', {
+                    trigger: true
+                });
             }
         },
 
@@ -158,7 +173,9 @@ define([
             this.showOnly('flightWizard');
 
             // Prepare the wizard!  Maybe should be moved to its own view at some point?
-            $('#flightWizard').wizard('selectedItem', { step: 1 });
+            $('#flightWizard').wizard('selectedItem', {
+                step: 1
+            });
 
             this.selectView.render();
         },
@@ -166,10 +183,14 @@ define([
         planning: function() {
 
             this.showOnly('flightWizard');
-            $('#flightWizard').wizard('selectedItem', {step: 2});
+            $('#flightWizard').wizard('selectedItem', {
+                step: 2
+            });
 
             this.routine.planning().then(_.bind(function() {
-                this.navigate('mission/preflight', { trigger: true });
+                this.navigate('mission/preflight', {
+                    trigger: true
+                });
             }, this));
         },
 
@@ -182,11 +203,17 @@ define([
             this.socket.emit('routine:started');
 
             this.showOnly('flightWizard');
-            $('#flightWizard').wizard('selectedItem', {step: 3});
+            $('#flightWizard').wizard('selectedItem', {
+                step: 3
+            });
 
-            this.mission.set({status:'preflight'});
+            this.mission.set({
+                status: 'preflight'
+            });
             this.routine.preflight().then(_.bind(function() {
-                this.navigate('mission/fly', { trigger: true });
+                this.navigate('mission/fly', {
+                    trigger: true
+                });
             }, this));
         },
 
@@ -194,26 +221,55 @@ define([
             this.showOnly('fly');
             // TODO this can't be right/here, otherwise any observer will also trigger this action.
             // GH#289
-            this.mission.set({status:'fly', active: true});
-            this.routine.fly();
+            this.mission.set({
+                status: 'fly',
+                active: true
+            });
+            this.routine.fly().then(_.bind(function() {
+                this.navigate('mission/postflight', {
+                    trigger: true
+                });
+            }, this));
+        },
+
+        postflight: function() {
+            // Alert all clients that a routine is about to end.
+            this.socket.emit('routine:ended');
+
+            this.showOnly('flightWizard');
+            $('#flightWizard').wizard('selectedItem', {
+                step: 5
+            });
+            this.mission.set({
+                status: 'postflight',
+                active: false
+            });
+            this.routine.postflight().then(_.bind(function() {
+                this.navigate('', {
+                    trigger: true
+                });
+            }, this));
         },
 
         // TODO GH#290 This handles the menu item, so it needs to dispatch you to the current state (flight, planning, etc).
         // Well... maybe not.  This gets called when, for example, user clicks on Continue button during Select phase.
         // Not sure if this is just some bit rot or what...?
         mission: function() {
-            this.showOnly('wizard');
-            this.navigate('mission/planning', { trigger: true });
+            this.showOnly('flightWizard');
+            this.navigate('mission/planning', {
+                trigger: true
+            });
         },
 
         // Simple flag to prevent re-rendering Engineering view.  Was GH#291.
         hasRenderedEngineering: false,
         engineering: function() {
             this.showOnly('engineering');
-            if( false === this.hasRenderedEngineering ) {
+            if (false === this.hasRenderedEngineering) {
                 this.engineeringView = new EngineeringView({
                     model: new Platform()
                 }).render();
+
                 this.hasRenderedEngineering = true;
             }
         },
