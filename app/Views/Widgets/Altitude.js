@@ -3,7 +3,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
     var AltitudeWidget = Backbone.View.extend({
 
         el: '#altitudeWidget',
-        template: templates['app/Templates/altitudeWidget'],
+        template: templates['app/Templates/Widgets/Altitude'],
         className: 'widget',
         hasRendered: false,
 
