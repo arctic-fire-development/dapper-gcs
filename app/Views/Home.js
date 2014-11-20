@@ -5,7 +5,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app', 'moment', 'fuelux'], functio
     var HomeView = Backbone.View.extend({
 
         el: '#home',
-        template: templates['app/Templates/home'],
+        template: templates['app/Templates/Home'],
 
         render: function() {
 

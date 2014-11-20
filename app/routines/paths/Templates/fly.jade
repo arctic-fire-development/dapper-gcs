@@ -1,0 +1,30 @@
+.paths.row
+	#widgets(style="display:none").col-md-2
+		#speedWidget.widget
+		#altitudeWidget.widget
+		#batteryWidget.widget
+
+		#controls.widget
+			button.launch.btn.btn-block.btn-primary.btn-lg <span class="glyphicon glyphicon-plane"></span> Fly
+			button.home.btn.btn-block.btn-success.btn-lg(style="display: none") <span class="glyphicon glyphicon-home"></span>  Home
+			button.stop.btn.btn-block.btn-warning.btn-lg(style="display: none") <span class="glyphicon glyphicon-stop"></span>  Stop
+
+		button.postflight.btn.btn-block.btn-primary-lg Done!
+
+	.col-md-10
+		div#mapWidget
+
+#waitForGps.alert.alert-info
+	<div class="loader" data-initialize="loader" id="myLoader"></div>
+	p Waiting for GPS fix before rendering map&hellip;
+
+#postflightConfirmation.modal
+	.modal-dialog
+		.modal-content
+			.modal-header
+				h4.modal-title <span class="glyphicon glyphicon-logout"></span>&nbsp;Routine finished?
+			.modal-body
+				p If you&rsquo;re done flying this routine, you can continue on to the postflight steps.
+			.modal-footer
+				button.confirmPostflight.btn.btn-success(data-dismiss="modal") I&rsquo;m done flying.
+				button.btn.btn-primary(data-dismiss="modal") Go back to flight
