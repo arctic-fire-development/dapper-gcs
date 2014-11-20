@@ -27,7 +27,8 @@ require.config({
         "leaflet-touch-extend": "assets/leaflet-touch-extend",
         modernizr: "assets/bower/modernizr/modernizr",
         "seiyria-bootstrap-slider": "assets/bower/seiyria-bootstrap-slider/js/bootstrap-slider",
-        "jquery-bridget": "assets/bower/jquery-bridget/jquery.bridget"
+        "jquery-bridget": "assets/bower/jquery-bridget/jquery.bridget",
+        "leaflet.freedraw": "assets/bower/leaflet.freedraw/dist/leaflet.freedraw"
     },
     shim: {
         backbone: {
