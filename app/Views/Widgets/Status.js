@@ -1,4 +1,4 @@
-define(['app','backbone', 'JST'], function(app, Backbone, templates) {
+define(['app','backbone', 'JST', 'underscore'], function(app, Backbone, templates, _) {
 
     var StatusWidget = Backbone.View.extend({
 
@@ -8,15 +8,19 @@ define(['app','backbone', 'JST'], function(app, Backbone, templates) {
 
         initialize: function() {
             _.bindAll(this, 'render');
-            this.model.on('change', this.render);
-            app.socket.on('status', function(data){
-                console.log(data);
-            });
+            //this.model.on('change', this.render);
+
+            app.socket.on('status:custom_mode', _.bind(function(message){
+                this.render();
+            }, this));
         },
 
         render: function() {
-
-            this.$el.html(this.template());
+            console.log(message);
+            var data = {
+                status: "hello"
+            };
+            this.$el.html(this.template(data));
 
         }
 

@@ -339,6 +339,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         renderWidgets: function() {
+            try {
+
 
             // Instantiate subviews, now that their elements are present on the page
             // GOTCHA: when instantiated, these hook up some event-based binding
@@ -371,12 +373,16 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             });
 
             // Render party
+            //this.statusWidget.render();
             this.speedWidget.render();
             this.altitudeWidget.render();
             this.batteryWidget.render();
             this.mapWidget.render();
             this.bindAltitudeSliderEvents();
-
+        } catch(e){
+            console.log(e);
+            console.log(e.stack);
+        }
             try {
                 // Must configure/render this only after the map has been rendered.
                 this.platformWidget.map = this.mapWidget.map;

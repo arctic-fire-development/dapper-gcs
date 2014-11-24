@@ -22,7 +22,8 @@ var mavlink = require('mavlink_ardupilotmega_v1.0'),
     platforms = require('./assets/js/libs/platforms.js'),
     _ = require('underscore'),
     Users = require('./assets/js/libs/Users.js'),
-    RoutineObj = require('./assets/js/libs/Routine.js');
+    RoutineObj = require('./assets/js/libs/Routine.js'),
+    Platform = require('./Models/Platform.js');
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -117,7 +118,21 @@ var mavParams = new MavParams(mavlinkParser, logger);
 app.set('mavParams', mavParams);
 
 var platform = {},
-    connection = {};
+    connection = {},
+    serverPlatform = new Platform();
+
+serverPlatform.on('change', function(){
+    io.emit('serverPlatform', serverPlatform.toJSON());
+    //console.log(util.inspect(serverPlatform.toJSON()));
+});
+
+serverPlatform.on('all', function(eventName){
+    if ('change' !== eventName){
+        logger.info('serverPlatform event triggered: ', eventName);
+    }
+});
+
+serverPlatform.io = io;
 
 var routine = new RoutineObj(logger, app, io);
 var users = new Users(logger, io);
@@ -390,6 +405,8 @@ function bindClientEventBridge() {
             alt: message.alt / 1000,
             relative_alt: message.relative_alt / 1000
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
     });
 
@@ -402,7 +419,10 @@ function bindClientEventBridge() {
             custom_mode: message.custom_mode,
             system_status: message.system_status
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
+        io.emit('status:custom_mode', message);
     });
 
     mavlinkParser.on('SYS_STATUS', function(message) {
@@ -413,6 +433,8 @@ function bindClientEventBridge() {
             drop_rate_comm: message.drop_rate_comm,
             errors_comm: message.errors_comm
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
     });
 
@@ -422,6 +444,8 @@ function bindClientEventBridge() {
             groundspeed: message.groundspeed * 2.23694, // m/s to miles/hour
             heading: message.heading
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
     });
 
@@ -431,6 +455,8 @@ function bindClientEventBridge() {
             satellites_visible: message.satellites_visible,
             hdop: message.eph / 100 // cm to m
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
     });
 
@@ -441,10 +467,14 @@ function bindClientEventBridge() {
             rxerrors: message.rxerrors,
             rxfixed: message.fixed
         });
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('platform', platform);
     });
 
     mavlinkParser.on('STATUSTEXT', function(message) {
+        serverPlatform.set(platform);
+        serverPlatform.trigger('change');
         io.emit('STATUSTEXT', message.text);
         logger.info('status text from APM: ' + util.inspect(message.text));
     });
