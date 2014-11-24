@@ -9,7 +9,7 @@ define(['app','backbone', 'JST'], function(app, Backbone, templates) {
         initialize: function() {
             _.bindAll(this, 'render');
             this.model.on('change', this.render);
-            app.socket.on('linkStatus', function(data){
+            app.socket.on('status', function(data){
                 console.log(data);
             });
         },
