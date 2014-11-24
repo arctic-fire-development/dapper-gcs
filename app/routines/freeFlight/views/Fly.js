@@ -6,6 +6,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
     'Models/Mission',
 
     // Widgets (subviews)
+    'Views/Widgets/Status',
     'Views/Widgets/Speed',
     'Views/Widgets/Map',
     'Views/Widgets/Altitude',
@@ -17,6 +18,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
     Mission,
 
     // Widgets (subviews)
+    StatusWidget,
     SpeedWidget,
     MapWidget,
     AltitudeWidget,
@@ -343,6 +345,10 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             // callbacks to the underlying model.  So even though the GUI may not be
             // fully built, it's possible for them to fire render() events that will mess
             // things up.  Wait until we have GPS fix so we can do this in an orderly fashion.
+            this.statusWidget = new StatusWidget({
+                model: this.model.platform
+            });
+
             this.speedWidget = new SpeedWidget({
                 model: this.model.platform
             });
