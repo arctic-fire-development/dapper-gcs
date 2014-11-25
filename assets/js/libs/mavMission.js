@@ -255,7 +255,11 @@ MavMission.prototype.getMissionItems = function() {
 
 // Given lat/lon, build a two-item mission that takes off and hovers.
 // Returns an array of mission items.
-MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
+MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt, ifContinue) {
+
+    // Default to not continue to the next waypoints.
+    ifContinue = (ifContinue) ? 1 : 0;
+
     if (!lat || !lon || !alt) {
         log.error('Lat [%d], lon [%d], alt [%d] zero or undefined in buildTakeoffThenHoverMission', lat, lon, alt);
         throw new Error('Lat, Lon, or Altitude were zero/undefined when asked to build takeoff mission');
@@ -284,7 +288,7 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_TAKEOFF,
         APM.mission_current.inactive,
-        0, // end of mission, platform should hover after this.
+        ifContinue, // end of mission, platform should hover after this.
         0, // 4 params, unused for this message type
         0,
         0,
@@ -295,6 +299,40 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
     );
 
     return [takeoff, hover];
+};
+
+// Given a home location and a list of lat/lons (array of arrays), build a list of MAVLink mission items.
+MavMission.prototype.buildAutoMission = function(currentLocation, latLngs, takeoffAltitude) {
+
+    // Build the takeoff component of the path flight, with the flag to continue to subsequent items
+    var missionItems = this.buildTakeoffThenHoverMission(currentLocation[0], currentLocation[1], takeoffAltitude, true);
+
+    // Append subsequent items
+    _.each(latLngs, function(latLng, index) {
+
+        // If this is the last mission item, don't auto-continue
+        var ifContinue = (index === missionItems.length - 1) ? 0 : 1;
+
+            missionItems.push(new mavlink.messages.mission_item(
+            mavlinkParser.srcSystem,
+            mavlinkParser.srcComponent,
+            missionItems.length, // sequence number,
+            mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+            mavlink.MAV_CMD_NAV_WAYPOINT,
+            APM.mission_current.inactive,
+            ifContinue, // end of mission, platform should hover after this.
+            0, // 4 params, unused for this message type
+            0,
+            0,
+            0,
+            latLng[0].toFixed(7),
+            latLng[1].toFixed(7),
+            takeoffAltitude
+        ));
+    });
+
+    return missionItems;
+
 };
 
 // Dumps current mission plan to console in QGC format, should be able

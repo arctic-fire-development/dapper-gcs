@@ -4,7 +4,16 @@
       .modal-header
         h4.modal-title <span class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;Draw a flight path
       .modal-body
-        p Use the map below to zoom into the area you're going to fly.  As you zoom and pan, tiles are saved for offline use.
-        #pathPlannerMapWidget(style="height: 500px")
+        p Use the map below to zoom into the area you're going to fly.  As you zoom and pan, tiles are saved for offline use.  Then, you can draw and edit the path you want to fly.
+        .btn-group(data-toggle="buttons")
+            label.btn.btn-default.active.pan
+                input(type="radio", name="mode", value="pan", checked="checked")
+                span.glyphicon.glyphicon-search
+                | &nbsp; Zoom &amp; pan
+            label.btn.btn-default.draw
+                input(type="radio", name="mode", value="draw")
+                span.glyphicon.glyphicon-pencil
+                | &nbsp; Draw
+        section#pathPlannerMapWidget(style="height: 500px").map
       .modal-footer
         button.close.btn.btn-primary(data-dismiss="modal") Save and continue

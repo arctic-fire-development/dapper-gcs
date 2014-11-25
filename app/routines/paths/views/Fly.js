@@ -145,27 +145,34 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // Swap the button text immediately for responsiveness, but disable it
             this.$el.find('button.launch').html('Launching&hellip;').attr('disabled', 'disabled');
+            console.log(this.path.get('latLngs'));
 
-            Q($.get('/drone/launch')).then(_.bind(function() {
+            Q($.post('/drone/mission/load', {
+                latLngs: _.map(this.path.get('latLngs'), function(latLng) { return [latLng.lat, latLng.lng] })
+            })).then(_.bind(function() {
 
-                // Swap buttons out, restore 'Fly' text on launch button
-                this.$el.find('button.launch').html('Fly').hide();
-                this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
+                Q($.get('/drone/launch/path')).then(_.bind(function() {
 
-                // Enable RTL when craft is hovering, this is the first mode the craft will enter
-                // after its auto program is finished so we can use it as an indicator that craft is ready
-                // for manual user control.
-                this.model.platform.on('mode:hover', function() {
-                    this.$el.find('button.home').attr('disabled', false);
-                }, this);
+                    // Swap buttons out, restore 'Fly' text on launch button
+                    this.$el.find('button.launch').html('Fly').hide();
+                    this.$el.find('button.home').show().attr('disabled', 'disabled'); // show, but disable until craft starts hovering
 
-                // Enable altitude control & fly to point.
-                // TODO GH#134, these should only really be enabled when we know
-                // that the system is in flight.
-                this.enableAltitudeSlider();
-                this.enableFlyToPoint();
+                    // Enable RTL when craft is hovering, this is the first mode the craft will enter
+                    // after its auto program is finished so we can use it as an indicator that craft is ready
+                    // for manual user control.
+                    this.model.platform.on('mode:hover', function() {
+                        this.$el.find('button.home').attr('disabled', false);
+                    }, this);
 
+                    // Enable altitude control & fly to point.
+                    // TODO GH#134, these should only really be enabled when we know
+                    // that the system is in flight.
+                    this.enableAltitudeSlider();
+                    this.enableFlyToPoint();
+
+                }, this));
             }, this));
+
         },
 
         render: function() {
@@ -181,8 +188,20 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             } catch (e) {
                 console.log(e);
+                console.log(e.stack);
             }
             return this;
+        },
+
+        renderPath: function() {
+            alert('rendering path');
+            this.freeDraw = new L.FreeDraw({
+                multiplePolygons: false
+            });
+            this.mapWidget.map.addLayer(this.freeDraw);
+            this.freeDraw.predefinedPolygon(this.path.get('latLngs'));
+            console.log(this.freeDraw);
+            this.mapWidget.map.fitBounds(this.freeDraw.polygons[0].getBounds());
         },
 
         regenerateGuiState: function() {
@@ -190,6 +209,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.showControls();
             this.altitudeWidget.disable();
             this.unbindFlyToPoint();
+            this.renderPath();
 
             this.model.platform.isFlying().then(_.bind(function(ifFlying) {
                 if (false === ifFlying) return;

@@ -7,7 +7,9 @@ define(['backbone', 'JST', 'leaflet-dist', 'concavehull', 'd3', 'evispa-timo-jsc
         template: templates['app/routines/components/Templates/PathPlanner'],
 
         events: {
-            'click .close': 'close'
+            'click .close': 'close',
+            'click label.pan': 'setPanMode',
+            'click label.draw': 'setDrawMode'
         },
 
         updateParameters: function(e) {
@@ -19,8 +21,25 @@ define(['backbone', 'JST', 'leaflet-dist', 'concavehull', 'd3', 'evispa-timo-jsc
             this.$el.hide();
         },
 
+        setPanMode: function() {
+            this.freeDraw.setMode(L.FreeDraw.MODES.VIEW);
+        },
+
+        setDrawMode: function() {
+            this.freeDraw.setMode(L.FreeDraw.MODES.ALL ^ L.FreeDraw.MODES.DELETE);
+        },
+
         render: function() {
+            var hasRendered = false;
             this.$el.html(this.template()).show();
+            if(false === hasRendered) {
+                this.addBaseMap();
+                this.addDrawingLayer();
+            }
+            return this;
+        },
+
+        addBaseMap: function() {
 
             // Define specific path to default Leaflet images
             L.Icon.Default.imagePath = '/images/leaflet';
@@ -48,13 +67,22 @@ define(['backbone', 'JST', 'leaflet-dist', 'concavehull', 'd3', 'evispa-timo-jsc
                 this.map.invalidateSize(false);
             }, this));
 
-            // Hook in the drawing layers
-            this.map.addLayer(new L.FreeDraw({
-                mode: L.FreeDraw.MODES.CREATE | L.FreeDraw.MODES.EDIT
-            }));
-            return this;
-        }
+        },
 
+        addDrawingLayer: function() {
+
+            // Hook in the drawing layers
+            this.freeDraw = new L.FreeDraw({
+                multiplePolygons: false
+            });
+            this.map.addLayer(this.freeDraw);
+
+            // When the path is edited, save it
+            this.freeDraw.on('markers', _.bind(function getMarkers(eventData) {
+                this.model.set('latLngs', eventData.latLngs[0]);
+            }, this));
+
+        }
     });
 
     return PathPlanner;

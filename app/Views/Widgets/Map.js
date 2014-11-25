@@ -32,7 +32,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
                 scrollWheelZoom: false,
                 tap: true,
                 attributionControl: false
-            }).setView([64.9, -147.1], 18);
+            }).setView([64.9, -147.1], 6);
 
             new L.Control.Zoom({
                 position: 'topright'

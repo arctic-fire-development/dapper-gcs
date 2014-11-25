@@ -31,7 +31,12 @@ require.config({
         "leaflet.freedraw": "assets/bower/leaflet.freedraw/dist/leaflet.freedraw",
         d3: "assets/bower/d3/d3",
         "evispa-timo-jsclipper": "assets/bower/evispa-timo-jsclipper/clipper",
-        concavehull: "assets/bower/concavehull/dist/concavehull.min"
+        concavehull: "assets/bower/concavehull/dist/concavehull.min",
+        hammerjs: "assets/bower/hammerjs/hammer",
+        graham_scan: "assets/bower/graham_scan/graham_scan.min",
+        angular: "assets/bower/angular/angular",
+        leaflet: "assets/bower/leaflet/dist/leaflet",
+        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src"
     },
     shim: {
         backbone: {
