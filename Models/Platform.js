@@ -156,7 +156,6 @@ var Platform = Backbone.Model.extend({
             }
 
             this.io.emit('status:custom_mode', message);
-            console.log(message);
 
         }, this);
 

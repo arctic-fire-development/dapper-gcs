@@ -123,11 +123,10 @@ var platform = {},
 
 serverPlatform.on('change', function(){
     io.emit('serverPlatform', serverPlatform.toJSON());
-    //console.log(util.inspect(serverPlatform.toJSON()));
 });
 
 serverPlatform.on('all', function(eventName){
-    if ('change' !== eventName){
+    if ('change' !== eventName && 'change:lon' !== eventName && 'change:lat' !== eventName){
         logger.info('serverPlatform event triggered: ', eventName);
     }
 });
@@ -422,7 +421,6 @@ function bindClientEventBridge() {
         serverPlatform.set(platform);
         serverPlatform.trigger('change');
         io.emit('platform', platform);
-        io.emit('status:custom_mode', message);
     });
 
     mavlinkParser.on('SYS_STATUS', function(message) {
@@ -476,7 +474,6 @@ function bindClientEventBridge() {
         serverPlatform.set(platform);
         serverPlatform.trigger('change');
         io.emit('STATUSTEXT', message.text);
-        logger.info('status text from APM: ' + util.inspect(message.text));
     });
 
     uavConnectionManager.on('disconnected', function() {

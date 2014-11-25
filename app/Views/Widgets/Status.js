@@ -11,14 +11,18 @@ define(['app','backbone', 'JST', 'underscore'], function(app, Backbone, template
             //this.model.on('change', this.render);
 
             app.socket.on('status:custom_mode', _.bind(function(message){
-                this.render();
+                try{
+                    this.render(message);
+                }catch(e){
+                    console.log(e);
+                    console.log(e.stack);
+                }
             }, this));
         },
 
-        render: function() {
-            console.log(message);
+        render: function(message) {
             var data = {
-                status: "hello"
+                status: message
             };
             this.$el.html(this.template(data));
 
