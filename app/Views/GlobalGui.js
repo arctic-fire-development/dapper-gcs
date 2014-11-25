@@ -3,7 +3,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
     var GlobalGuiView = Backbone.View.extend({
 
         el: '#global',
-        template: templates['app/Templates/globalGui'],
+        template: templates['app/Templates/GlobalGui'],
         events: {
             'click #gotoFly': 'gotoFly',
             'click #gotoHome': 'gotoHome'

@@ -16,29 +16,32 @@ define([
 
     // Parent objects
     'routines/components/Routine',
+    'routines/components/Models/Path',
 
     // Dependent views
-    'routines/freeFlight/views/Planning',
-    'routines/freeFlight/views/Preflight',
-    'routines/freeFlight/views/Fly',
-    'routines/freeFlight/views/Postflight'
+    'routines/paths/views/Planning',
+    'routines/paths/views/Preflight',
+    'routines/paths/views/Fly',
+    'routines/paths/views/Postflight'
 
 ], function(app, _, $, Q, Backbone,
     Mission,
     Platform,
     Connection,
     BaseRoutine,
+    Path,
     PlanningView,
     PreflightView,
-    FreeFlightFlyView,
+    FlyView,
     PostflightView
 ) {
 
     var Routine = BaseRoutine.extend({
 
         initialize: function() {
+            this.set('path', new Path());
             BaseRoutine.prototype.initialize.apply(this);
-
+            console.log(this);
             // Assign views that will be invoked by the base class here.
             this.PreflightView = PreflightView;
         },
@@ -47,7 +50,8 @@ define([
             var deferred = Q.defer();
             var planningView = new PlanningView({
                 model: this.get('mission'),
-                deferred: deferred
+                deferred: deferred,
+                path: this.get('path')
             }).render();
             return deferred.promise;
         },
@@ -64,16 +68,19 @@ define([
                     // we don't want to sync or persist them.
                     this.get('mission').platform = this.platform;
                     this.get('mission').connection = this.connection;
-                    this.flyView = new FreeFlightFlyView({
+                    this.flyView = new FlyView({
                         model: this.get('mission')
                     });
+                    this.flyView.path = this.get('path');
                     this.flyView.deferred = flightCompletedDeferred;
                     this.flyView.render();
-                    this.flightInProgress = true;
                     this.bindServerClientSocketEvents(); // in parent code
+
+                    this.flightInProgress = true;
 
                 } catch (e) {
                     console.log(e);
+                    console.log(e.stack);
                 }
             }
             return flightCompletedDeferred.promise;

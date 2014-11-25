@@ -3,7 +3,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
     var BatteryWidget = Backbone.View.extend({
 
         el: '#batteryWidget',
-        template: templates['app/Templates/batteryWidget'],
+        template: templates['app/Templates/Widgets/Battery'],
         className: 'widget',
 
         initialize: function() {

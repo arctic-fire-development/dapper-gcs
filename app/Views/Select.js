@@ -3,7 +3,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
     var SelectView = Backbone.View.extend({
 
         el: '#select',
-        template: templates['app/Templates/select'],
+        template: templates['app/Templates/Select'],
         initialize: function() {
             _.bindAll(this, 'render', 'updateMission');
             this.listenTo(this.model, 'change', this.render);

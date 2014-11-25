@@ -2,7 +2,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
 
     var ConnectionWidget = Backbone.View.extend({
 
-        template: templates['app/Templates/connectionWidget'],
+        template: templates['app/Templates/Widgets/Connection'],
         className: 'widget',
 
         initialize: function() {
