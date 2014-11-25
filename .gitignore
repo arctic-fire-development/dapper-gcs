@@ -6,7 +6,7 @@ app/assets/bower/*
 config.json
 
 # No mapproxy cache
-etc/cache_data/
+etc/cache_data/*
 
 # No upstart generated files
 dapper-gcs.log
