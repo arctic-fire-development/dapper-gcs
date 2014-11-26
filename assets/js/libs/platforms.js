@@ -56,7 +56,12 @@ var platforms = [{
     name: 'ArduCopter (Simulation)',
     type: 'quadcopter',
     payloads: [],
-    missions: ['Free Flight'],
+    missions: ['Free Flight',
+    'Search and rescue',
+    'Infrastructure inspection',
+    'High-resolution mapping',
+    'Digital elevation model'
+    ],
     id: 0,
     parameters: sitlCopterParams,
     defaults: {
@@ -65,7 +70,7 @@ var platforms = [{
 }, {
     name: 'NES Ptarmigan',
     type: 'quadcopter',
-    payloads: ['GoPro', 'IR'],
+    payloads: ['GoPro', 'Flir IR', 'Methan Sensor', 'MicroSAR', 'LiDAR'],
     missions: [
     'Free flight',
     'Search and rescue',
@@ -81,7 +86,7 @@ var platforms = [{
 }, {
     name: '3DR Iris',
     type: 'quadcopter',
-    payloads: ['GoPro'],
+    payloads: ['GoPro', 'Flir IR', 'Methan Sensor', 'MicroSAR', 'LiDAR'],
     missions: [
         'Free flight',
         'Search and rescue',
@@ -97,7 +102,7 @@ var platforms = [{
 }, {
     name: '3DR Iris+',
     type: 'quadcopter',
-    payloads: ['GoPro'],
+    payloads: ['GoPro', 'Flir IR', 'Methan Sensor', 'MicroSAR', 'LiDAR'],
     missions: [
     'Free flight',
     'Search and rescue',
@@ -113,7 +118,7 @@ var platforms = [{
 }, {
     name: 'X8',
     type: 'plane',
-    payloads: ['GoPro'],
+    payloads: ['GoPro', 'Flir IR', 'Methan Sensor', 'MicroSAR', 'LiDAR'],
     missions: [
     'Free flight',
     'Search and rescue',
@@ -129,7 +134,7 @@ var platforms = [{
 }, {
     name: '3DR Aero',
     type: 'plane',
-    payloads: ['GoPro'],
+    payloads: ['GoPro', 'Flir IR', 'Methan Sensor', 'MicroSAR', 'LiDAR'],
     missions: [
     'Free flight',
     'Search and rescue',
