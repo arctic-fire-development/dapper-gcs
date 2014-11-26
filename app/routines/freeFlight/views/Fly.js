@@ -104,7 +104,10 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 // Detect when system has landed, then instruct disarm.
                 this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
-                        this.showButton('launch');
+                        this.$el.find('button.launch').hide();
+                        this.$el.find('button.stop').hide();
+                        this.$el.find('button.home').hide();
+                        this.$el.find('button.postflight').show();
                         this.$el.find('button.launch').removeAttr('disabled');
                     }, this));
                 }, this);
