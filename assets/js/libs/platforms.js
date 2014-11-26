@@ -53,7 +53,7 @@ var sitlCopterParams = [
 // Some below are commented out to demonstrate structure, but they shouldn't
 // be in the GUI at this point.
 var platforms = [{
-    name: 'ArduCopter (SITL)',
+    name: 'ArduCopter (Simulation)',
     type: 'quadcopter',
     payloads: [],
     missions: ['Free Flight'],
@@ -61,6 +61,22 @@ var platforms = [{
     parameters: sitlCopterParams,
     defaults: {
         topSpeed: 15 // kph
+    }
+}, {
+    name: 'NES Ptarmigan',
+    type: 'quadcopter',
+    payloads: ['GoPro', 'IR'],
+    missions: [
+    'Free flight',
+    'Search and rescue',
+    'Infrastructure inspection',
+    'High-resolution mapping',
+    'Digital elevation model'
+    ],
+    id: 1,
+    parameters: false,
+    defaults: {
+        topSpeed: 10 // kph
     }
 }, {
     name: '3DR Iris',
@@ -73,7 +89,55 @@ var platforms = [{
         'High-resolution mapping',
         'Digital elevation model'
     ],
-    id: 1,
+    id: 2,
+    parameters: false,
+    defaults: {
+        topSpeed: 10 // kph
+    }
+}, {
+    name: '3DR Iris+',
+    type: 'quadcopter',
+    payloads: ['GoPro'],
+    missions: [
+    'Free flight',
+    'Search and rescue',
+    'Infrastructure inspection',
+    'High-resolution mapping',
+    'Digital elevation model'
+    ],
+    id: 3,
+    parameters: false,
+    defaults: {
+        topSpeed: 10 // kph
+    }
+}, {
+    name: 'X8',
+    type: 'plane',
+    payloads: ['GoPro'],
+    missions: [
+    'Free flight',
+    'Search and rescue',
+    'Infrastructure inspection',
+    'High-resolution mapping',
+    'Digital elevation model'
+    ],
+    id: 4,
+    parameters: false,
+    defaults: {
+        topSpeed: 10 // kph
+    }
+}, {
+    name: '3DR Aero',
+    type: 'plane',
+    payloads: ['GoPro'],
+    missions: [
+    'Free flight',
+    'Search and rescue',
+    'Infrastructure inspection',
+    'High-resolution mapping',
+    'Digital elevation model'
+    ],
+    id: 5,
     parameters: false,
     defaults: {
         topSpeed: 10 // kph
