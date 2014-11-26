@@ -4,7 +4,7 @@
 
 exports.index = function(req, res) {
     res.render('index', {
-        title: 'DapperGCS',
+        title: 'Routine.ly',
         platforms: req.app.get('platforms'),
         mapProxyUrl: req.app.get('config').get('mapproxy:url'),
         APM: req.app.get('APM'),
