@@ -5,7 +5,7 @@
   },
 
   "mapproxy": {
-    "url":"http://gcs.local:8080/service"
+    "url":"http://localhost:8080/service"
   },
 
   "connection" : {
