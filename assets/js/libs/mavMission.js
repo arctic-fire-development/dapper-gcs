@@ -110,6 +110,9 @@ util.inherits(MavMission, events.EventEmitter);
 
 // http://qgroundcontrol.org/mavlink/waypoint_protocol
 MavMission.prototype.sendToPlatform = function() {
+
+    var deferred = Q.defer();
+
     log.silly('Sending mission to platform...');
 
     // send mission_count
@@ -131,12 +134,15 @@ MavMission.prototype.sendToPlatform = function() {
             self.writeToQgcFormat();
 
             mavlinkParser.removeListener('MISSION_ACK', ackMission);
-            self.emit('mission:loaded');
+            deferred.resolve();
+
         } else {
             log.error('Unexpected MISSION_ACK type received: %d', ack.type);
             throw new Error('Unexpected mission acknowledgement received in mavMission.js');
         }
     });
+
+    return deferred.promise;
 };
 
 // Read the current mission from the UAV, into this instance of MavMission.
@@ -235,15 +241,12 @@ MavMission.prototype.loadMission = function(mission) {
                 this.addMissionItem(missionItem);
             }, this);
 
-            this.sendToPlatform();
+            this.sendToPlatform().then(function() {
+                deferred.resolve();
+            });
 
         }, this))
         .done(); // rethrow errors
-
-    this.on('mission:loaded', function() {
-        log.info('Mission loaded successfully!');
-        deferred.resolve();
-    });
 
     return deferred.promise;
 
@@ -372,6 +375,55 @@ MavMission.prototype.writeToQgcFormat = function(filename) {
     } catch (e) {
         log.error(e);
     }
+};
+
+
+// Dumps current mission plan to console in QGC format, should be able
+// to copy/paste and load in APM planner to check the mission out.
+MavMission.prototype.readFromQgcFormat = function(filename) {
+    var deferred = Q.defer();
+
+    try {
+        log.verbose('Reading QGC format mission items from %s', filename);
+
+        var fs = require('fs');
+        var parse = require('csv-parse');
+        var mavlinkMissionItems = [];
+
+        var parser = parse({delimiter: '\t', comment: 'Q'}, function(err, data){
+
+            _.each(data, function(missionItem) {
+                // The strange order below is to map the QGC format into the constructor format
+                // for the mission_item MAVLink packet.
+                mavlinkMissionItems.push(new mavlink.messages.mission_item(
+                    mavlinkParser.srcSystem,
+                    mavlinkParser.srcComponent,
+                    missionItem[0],
+                    missionItem[2],
+                    missionItem[3],
+                    missionItem[1],
+                    missionItem[11],
+                    missionItem[4],
+                    missionItem[5],
+                    missionItem[6],
+                    missionItem[7],
+                    missionItem[8],
+                    missionItem[9],
+                    missionItem[10]
+                ));
+            });
+
+            deferred.resolve(mavlinkMissionItems);
+        });
+
+        fs.createReadStream("copter_mission.txt").pipe(parser);
+
+    } catch (e) {
+        log.error(e);
+        console.log(util.inspect(e));
+    }
+    return deferred.promise;
+
 };
 
 module.exports = MavMission;

@@ -223,11 +223,10 @@ app.post('/drone/mission/load', function(req, res) {
                 .then(function() {
                     deferred.resolve();
                 });
-
         });
 
     // Make this a qRetry GH#265
-    Q.when(deferred, function() {
+    Q.when(deferred.promise, function() {
         res.send(200);
     });
 });
@@ -257,9 +256,14 @@ function loadTakeoffMission() {
     return deferred.promise;
 }
 
+app.get('/drone/mission/read', function(req, res) {
+    var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+    mm.readFromQgcFormat();
+});
+
 // # TODO combine + refactor this functionality with /drone/launch  before finishing branch
 app.get('/drone/launch/path', function(req, res) {
-
+    logger.error('LAUNCH LAUNCH FFIRE FIRE LAUNCH');
     logger.debug('launching freeflight mission');
 
     try {

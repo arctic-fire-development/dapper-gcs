@@ -145,12 +145,10 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
             // Swap the button text immediately for responsiveness, but disable it
             this.$el.find('button.launch').html('Launching&hellip;').attr('disabled', 'disabled');
-            console.log(this.path.get('latLngs'));
 
             Q($.post('/drone/mission/load', {
                 latLngs: _.map(this.path.get('latLngs'), function(latLng) { return [latLng.lat, latLng.lng] })
-            })).then(_.bind(function() {
-
+            })).then(_.bind(function(data) {
                 Q($.get('/drone/launch/path')).then(_.bind(function() {
 
                     // Swap buttons out, restore 'Fly' text on launch button
@@ -194,13 +192,11 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
         },
 
         renderPath: function() {
-            alert('rendering path');
             this.freeDraw = new L.FreeDraw({
                 multiplePolygons: false
             });
             this.mapWidget.map.addLayer(this.freeDraw);
             this.freeDraw.predefinedPolygon(this.path.get('latLngs'));
-            console.log(this.freeDraw);
             this.mapWidget.map.fitBounds(this.freeDraw.polygons[0].getBounds());
         },
 
