@@ -1,10 +1,10 @@
 .col-md-12
-  h2 Select platform and routine
+  h2 Select drone and routine
   .row
     .col-md-6
       form(role="form")
         div.form-group
-          label(for="platformSelection") Platform
+          label(for="platformSelection") Drone
           select#platformSelection.form-control
             each platform in platforms
               option(value="#{platform.id}", selected=platform.id==currentPlatform)= platform.name

@@ -50,10 +50,11 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 this.hasRendered = true;
 
             }
-
-            this.$el.find('#altitudeWidgetValue').text(this.model.get('relative_alt'));
+            var fakeAlt = this.model.get('relative_alt');
+            fakeAlt = (fakeAlt < 0) ? 0 : fakeAlt;
+            this.$el.find('#altitudeWidgetValue').text(fakeAlt);
             if (false === this.suspendSliderRender) {
-                this.slider.slider('setValue', this.model.get('relative_alt'));
+                this.slider.slider('setValue', fakeAlt);
             }
 
         }
