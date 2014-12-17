@@ -249,12 +249,30 @@ and bzip2 to make a compressed image of the uSD card
 
 ### WiFi Router Setup
 
+From a Linux box with a hardline ethernet do the following:
+1.  Download firmware from [here](http://downloads.openwrt.org/attitude_adjustment/12.09/ar71xx/generic/openwrt-ar71xx-generic-tl-mr3020-v1-squashfs-factory.bin)
+2.  manually set your ethernet to the following settings
+    - ip4: 192.168.0.1
+    - netmask: 255.255.255.0
+    - gateway: 192.168.0.254
+3.  connect the router to the linux machine via ethernet cable and usb (for power)
+4.  browse to the address 192.168.0.254
+    - default login/password: admin / admin
+5.  go to administration and upload the firmware image downloaded earlier like a regular firmware update
+6.  Wait for the progress bar to finish twice (the device will reset itself in the process), and [proceed with basic configuration](http://wiki.openwrt.org/toh/tp-link/tl-mr3020#basic_configuration) as with any fresh OpenWRT install.
+7.  reset your hardline ethernet connection to obtain ip4 from dhcp
+8.  log into 192.168.1.1
+    - there will be no password
+9.  change the ESSID to GCS
+10. enable the wifi
+
+notes for future configuration possibilities
 1.  [OpenWRTlink recipe for routed ap for future reference](http://wiki.openwrt.org/doc/recipes/routedap)
 2.  [OpenWRT relay client](http://wiki.openwrt.org/doc/recipes/relayclient)
 
 ### Resources
 
-    - [GPS integration](http://the8thlayerof.net/2013/12/08/adafruit-ultimate-gps-cape-creating-custom-beaglebone-black-device-tree-overlay-file/)
+- [GPS integration](http://the8thlayerof.net/2013/12/08/adafruit-ultimate-gps-cape-creating-custom-beaglebone-black-device-tree-overlay-file/)
 
 ### Troubleshooting
 
@@ -262,40 +280,40 @@ and bzip2 to make a compressed image of the uSD card
 
 ##### First go around
 
-    ```
-    Today i started configuring my beaglebone board. While the first time after installing the USB driver and the tethering HoRNDIS driver, it soon stopped working. I ended up getting multiple entries in my network configuration.
+```
+Today i started configuring my beaglebone board. While the first time after installing the USB driver and the tethering HoRNDIS driver, it soon stopped working. I ended up getting multiple entries in my network configuration.
 
-    This will fix the issue:
+This will fix the issue:
 
-    Edit these two files and remove all entries containing beagleboard (beginning with <key>, including the following <dict> entry until </dict>). Do  this for every key/dict pair that holds a “Beagle” propery/string. – After removing all these from the two .plist files, i rebooted, and it was immediately working again! if i would have known this, i would have saved lots of time reinstalling the drivers again and again … ;-)
+Edit these two files and remove all entries containing beagleboard (beginning with <key>, including the following <dict> entry until </dict>). Do  this for every key/dict pair that holds a “Beagle” propery/string. – After removing all these from the two .plist files, i rebooted, and it was immediately working again! if i would have known this, i would have saved lots of time reinstalling the drivers again and again … ;-)
 
-    /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist
+/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist
 
-    /Library/Preferences/SystemConfiguration/preferences.plist
-    ```
+/Library/Preferences/SystemConfiguration/preferences.plist
+```
 
 [Source](http://blog.b-nm.at/2014/02/12/beagleboard-beaglebone-no-connection-via-usbnetwork-anymore-on-osx-10-9-mavericks/)
 
 ##### Second go around
 
-    ```
-    I have solved this problem by resetting the SMC and the PRAM. Here are the details if someone needs it:
+```
+I have solved this problem by resetting the SMC and the PRAM. Here are the details if someone needs it:
 
-    Reset the SMC and PRAM
-    - SMC Reset:
-        - Shut down the MacBook Pro.
-        - Plug in the MagSafe power adapter to a power source, connecting it to the Mac if its not already connected.
-        - On the built-in keyboard, press the (left side) Shift-Control-Option keys and the power button at the same time.
-        - Release all the keys and the power button at the same time.
-        - Press the power button to turn on the computer.
-    - PRAM:
-        - Shut down the MacBook Pro.
-        - Locate the following keys on the keyboard: Command, Option, P, and R.
-        - Turn on the computer.
-        - Press and hold the Command-Option-P-R keys. You must press this key combination before the gray screen appears.
-        - Hold the keys down until the computer restarts and you hear the startup sound for the second time.
-        - Release the keys.
-    - After following the above two steps I plugged in the beaglebone and it was detected in the network interface. I was then able to successfully ssh into it.
-    ```
+Reset the SMC and PRAM
+- SMC Reset:
+    - Shut down the MacBook Pro.
+    - Plug in the MagSafe power adapter to a power source, connecting it to the Mac if its not already connected.
+    - On the built-in keyboard, press the (left side) Shift-Control-Option keys and the power button at the same time.
+    - Release all the keys and the power button at the same time.
+    - Press the power button to turn on the computer.
+- PRAM:
+    - Shut down the MacBook Pro.
+    - Locate the following keys on the keyboard: Command, Option, P, and R.
+    - Turn on the computer.
+    - Press and hold the Command-Option-P-R keys. You must press this key combination before the gray screen appears.
+    - Hold the keys down until the computer restarts and you hear the startup sound for the second time.
+    - Release the keys.
+- After following the above two steps I plugged in the beaglebone and it was detected in the network interface. I was then able to successfully ssh into it.
+```
 
 [Source](http://stackoverflow.com/questions/23318071/beagle-bone-black-not-detected-in-network-interface-on-mac)
