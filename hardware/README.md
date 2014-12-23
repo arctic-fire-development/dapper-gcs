@@ -222,7 +222,13 @@ We are going to set this up to do everything from the sd card.
 
         -   `sudo service dapper-gcs start`
 
-3.  clean up any ssh files
+3.  remove desktop packages
+    - aptitude purge `dpkg --get-selections | grep gnome | cut -f 1`
+    - aptitude -f install
+    - aptitude purge `dpkg --get-selections | grep deinstall | cut -f 1`
+    - aptitude -f install
+
+4.  clean up any ssh files
     -   delete .ssh directory
     -   delete .gitconfig
 
