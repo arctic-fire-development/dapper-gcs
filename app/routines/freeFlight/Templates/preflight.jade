@@ -66,6 +66,18 @@
               span.glyphicon.glyphicon-question-sign
           .clearfix
 
+        li.list-group-item.manual
+          span.txt Lighting conditions suitable for data gathering?
+          .groupWrapper
+            .btn-group(data-toggle="buttons")
+              label.btn.btn-danger.btn-sm.active
+                <input checked type="radio" name="props" id="props_no"/> No
+              label.btn.btn-success.btn-sm
+                <input type="radio" name="props" id="props_yes"/> Yes
+            button.btn.btn-info.btn-sm(type="button", data-toggle="modal", data-target="#preflightChecklistLighting")
+              span.glyphicon.glyphicon-question-sign
+          .clearfix
+
 form(role="form")
   div.form-group
     button.continue.btn.btn-primary.btn-lg.pull-right Fly routine
@@ -143,5 +155,23 @@ form(role="form")
           li Do you have permission to fly?
           li Do nearby people know you're about to fly?
           li Are there loose children or pets nearby?
+      .modal-footer
+        button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
+
+#preflightChecklistLighting.modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title <span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;&nbsp;Is the lighting good?
+      .modal-body
+        p
+          strong Collect good data.
+          | &nbsp;Lighting conditions can affect the quality of gathered data, and thus your final product.
+        ul
+          li Is the sun casting long shadows?
+          li Is it overcast?
+          li Has your camera been configured correctly for the lighting conditions; ISO setting, etc?
+          li If applicable, is snow reducing effective contrast?
+          li Have you recorded lighting conditions for post-processing correction?
       .modal-footer
         button#gotoFly.btn.btn-primary(data-dismiss="modal") Done
