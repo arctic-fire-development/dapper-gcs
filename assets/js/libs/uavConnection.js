@@ -14,6 +14,8 @@ var SerialPort = require('serialport').SerialPort,
     net = require('net'),
     _ = require('underscore'),
     fs = require('fs'),
+    os = require('os'),
+    glob = require('glob'),
     moment = require('moment'),
     mavlink = require('mavlink_ardupilotmega_v1.0'),
     MavParams = require('./mavParam');
@@ -223,6 +225,20 @@ UavConnection.prototype.sendHeartbeat = function() {
     this.sendAsGcs(heartbeatMessage);
 };
 
+UavConnection.prototype.getUSBSerial = function() {
+    var usbSerialPath = (os.platform() === 'darwin') ? '/dev/cu.usbserial-*' : '/dev/ttyUSB*';
+
+    if (config.get('serial:device') === 'auto'){
+        log.silly('[UavConnection] usb serial: auto-detecting');
+        return glob.sync(usbSerialPath)[0];
+
+    }else{
+        log.silly('[UavConnection] usb serial: reading from config file');
+        return config.get('serial:device')
+    }
+
+}
+
 UavConnection.prototype.disconnected = function() {
 
     // Reset this because we've lost (or never had) the physical connection;
@@ -247,8 +263,12 @@ UavConnection.prototype.disconnected = function() {
                 // these errors at this point.
 
                 dataEventName = 'data';
+
+                var serialDevice = this.getUSBSerial();
+                log.silly('[UavConnection] usb serial is using ', serialDevice);
+
                 connection = new SerialPort(
-                    config.get('serial:device'), {
+                    serialDevice, {
                         baudrate: config.get('serial:baudrate'),
                         // See:
                         // https://github.com/voodootikigod/node-serialport/issues/284
