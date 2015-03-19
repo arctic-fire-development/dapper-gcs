@@ -1,6 +1,6 @@
 'use strict';
 /*global require, module, process, __dirname, console */
-var mavlink = require('mavlink_ardupilotmega_v1.0'),
+var MAVLink = require('mavlink_ardupilotmega_v1.0'),
     UavConnection = require('./assets/js/libs/uavConnection.js'),
     MavParams = require('./assets/js/libs/mavParam.js'),
     express = require('express'),
@@ -105,12 +105,12 @@ server.listen(app.get('port'), function() {
     logger.info('Express server listening on port ' + app.get('port'));
 });
 
-// Establish parser
-var mavlinkParser = new mavlink(logger);
+// Establish parser, disable bad_data messages
+var mavlinkParser = new MAVLink(logger);
+mavlinkParser.silentBadPrefix = true;
 
 // Connection to UAV.  Started/stopped by client.
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
-mavlinkParser.setConnection(uavConnectionManager);
 
 // MavParams are for handling loading parameters
 var mavParams = new MavParams(mavlinkParser, logger);
@@ -268,7 +268,7 @@ app.get('/drone/launch/path', function(req, res) {
 
     try {
 
-        Q.fcall(quad.setAutoMode)
+        Q.fcall(quad.setLoiterMode)
             .then(quad.arm)
             .then(quad.takeoff)
             .then(function() {
@@ -288,8 +288,9 @@ app.get('/drone/launch', function(req, res) {
     try {
 
         Q.fcall(loadTakeoffMission)
-            .then(quad.setAutoMode)
+            .then(quad.setLoiterMode)
             .then(quad.arm)
+            .then(quad.setAutoMode)
             .then(quad.takeoff)
             .then(function() {
                 res.send(200);
@@ -413,9 +414,9 @@ function bindClientEventBridge() {
     // TODO GH#180
     // Bind this in the same scope as the other client/server connections so we can be sure we're not
     // flooding event handlers.
-    // mavlinkParser.on('message', function(m) {
-    //   logger.silly('Got MAVLink message %s', m.name);
-    // });
+    mavlinkParser.on('message', function(m) {
+     // logger.silly('Got MAVLink message %s', m.name);
+    });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {

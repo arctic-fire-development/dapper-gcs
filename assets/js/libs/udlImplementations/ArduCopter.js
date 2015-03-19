@@ -2,7 +2,7 @@
 /*global require, util, Buffer, module */
 
 var udlInterface = require('../udlInterface.js'),
-    mavlink = require('mavlink_ardupilotmega_v1.0'),
+    MAVLink = require('mavlink_ardupilotmega_v1.0'),
     Q = require('q'),
     Qretry = require('qretry'),
     jspack = require('jspack').jspack,
@@ -209,6 +209,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
         });
     } catch (e) {
         log.error(e);
+        log.error(e.stack);
     }
 
     var set_mode = new mavlink.messages.set_mode(

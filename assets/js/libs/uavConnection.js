@@ -15,7 +15,7 @@ var SerialPort = require('serialport').SerialPort,
     _ = require('underscore'),
     fs = require('fs'),
     moment = require('moment'),
-    mavlink = require('mavlink_ardupilotmega_v1.0'),
+    MAVLink = require('mavlink_ardupilotmega_v1.0'),
     MavParams = require('./mavParam');
 
 // log is expected to be a winston instance; keep it in the shared global namespace for convenience.
@@ -23,6 +23,9 @@ var log;
 
 // receivedBinaryLog is the writable stream where all incoming buffer data from the UAV will be written.
 var receivedBinaryLog;
+
+// Holds the most recent binary log
+var latestBinaryLog;
 
 // sentBinaryLog is the writable stream associated with this connection, all buffer data sent to this UAV will be written to this file.
 var sentBinaryLog;
@@ -61,6 +64,10 @@ var protocol;
 // this flag is set to true if the event listener must be reattached to the connection, in case
 // the connection itself was lost
 var attachDataEventListener = true;
+
+// If true, the connection has already been attached.
+// TODO hack figure out why this is needed / being done twice
+var isAttached = false;
 
 // handler for the Heartbeat setInterval() invocation
 var heartbeatMonitor = false;
@@ -122,6 +129,7 @@ UavConnection.prototype.startLogging = function() {
     receivedBinaryLog.on('error', function(err) {
         log.error('unable to log received binary mavlink stream: ' + err);
     });
+    latestBinaryLog = fs.createWriteStream(config.get('logging:root') + 'latest');
     sentBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:sentBinary') + logTime);
     sentBinaryLog.on('error', function(err) {
         log.error('unable to log sent binary mavlink stream: ' + err);
@@ -132,6 +140,7 @@ UavConnection.prototype.startLogging = function() {
 // Explicitly close the streams to ensure all data is flushed to disk.
 UavConnection.prototype.stopLogging = function() {
     receivedBinaryLog.end();
+    latestBinaryLog.end();
     sentBinaryLog.end();
 };
 
@@ -196,8 +205,11 @@ UavConnection.prototype.updateHeartbeat = function() {
             this.changeState('connected');
         }
     } catch (e) {
+        console.log('***')
+        console.log(e.stack);
+        console.log(e);
         log.error('error when updating heartbeat: ' + util.inspect(e));
-        throw (e);
+        //throw (e);
     }
 };
 
@@ -325,9 +337,11 @@ UavConnection.prototype.connecting = function() {
         // If necessary, attach the message parser to the connection.
         // This is only done the first time the connection reaches this state after first connecting,
         // to avoid attaching too many callbacks.
-        if (true === attachDataEventListener) {
+        if (true === attachDataEventListener && false === isAttached) {
 
-            log.silly('attaching data event listener in UavConnection')
+            isAttached = true;
+            log.silly('attaching data event listener & connection bindings in UavConnection')
+            protocol.file = connection;
 
             // One time, wait for a heartbeat then set the srcSystem / srcComponent
             // Possible loose ends here.  TODO GH#195.
@@ -432,6 +446,7 @@ UavConnection.prototype.closeConnection = function() {
 
 UavConnection.prototype.handleDataEvent = function(message) {
     receivedBinaryLog.write(message);
+    latestBinaryLog.write(message);
     protocol.parseBuffer(message);
 };
 

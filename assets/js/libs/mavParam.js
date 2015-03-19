@@ -17,7 +17,7 @@ var _ = require('underscore'),
     Q = require('q'),
     Qretry = require('qretry'),
     EventEmitter = require('events').EventEmitter,
-    mavlink = require('mavlink_ardupilotmega_v1.0');
+    MAVLink = require('mavlink_ardupilotmega_v1.0');
 
 // Logger, passed in object constructor for common logging
 var log;
@@ -85,16 +85,22 @@ MavParam.prototype.get = function(name) {
 
     var parameterVerifier = _.bind(function(msg) {
         log.silly('Verifying parameter match between requested [%s] and received [%s]', name, msg.param_id);
-        if (name === msg.param_id) {
-            mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
-            log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
-            deferred.resolve(msg.param_value);
+        if (name == msg.param_id) {
+            try {
+                mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
+                log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
+                deferred.resolve(msg.param_value);
+            } catch(e) {
+                log.error(e);
+                log.error(e.stack);
+            }
+        } else {
+            log.silly('Ignoring verification because parameter names did not match [%s] [%s]', name, msg.param_id);
         }
     }, this);
 
     log.silly('Adding paramVerifier listener from single GET instance for [%s]...', name);
     mavlinkParser.on('PARAM_VALUE', parameterVerifier);
-
     var index = -1; // this will use the name as the lookup method
     var param_request_read = new mavlink.messages.param_request_read(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, index);
     mavlinkParser.send(param_request_read);
