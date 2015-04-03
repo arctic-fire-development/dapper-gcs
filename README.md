@@ -219,3 +219,7 @@ To run client-side Jasmine tests, open a web browser and open the ```test/jasmin
 #### References for library components manually installed
 - [jQuery Toolbar](https://github.com/paulkinzett/toolbar)
 - [node-jspack](https://github.com/pgriess/node-jspack)
+
+# License Information
+
+This code is released under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
