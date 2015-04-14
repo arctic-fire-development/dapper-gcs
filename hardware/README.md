@@ -1,8 +1,36 @@
-# Setup and Installation
+# Setup and Installation on Intel Edison
 
-## Setup Wifi
+## Connecting to Edison (from OS X)
 
+- install bloop
+    - `npm install -g bloop`
+- attach the edison to laptop with two micro-usb cables
+- run `bloop sniff`
+    - should get something like this `screen /dev/cu.usbserial-DA01LQHR 115200 -L`
+- run that command to bring up the console
+- press Enter a few times to bring up the console
+    - type *root* and press *Enter*
+        - there is no password
+- connect the edison to your laptop with both cables
+    - this enables the console and the mounted drive
+- download the latest os distribution [from intel](http://www.intel.com/support/edison/sb/CS-035180.htm)
+- unpack it
+- cd into that folder
+- upgrade the stock OS by pushing zip contents onto the mounted partition
+- from the console
+    - `reboot ota`
+- once rebooted, log back in via `ssh root@192.168.2.15` or `ssh root@<MACHINE_NAME>.local`
+- `configure_edison --version`
+    - 120
 
+## Setup Wifi and Ethernet over USB
+- now that the latest os is installed, it's time to get networking going
+- run `configure_edison --setup`
+    - give a password
+    - give a new name for the machine if you want
+    - connect to a wifi
+- verify your connection
+    - `curl -4 icanhazip.com`
 
 ## Initial Fixes
 
@@ -13,7 +41,7 @@ Problem:
 The /boot partition vfat filesystem is not created correctly by the Yocto packages. The edison-image-edison.hddimg is about 6MB, but the partition is 32MB, with the vfat partition only created the same size as the hddimg rather than the size of the partition.
 
 Solution:
-- uncomment the line in /etc/fstab for partition 7 (/boot)
+- if commented, uncomment the line in /etc/fstab for partition 7 (/boot)
 - mount /boot
 - mkdir /tmp/boot
 - mv /boot/* /tmp/boot
@@ -21,6 +49,7 @@ Solution:
 - mkfs.vfat /dev/mmcblk0p7
 - mount /boot
 - cp /tmp/boot/* /boot
+- df -h
 
 You should now have a 32MB /boot partition, plenty big enough for larger kernels
 
@@ -57,6 +86,8 @@ Solution:
 ## Configure System
 
 ## Install GCS
+- `opkg install git`
+- `git clone git@github.com:arctic-fire-development/dapper-gcs.git`
 
 ## Links:
 - [yocto repo](http://alextgalileo.altervista.org/edison-package-repo-configuration-instructions.html)
@@ -121,4 +152,3 @@ usb: FTDI USB Serial Device converter now attached to ttyUSB0
 - Flashing will take awhile and the Edison will be reset twice so be patient
 - Open a serial terminal connection to your Edison and log in as root with no password
 - Configure some basic settings on your Edison with the command "configure-edison --setup" which should now allow you to connect to your Edison over WiFi with SSH.
-
