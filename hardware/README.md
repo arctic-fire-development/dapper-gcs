@@ -21,7 +21,7 @@
     - `reboot ota`
 - once rebooted, log back in via `ssh root@192.168.2.15` or `ssh root@<MACHINE_NAME>.local`
 - `configure_edison --version`
-    - 120
+    - `120`
 
 ## Setup Wifi and Ethernet over USB
 - now that the latest os is installed, it's time to get networking going
@@ -32,9 +32,7 @@
 - verify your connection
     - `curl -4 icanhazip.com`
 
-## Initial Fixes
-
-### Fix /boot partition
+## Fix /boot partition
 
 Problem:
 
@@ -44,7 +42,7 @@ Solution:
 - if commented, uncomment the line in /etc/fstab for partition 7 (/boot)
 - mount /boot
 - mkdir /tmp/boot
-- mv /boot/* /tmp/boot
+- cp /boot/* /tmp/boot
 - umount /boot
 - mkfs.vfat /dev/mmcblk0p7
 - mount /boot
@@ -53,15 +51,7 @@ Solution:
 
 You should now have a 32MB /boot partition, plenty big enough for larger kernels
 
-### Put /usr/lib in /home/root to free up os space
-- cd /home/root
-- mkdir -p usr/lib
-- cd usr/lib
-- cp -Rv /usr/lib/* .
-- mv /usr/lib /usr/lib-orig
-- ln -s /home/root/usr/lib /usr/lib
-
-### Add repo
+## Add repo
 
 Problem:
 
@@ -83,11 +73,47 @@ Solution:
 
 ## Install Base Distribution
 
-## Configure System
-
-## Install GCS
+### Install GCS
+- `npm install -g npm@latest`
 - `opkg install git`
-- `git clone git@github.com:arctic-fire-development/dapper-gcs.git`
+    - `git config --global user.name "John Doe"`
+    - `git config --global user.email johndoe@example.com`
+- `git clone https://github.com/arctic-fire-development/dapper-gcs.git`
+
+
+
+## Troubleshooting
+
+### I Hosed my system and want to start from scratch
+Ideally you'd be able to do this from OS X, however the reality is there is still something wonky with reflashing from this os.
+Use a Linux system to do the re-flash. These steps involve a bit of bouncing back and forth between shells.
+- connect the edison via usb otg to the linux box...
+    - this shell will be called OTG
+    - it's where you will run flash.sh
+- connect the console to the linux box...
+    - this shell will be called CONSOLE
+    - it's where you will intterupt the boot sequence, and monitor the progress
+- from CONSOLE
+    - login as root
+    - `reboot`
+    - as the system reboots, it will give a VERY BRIEF opportunity to interrupt the boot sequence
+        - hit <ENTER> to interrupt
+    - you should now be at a prompt like this: `boot > `
+- from OTG
+    - cd into where the stock intel flash image is located
+        - something like `cd edison-image-ww05-15`
+    - run `sudo ./flashall.sh`
+    - it will pause while waiting for the edison, this is good
+- from CONSOLE
+    - `run do_flash`
+    - now the magic is happening
+    - don't touch anything until everything finishes and you're at the login prompt
+        - it will reboot a few times
+        - process takes 5-10 minutes
+    - once everything has settled down, login as root
+    - `configure_edison --version`
+        - `120`
+- congratulations!! now you can start over
 
 ## Links:
 - [yocto repo](http://alextgalileo.altervista.org/edison-package-repo-configuration-instructions.html)
@@ -102,7 +128,7 @@ Solution:
 
 ### Using USB-serial FTDI adapters with Intel Edison
 
-The current Yocto kernel distro available for the Intel Edison (version 68 by configure_edison --version) does not include the FTDI driver. Thus when you plug a USB-serial adapter into the USB OTG host port, you’ll see it partially recognized in dmesg tail upon plugin, but you won’t see an assignment to a /dev/ttyUSB_ device.
+The current Yocto kernel distro available for the Intel Edison (version 68 by configure_edison --version) does not include the FTDI driver. Thus when you plug a USB-serial adapter into the USB OTG host port, you’ll see it partially recognized in dmesg tail upon plugin, but you won’t see an assignment to a /dev/ttyUSB_ device. This has been RESOLVED with version 120!
 
 You need to install the FTDI kernel module first.
 - `opkg install kernel-module-ftdi-sio`
@@ -142,7 +168,7 @@ usb: FTDI USB Serial Device converter now attached to ttyUSB0
 - create flash
   - `cd /edison-src/device-software/utils/flash`
   - `./postBuild.sh`
-  - You may get some errors about "No such file or directory" which can be ignored
+    - You may get some errors about "No such file or directory" which can be ignored as long as you don't want to use `reboot ota`
 - use scp to copy /edison-src/build/toFlash to local linux box
 - now on your local linux box
 - Install the DFU utilities
@@ -151,4 +177,4 @@ usb: FTDI USB Serial Device converter now attached to ttyUSB0
 - Flash your Edison with your newly compiled firmware with the command "sudo ./flashall.sh" which will prompt you to plug in your Edison board with the two USB connections.
 - Flashing will take awhile and the Edison will be reset twice so be patient
 - Open a serial terminal connection to your Edison and log in as root with no password
-- Configure some basic settings on your Edison with the command "configure-edison --setup" which should now allow you to connect to your Edison over WiFi with SSH.
+- Configure some basic settings on your Edison with the command "configure_edison --setup" which should now allow you to connect to your Edison over WiFi with SSH.
