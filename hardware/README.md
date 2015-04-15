@@ -75,11 +75,23 @@ Solution:
 
 ### Install GCS
 - `npm install -g npm@latest`
+- `npm install -g forever bower grunt-cli`
 - `opkg install git`
     - `git config --global user.name "John Doe"`
     - `git config --global user.email johndoe@example.com`
 - `git clone https://github.com/arctic-fire-development/dapper-gcs.git`
+- `cd dapper-gcs`
+- `npm install`
+- `grunt`
 
+### Install mapproxy
+- `wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate`
+- `python get-pip.py`
+- `opkg install python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
+- `pip install pyproj PyYAML`
+    - this seems to take abnormally log to install once downloaded
+    - be patient
+- `pip install mapproxy`
 
 
 ## Troubleshooting
