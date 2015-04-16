@@ -1,0 +1,20 @@
+[Unit]
+Description=Dapper GCS
+After=network.target
+
+[Service]
+Type=forking
+Environment=NODE_BIN_DIR=/usr/bin/node
+Environment=NODE_PATH=/usr/local/lib/node_modules
+Environment=PIDFILE="/home/root/dapper-gcs/dapper-gcs.pid"
+Environment=LOG=/home/root/dapper-gcs/dapper-gcs.log
+Environment=GCS_LOG_LEVEL=debug
+Environment=PORT=80
+Environment=MIN_UPTIME=5000
+Environment=SPIN_SLEEP_TIME=2000
+Environment=APPLICATION=/home/root/dapper-gcs/server.js
+ExecStart=/usr/bin/forever --pidFile $PIDFILE -a -l $LOG --minUptime $MIN_UPTIME --spinSleepTime $SPIN_SLEEP_TIME start $APPLICATION
+ExecStop=/usr/bin/forever stop $APPLICATION
+
+[Install]
+WantedBy=multi-user.target

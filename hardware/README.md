@@ -23,6 +23,8 @@
 - `configure_edison --version`
     - `120`
 
+at this point you can continue from an ssh connection. this sometimes helps with the package downloads.
+
 ## Setup Wifi and Ethernet over USB
 - now that the latest os is installed, it's time to get networking going
 - run `configure_edison --setup`
@@ -82,16 +84,44 @@ Solution:
 - `git clone https://github.com/arctic-fire-development/dapper-gcs.git`
 - `cd dapper-gcs`
 - `npm install`
+    - this will take a while, be patient
+- `bower install --allow-root`
+    - this also will take a bit
 - `grunt`
 
 ### Install mapproxy
 - `wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate`
 - `python get-pip.py`
-- `opkg install python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
+- `opkg install python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
 - `pip install pyproj PyYAML`
     - this seems to take abnormally log to install once downloaded
     - be patient
-- `pip install mapproxy`
+- `pip install MapProxy`
+
+### Config Scripts
+- `cd dapper-gcs`
+- `cp config.json.example config.json`
+- `vi config.json`
+
+    ```bash
+    "connection" : {
+        "type": "serial",
+    }
+    ```
+
+    ```bash
+      "serial" : {
+        "device" : "/dev/tty.usbserial-A900XUV3",
+    }
+    ```
+- `cp dapper-gcs.service /lib/systemd/system/`
+- `cp dapper-mapproxy.service /lib/systemd/system/`
+- `systemctl stop edison_config.service`
+    - this frees up port 80
+- `systemctl start dapper-mapproxy.service`
+- `systemctl start dapper-gcs.service`
+
+##TODO add 'systemctl enable' steps
 
 
 ## Troubleshooting
