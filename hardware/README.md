@@ -81,6 +81,8 @@ Solution:
 - `opkg install git`
     - `git config --global user.name "John Doe"`
     - `git config --global user.email johndoe@example.com`
+    - `git config --global url."https://".insteadOf git://`
+        - this makes it punch through timeout issues when behind a firewall
 - `git clone https://github.com/arctic-fire-development/dapper-gcs.git`
 - `cd dapper-gcs`
 - `npm install`
@@ -116,13 +118,17 @@ Solution:
     ```
 - `cp dapper-gcs.service /lib/systemd/system/`
 - `cp dapper-mapproxy.service /lib/systemd/system/`
-- `systemctl stop edison_config.service`
-    - this frees up port 80
-- `systemctl start dapper-mapproxy.service`
-- `systemctl start dapper-gcs.service`
-
-##TODO add 'systemctl enable' steps
-
+- verify they work
+    - `systemctl stop edison_config.service`
+        - this frees up port 80
+    - `systemctl start dapper-mapproxy.service`
+    - `systemctl start dapper-gcs.service`
+- enable them to come up during boot
+    - `systemctl enable dapper-mapproxy.service`
+    - `systemctl enable dapper-gcs.service`
+    - `systemctl disable edison_config.service`
+- `netstat -tulpn`
+    - verify port 80 is node and 8080 is python
 
 ## Troubleshooting
 
