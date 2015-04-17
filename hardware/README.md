@@ -29,7 +29,8 @@ at this point you can continue from an ssh connection. this sometimes helps with
 - now that the latest os is installed, it's time to get networking going
 - run `configure_edison --setup`
     - give a password
-    - give a new name for the machine if you want
+    - give a new hostname
+        - should be gcsXX, a label on the device should have this
     - connect to a wifi
 - verify your connection
     - `curl -4 icanhazip.com`
@@ -129,6 +130,13 @@ Solution:
     - `systemctl disable edison_config.service`
 - `netstat -tulpn`
     - verify port 80 is node and 8080 is python
+
+### Enable WiFi AP mode
+- press and hold power button for 4-7seconds
+- wifi ap should become available that is named the same as the hostname
+- ssh into the machine
+    - `reboot`
+- verify ability to browse to http://<hostname>.local and http://<hostname>.local:8080
 
 ## Troubleshooting
 
