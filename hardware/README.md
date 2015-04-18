@@ -1,27 +1,38 @@
 # Setup and Installation on Intel Edison
 
-## Connecting to Edison (from OS X)
+## Flashing Edison with latest OS (Linux)
+Ideally you'd be able to do this from OS X, however the reality is there is still something wonky with re-flashing from this os.
+Use a Linux system to do the re-flash.
 
-- install bloop
-    - `npm install -g bloop`
-- attach the edison to laptop with two micro-usb cables
-- run `bloop sniff`
-    - should get something like this `screen /dev/cu.usbserial-DA01LQHR 115200 -L`
-- run that command to bring up the console
-- press Enter a few times to bring up the console
-    - type *root* and press *Enter*
-        - there is no password
-- connect the edison to your laptop with both cables
-    - this enables the console and the mounted drive
+These steps involve a bit of bouncing back and forth between shells.
 - download the latest os distribution [from intel](http://www.intel.com/support/edison/sb/CS-035180.htm)
-- unpack it
-- cd into that folder
-- upgrade the stock OS by pushing zip contents onto the mounted partition
-- from the console
-    - `reboot ota`
-- once rebooted, log back in via `ssh root@192.168.2.15` or `ssh root@<MACHINE_NAME>.local`
-- `configure_edison --version`
-    - `120`
+    - unpack it
+- connect the edison via usb otg to the linux box...
+    - this shell will be called OTG
+    - it's where you will run flash.sh
+- connect the console to the linux box...
+    - this shell will be called CONSOLE
+    - it's where you will intterupt the boot sequence, and monitor the progress
+- from CONSOLE
+    - login as root
+    - `reboot`
+    - as the system reboots, it will give a VERY BRIEF opportunity to interrupt the boot sequence
+        - hit <ENTER> to interrupt
+    - you should now be at a prompt like this: `boot > `
+- from OTG
+    - cd into where the stock intel flash image is located
+        - something like `cd edison-image-ww05-15`
+    - run `sudo ./flashall.sh`
+    - it will pause while waiting for the edison, this is good
+- from CONSOLE
+    - `run do_flash`
+    - now the magic is happening
+    - don't touch anything until everything finishes and you're at the login prompt
+        - it will reboot a few times
+        - process takes 5-10 minutes
+    - once everything has settled down, login as root
+    - `configure_edison --version`
+        - `120`
 
 at this point you can continue from an ssh connection. this sometimes helps with the package downloads.
 
@@ -95,7 +106,7 @@ Solution:
 ### Install mapproxy
 - `wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate`
 - `python get-pip.py`
-- `opkg install python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
+- `opkg install vim python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
 - `pip install pyproj PyYAML`
     - this seems to take abnormally log to install once downloaded
     - be patient
@@ -104,7 +115,13 @@ Solution:
 ### Config Scripts
 - `cd dapper-gcs`
 - `cp config.json.example config.json`
-- `vi config.json`
+- `vim config.json`
+
+    ```bash
+    "mapproxy": {
+        "url":"http://<HOSTNAME>.local:8080/service"
+    }    be sure to set this to the correct hostname
+    ```
 
     ```bash
     "connection" : {
@@ -128,7 +145,7 @@ Solution:
     - `systemctl enable dapper-mapproxy.service`
     - `systemctl enable dapper-gcs.service`
     - `systemctl disable edison_config.service`
-- `netstat -tulpn`
+- `netstat -tulpn | grep 80`
     - verify port 80 is node and 8080 is python
 
 ### Enable WiFi AP mode
@@ -171,6 +188,31 @@ Use a Linux system to do the re-flash. These steps involve a bit of bouncing bac
         - `120`
 - congratulations!! now you can start over
 
+## Connecting to and upgrading Edison (from OS X)
+note that this will not re-partition the hard drive
+
+- install bloop
+    - `npm install -g bloop`
+- attach the edison to laptop with two micro-usb cables
+- run `bloop sniff`
+    - should get something like this `screen /dev/cu.usbserial-DA01LQHR 115200 -L`
+- run that command to bring up the console
+- press Enter a few times to bring up the console
+    - type *root* and press *Enter*
+        - there is no password
+- connect the edison to your laptop with both cables
+    - this enables the console and the mounted drive
+- download the latest os distribution [from intel](http://www.intel.com/support/edison/sb/CS-035180.htm)
+- unpack it
+- cd into that folder
+- upgrade the stock OS by pushing zip contents onto the mounted partition
+- from the console
+    - `reboot ota`
+- once rebooted, log back in via `ssh root@192.168.2.15` or `ssh root@<MACHINE_NAME>.local`
+- `configure_edison --version`
+    - `120`
+
+
 ## Links:
 - [yocto repo](http://alextgalileo.altervista.org/edison-package-repo-configuration-instructions.html)
 - [install base intel provided image](https://communities.intel.com/docs/DOC-23193)
@@ -183,8 +225,9 @@ Use a Linux system to do the re-flash. These steps involve a bit of bouncing bac
 ## Notes:
 
 ### Using USB-serial FTDI adapters with Intel Edison
+This has been RESOLVED with version 120!
 
-The current Yocto kernel distro available for the Intel Edison (version 68 by configure_edison --version) does not include the FTDI driver. Thus when you plug a USB-serial adapter into the USB OTG host port, you’ll see it partially recognized in dmesg tail upon plugin, but you won’t see an assignment to a /dev/ttyUSB_ device. This has been RESOLVED with version 120!
+The current Yocto kernel distro available for the Intel Edison (version 68 by configure_edison --version) does not include the FTDI driver. Thus when you plug a USB-serial adapter into the USB OTG host port, you’ll see it partially recognized in dmesg tail upon plugin, but you won’t see an assignment to a /dev/ttyUSB_ device.
 
 You need to install the FTDI kernel module first.
 - `opkg install kernel-module-ftdi-sio`
