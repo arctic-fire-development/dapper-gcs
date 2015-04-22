@@ -44,6 +44,8 @@ var logger = module.exports = new(winston.Logger)({
     colors: gcsLogConfig.colors
 });
 
+var pathToConfig = path.resolve(__dirname, 'config.json');
+logger.info('Current working directory to config.json', pathToConfig);
 // Fetch configuration information.
 nconf.argv()
     .env()
