@@ -31,7 +31,7 @@ define(['backbone', 'JST',
             }
 
             // Hinky but gets the job done for the moment.  Probably, let's do better before submitting the code.
-            if (4 !== this.$el.find('.checklist .manual .btn-success.active').length) {
+            if (5 !== this.$el.find('.checklist .manual .btn-success.active').length) {
                 this.$el.find('.continue').html('Checklist not completed, OK to continue?').removeClass('btn-primary').addClass('btn-default');
                 this.forceContinue = true;
             } else {
