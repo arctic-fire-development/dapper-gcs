@@ -58,10 +58,8 @@ define([
 
             _.bindAll(this, 'handleOperatorPromotion', 'handleOperatorDemotion', 'handleRoutineStarted', 'handleRoutineEnded');
 
-            this.socket = app.socket;
-
             this.mission = new Mission({}, {
-                socket: this.socket
+                socket: app.socket
             });
             this.mission.fetch();
 
@@ -80,14 +78,14 @@ define([
             $('#flightWizard').wizard();
 
             // TODO GH#xxx refactor to more sensible place...?
-            this.socket.on('operator:promoted', this.handleOperatorPromotion);
-            this.socket.on('operator:demoted', this.handleOperatorDemotion);
-            this.socket.on('routine:started', this.handleRoutineStarted);
-            this.socket.on('routine:ended', this.handleRoutineEnded);
-            this.socket.on('disconnect', this.globalGuiView.renderLostServerConnection);
+            app.socket.on('operator:promoted', this.handleOperatorPromotion);
+            app.socket.on('operator:demoted', this.handleOperatorDemotion);
+            app.socket.on('routine:started', this.handleRoutineStarted);
+            app.socket.on('routine:ended', this.handleRoutineEnded);
+            app.socket.on('disconnect', this.globalGuiView.renderLostServerConnection);
 
             // Just reload the screen when we're reconnected.  Not perfect, but a start.
-            this.socket.on('reconnect', function() {
+            app.socket.on('reconnect', function() {
                 document.location.reload(true);
             });
 
@@ -200,10 +198,10 @@ define([
         preflight: function() {
             // Preflight is when we need to lock down operator vs. observers.
             // Let's try doing this via non-ack'd realtime requests and see how the approach works.
-            this.socket.emit('operator:promote:force');
+            app.socket.emit('operator:promote:force');
 
             // Alert all clients that a routine is about to be underway.
-            this.socket.emit('routine:started');
+            app.socket.emit('routine:started');
 
             this.showOnly('flightWizard');
             $('#flightWizard').wizard('selectedItem', {
@@ -237,7 +235,7 @@ define([
 
         postflight: function() {
             // Alert all clients that a routine is about to end.
-            this.socket.emit('routine:ended');
+            app.socket.emit('routine:ended');
 
             this.showOnly('flightWizard');
             $('#flightWizard').wizard('selectedItem', {
