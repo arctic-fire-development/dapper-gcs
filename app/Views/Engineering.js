@@ -36,10 +36,9 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app', 'Models/Connecti
             this.startConnection();
         },
         startConnection: function() {
-            this.socket = app.socket;
-            this.socket.emit('startConnection');
-            this.socket.on('platform', this.updatePlatform);
-            this.socket.on('linkStatus', this.updateConnection);
+            app.socket.emit('startConnection');
+            app.socket.on('platform', this.updatePlatform);
+            app.socket.on('linkStatus', this.updateConnection);
         },
 
         updatePlatform: function(platformData) {

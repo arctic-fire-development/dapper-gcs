@@ -34,7 +34,6 @@ define([
 
         initialize: function() {
             _.bindAll(this, 'planning', 'preflight', 'fly', 'postflight', 'bindServerClientSocketEvents');
-            this.socket = app.socket;
             this.connection = new Connection();
             this.platform = new Platform();
             this.connection.on('change:status', _.bind(function(model) {
@@ -71,8 +70,8 @@ define([
 
             try {
                 // Initalize connection.
-                this.socket.emit('startConnection');
-                this.socket.on('linkStatus', _.bind(function(linkStatus) {
+                app.socket.emit('startConnection');
+                app.socket.on('linkStatus', _.bind(function(linkStatus) {
                     this.connection.set(linkStatus);
                 }, this));
             } catch (e) {
@@ -128,7 +127,7 @@ define([
 
             // Hook up platform-based updates.
             // The socket connection is established in the BaseRoutine/preflight code.
-            this.socket.on('platform', _.bind(function(platformJson) {
+            app.socket.on('platform', _.bind(function(platformJson) {
                 try {
                     this.platform.set(platformJson);
                 } catch (e) {
@@ -136,7 +135,7 @@ define([
                 }
             }, this));
 
-            this.socket.on('operator:promoted', _.bind(function(operator) {
+            app.socket.on('operator:promoted', _.bind(function(operator) {
 
                 // TODO GH#219, improve ID management here.
                 if (app.socket.io.engine.id === operator) {
@@ -152,7 +151,7 @@ define([
 
             }, this));
 
-            this.socket.on('operator:demoted', _.bind(function() {
+            app.socket.on('operator:demoted', _.bind(function() {
                 if (false !== this.get('mission').isOperator) {
                     try {
                         this.get('mission').isOperator = false;
