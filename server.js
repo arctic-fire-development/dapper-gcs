@@ -50,7 +50,7 @@ logger.info('Current working directory to config.json', pathToConfig);
 nconf.argv()
     .env()
     .file({
-        file: 'config.json'
+        file: pathToConfig
     });
 
 // The logging path is created here if not already present;
