@@ -30,8 +30,14 @@ define(['backbone', 'JST',
                 this.options.deferred.resolve();
             }
 
-            // Hinky but gets the job done for the moment.  Probably, let's do better before submitting the code.
-            if (4 !== this.$el.find('.checklist .manual .btn-success.active').length) {
+            var allCheckedYes = true;
+            this.$el.find('.checklist .manual input:radio:checked').each(function(){
+                if("no" === $(this).val()){
+                    allCheckedYes = false;
+                }
+            });
+
+            if (false === allCheckedYes) {
                 this.$el.find('.continue').html('Checklist not completed, OK to continue?').removeClass('btn-primary').addClass('btn-default');
                 this.forceContinue = true;
             } else {
