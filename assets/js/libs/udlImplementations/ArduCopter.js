@@ -52,14 +52,14 @@ ArduCopterUdl.prototype.takeoff = function() {
 
     log.info('ArduCopter UDL: sending takeoff command...');
 
-    if (true === config.get('sitl:active')) {
+    if (true === config.get('tcp:sitl:active')) {
 
         log.info('ArduCopter UDL: sending SITL command for takeoff...');
 
         try {
             var sitlUdp = dgram.createSocket('udp4');
             var buf = new Buffer(jspack.Pack('<HHHHHHHH', [0, 0, 1530, 0, 0, 0, 0, 0])); // 1530 to RC3 launches the quad.
-            sitlUdp.send(buf, 0, buf.length, config.get('sitl:port'), config.get('sitl:host'));
+            sitlUdp.send(buf, 0, buf.length, config.get('tcp:sitl:port'), config.get('tcp:host'));
         } catch (e) {
             log.error('Uncaught exception when sending SITL RC override UDP packet to simulator', e);
         }

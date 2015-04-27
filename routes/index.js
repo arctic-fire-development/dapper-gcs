@@ -8,7 +8,7 @@ exports.index = function(req, res) {
         platforms: req.app.get('platforms'),
         mapProxyUrl: req.app.get('config').get('mapproxy:url'),
         APM: req.app.get('APM'),
-        bypassGps: req.app.get('config').get('sitl:bypassGps')
+        bypassGps: req.app.get('config').get('tcp:sitl:bypassGps')
     });
 };
 
