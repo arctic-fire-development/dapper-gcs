@@ -28,7 +28,7 @@
       "active" : false,
       "port" : 5501,
       "bypassGps": false
-    },
+    }
   },
 
   "udp" : {
