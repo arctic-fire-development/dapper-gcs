@@ -67,12 +67,12 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
                 var homeIcon = L.icon({
                     iconUrl: '/images/home.min.svg',
                     iconSize: [50, 50],
-                    iconAnchor: [25, 25],
-                    zindex: -10
+                    iconAnchor: [25, 25]
                 });
 
                 this.marker = L.marker([this.model.get('homeLat'), this.model.get('homeLon')], {
-                    icon: homeIcon
+                    icon: homeIcon,
+                    zIndexOffset: -10
                 }).addTo(this.map);
 
             }, this);

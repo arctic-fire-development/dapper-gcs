@@ -28,7 +28,8 @@ define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone,
 
                 this.marker = L.marker([64.9, -147.1], {
                     icon: this.myIcon,
-                    iconAngle: 0
+                    iconAngle: 0,
+                    zIndexOffset: 1000
                 }).addTo(this.map);
 
                 // Do once;
