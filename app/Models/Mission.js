@@ -83,10 +83,12 @@
         },
 
         setHome: function(){
-            console.log("from within setHome in Mission.js");
-            console.log(this);
-            console.trace();
-            console.log(this.platform.get('lat'));
+            this.set({
+                homeLat: this.platform.get('lat'),
+                homeLon: this.platform.get('lon')
+            });
+            this.save();
+            this.trigger('setHomePosition');
         }
 
     });

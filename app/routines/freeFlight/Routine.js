@@ -62,8 +62,6 @@ define([
                     // We keep some structures separate from the Backbone-managed attributes because
                     // we don't want to sync or persist them.
                     this.get('mission').setPlatform(this.platform);
-                    console.log("setting this.mission.platform in Freeflight/Routine.js");
-                    console.log(this.platform);
                     this.get('mission').connection = this.connection;
                     this.flyView = new FreeFlightFlyView({
                         model: this.get('mission')
@@ -74,7 +72,7 @@ define([
                     this.bindServerClientSocketEvents(); // in parent code
 
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
             }
             return flightCompletedDeferred.promise;
