@@ -8,7 +8,7 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
         map: undefined, // will be Leaflet map object
 
         initialize: function() {
-            _.bindAll(this, 'render', 'renderLayout');
+            _.bindAll(this, 'render', 'renderLayout', 'drawHomeIcon');
             this.breadcrumb = [];
         },
 
@@ -61,22 +61,26 @@ define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend
                 e.preventDefault();
             });
 
+            this.homeIcon = L.icon({
+                iconUrl: '/images/home.min.svg',
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
+            });
+
+            // If we already have a Home location, draw it first.
+            if(this.mission.get('homeLat') && this.mission.get('homeLon')) {
+                this.drawHomeIcon();
+            }
+
             // When home position is established, mark it on the map.
-            this.model.on('armed', function() {
+            this.mission.on('setHomePosition', this.drawHomeIcon, this);
+        },
 
-                var homeIcon = L.icon({
-                    iconUrl: '/images/home.min.svg',
-                    iconSize: [50, 50],
-                    iconAnchor: [25, 25]
-                });
-
-                this.marker = L.marker([this.model.get('homeLat'), this.model.get('homeLon')], {
-                    icon: homeIcon,
-                    zIndexOffset: -10
-                }).addTo(this.map);
-
-            }, this);
-
+        drawHomeIcon: function() {
+            this.homeMarker = L.marker([this.mission.get('homeLat'), this.mission.get('homeLon')], {
+                icon: this.homeIcon,
+                zIndexOffset: -10
+            }).addTo(this.map);
         },
 
         resizeMap: function() {

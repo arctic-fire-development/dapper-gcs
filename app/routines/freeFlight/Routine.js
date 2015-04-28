@@ -58,11 +58,10 @@ define([
                 try {
 
                     var flightCompletedDeferred = Q.defer();
-                    var platform = this.platform; // to juggle context references
 
                     // We keep some structures separate from the Backbone-managed attributes because
                     // we don't want to sync or persist them.
-                    this.get('mission').platform = this.platform;
+                    this.get('mission').setPlatform(this.platform);
                     this.get('mission').connection = this.connection;
                     this.flyView = new FreeFlightFlyView({
                         model: this.get('mission')
@@ -73,7 +72,7 @@ define([
                     this.bindServerClientSocketEvents(); // in parent code
 
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
             }
             return flightCompletedDeferred.promise;

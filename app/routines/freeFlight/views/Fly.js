@@ -359,6 +359,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.mapWidget = new MapWidget({
                 model: this.model.platform
             });
+            this.mapWidget.mission = this.model;
 
             this.platformWidget = new PlatformWidget({
                 model: this.model.platform

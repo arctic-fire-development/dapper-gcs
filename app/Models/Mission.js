@@ -28,7 +28,9 @@
             active: false,
             maxSpeed: 7, //  m/s
             maxAltitude: 120, // meters
-            takeoffAltitude: 20 // meters
+            takeoffAltitude: 20, // meters
+            homeLat: null,
+            homeLon: null
         },
 
         // Flag indicating if this client GUI is the operator of this mission.
@@ -62,9 +64,14 @@
         },
 
         initialize: function() {
-            _.bindAll(this, 'syncToServer', 'syncFromServer');
+            _.bindAll(this, 'syncToServer', 'syncFromServer', 'setHome', 'setPlatform');
             this.on('change', this.syncToServer);
             this.socket.on('routine:update', this.syncFromServer);
+        },
+
+        setPlatform: function(platform) {
+            this.platform = platform;
+            this.platform.on('setHomePosition', this.setHome);
         },
 
         syncToServer: function() {
@@ -73,6 +80,15 @@
 
         syncFromServer: function(json) {
             this.set(json);
+        },
+
+        setHome: function(){
+            this.set({
+                homeLat: this.platform.get('lat'),
+                homeLon: this.platform.get('lon')
+            });
+            this.save();
+            this.trigger('setHomePosition');
         }
 
     });
