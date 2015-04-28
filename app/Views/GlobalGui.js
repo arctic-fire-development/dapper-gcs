@@ -52,8 +52,31 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 app.growl('Launching');
             });
 
+            // sketch of approach
+            var statustextRegex = {
+                '^Initialising' : false, // one we would not display
+                '^PREARM' : { severity: 'warning'} // one we would display
+            };
+
             app.socket.on('STATUSTEXT', function(statustext) {
-                app.growl(statustext);
+                console.info("STATUSTEXT: " + statustext); // so we can find all these
+                // consider just turning these bad boys off to start with???
+                // no, because they often convey "FAILED TO ARM BECAUSE REASON".
+                var growlType = _.find(statustextRegex, function(el, index) {
+                    var re = new RegExp(index);
+                    return re.test(statustext);
+                });
+                if('undefined' === typeof growlType) {
+                    app.growl(statustext, 'error');
+                } else if ('object' === typeof growlType) {
+                    app.growl(statustext, growlType.severity);
+                } else if ('false' === typeof growlTypel) {
+                    // don't do anything
+                } else {
+                    // wat
+                    console.error('unexpected type of growl in GlobalGui.js')
+                }
+
             });
         }
 
