@@ -88,11 +88,8 @@ define(['backbone', 'underscore', 'q'], function(Backbone, _, Q) {
                 if (128 & this.get('base_mode')) {
                     // This means the system is armed.  When the APM Quad arms, then it also
                     // sets its home location.
-                    this.set({
-                        homeLat: this.get('lat'),
-                        homeLon: this.get('lon')
-                    });
                     this.set('armed', true);
+                    this.trigger('setHomePosition');
                 } else {
                     this.set('armed', false);
                 }
