@@ -173,7 +173,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 } else if ('object' === typeof growlType) {
                     console.log('found an object in GlobalGui.js: ' + statustext + ' ' + growlType.severity);
                     app.growl(statustext, growlType.severity);
-                } else if ('boolean' === typeof growlType) {
+                } else if (false === growlType) {
                     // don't do anything
                     console.log('found a boolean in GlobalGui.js: ' + typeof growlType + ' ' + growlType + ' ' + statustext);
                 } else {
