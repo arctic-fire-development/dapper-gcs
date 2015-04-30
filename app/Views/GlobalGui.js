@@ -53,9 +53,32 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
             });
 
             // sketch of approach
+            // growl types:
+            //      warning, success, danger, error
             var statustextRegex = {
                 '^Initialising' : false, // one we would not display
-                '^PREARM' : { severity: 'warning'} // one we would display
+                '^PREARM' : false,
+                '^PreArm' : false,
+                '^Throttle' : {severity: 'warning'},
+                '^Erasing' : { severity: 'warning'},
+                '^Log\ erase\ complete': {severity: 'success'},
+                '^AutoTune': {severity: 'warning'},
+                '^Crash': {severity: 'danger'},
+                '^Parachute' : {severity: 'warning'},
+                '^EKF variance': {severity: 'danger'},
+                '^DCM bad heading': {severity: 'danger'},
+                '^Low battery': {severity: 'danger'},
+                '^Lost GPS': {severity: 'danger'},
+                '^ARMING': {severity : 'warning'},
+                '^Arm': {severity: 'danger'},
+                '^DISARMING': {severity: 'warning'},
+                '^Calibrating': false,
+                '^barometer calibration': false,
+                '^trim saved': false,
+                '^No dataflash inserted': false,
+                '^ERASING LOGS': {severity: 'warning'},
+                '^Waiting for first HIL_STATE message': false,
+                '^GROUND START': {severity: 'success'}
             };
 
             app.socket.on('STATUSTEXT', function(statustext) {
@@ -70,11 +93,11 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                     app.growl(statustext, 'error');
                 } else if ('object' === typeof growlType) {
                     app.growl(statustext, growlType.severity);
-                } else if ('false' === typeof growlTypel) {
+                } else if ('false' === typeof growlType) {
                     // don't do anything
                 } else {
                     // wat
-                    console.error('unexpected type of growl in GlobalGui.js')
+                    console.error('unexpected type of growl in GlobalGui.js: ' + typeof growlType + ' ' + growlType);
                 }
 
             });
