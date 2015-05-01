@@ -35,7 +35,7 @@ requirejs.config({
 var logger = module.exports = new(winston.Logger)({
     transports: [
         new(winston.transports.Console)({
-            colorize: false,
+            colorize: true,
             timestamp: true,
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
         })

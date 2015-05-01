@@ -52,8 +52,6 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 app.growl('Launching');
             });
 
-            // sketch of approach
-
             // for right now, setting the APM severity to have a one-to-one with growl type
             // growl types:
             //      warning, success, danger, error
@@ -73,28 +71,28 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 "Arm: Safety Switch" : {severity: SEVERITY_HIGH},
                 "Arm: Thr below FS " : {severity: SEVERITY_HIGH},
                 "AutoTune: Failed" : {severity: SEVERITY_HIGH},
-                "AutoTune: Started" : false, //{severity: SEVERITY_HIGH},
-                "AutoTune: Stopped" : false, //{severity: SEVERITY_HIGH},
-                "AutoTune: Success" : false, //{severity: SEVERITY_HIGH},
-                "Beginning INS calibration" : false, //{severity: SEVERITY_MEDIUM},
-                "Calibrating barometer" : false, //{severity: SEVERITY_LOW},
+                "AutoTune: Started" : false,
+                "AutoTune: Stopped" : false,
+                "AutoTune: Success" : false,
+                "Beginning INS calibration" : false,
+                "Calibrating barometer" : false,
                 "Crash: Disarming" : {severity: SEVERITY_HIGH},
                 "DCM bad heading" : {severity: SEVERITY_HIGH},
                 "DISARMING MOTORS" : {severity: SEVERITY_HIGH},
-                "Demo Servos" : false, //{severity: SEVERITY_LOW},
+                "Demo Servos" : false,
                 "Disable fence failed" : {severity: SEVERITY_HIGH},
                 "EKF variance" : {severity: SEVERITY_HIGH},
-                "ERASING LOGS" : false, //{severity: SEVERITY_LOW},
+                "ERASING LOGS" : false,
                 "Enable fence failed" : {severity: SEVERITY_HIGH},
-                "Erasing logs" : false, //{severity: SEVERITY_LOW},
+                "Erasing logs" : false,
                 "Failsafe - Long event on" : {severity: SEVERITY_LOW},
                 "Failsafe - Short event off" : {severity: SEVERITY_LOW},
                 "Failsafe - Short event on" : {severity: SEVERITY_LOW},
                 "Fence disabled" : {severity: SEVERITY_HIGH},
                 "Fence enabled" : {severity: SEVERITY_HIGH},
                 "GROUND START" : {severity: SEVERITY_LOW},
-                "Initialising APM" : false, //{severity: SEVERITY_LOW},
-                "Log erase complete" : false, //{severity: SEVERITY_LOW},
+                "Initialising APM" : false,
+                "Log erase complete" : false,
                 "Lost GPS" : {severity: SEVERITY_LOW},
                 "Low Battery" : {severity: SEVERITY_LOW},
                 "NO airspeed" : {severity: SEVERITY_LOW},
@@ -111,7 +109,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 "PreArm: Bad Velocity" : {severity: SEVERITY_HIGH},
                 "PreArm: Baro not healthy" : {severity: SEVERITY_HIGH},
                 "PreArm: Battery failsafe on." : {severity: SEVERITY_HIGH},
-                "PreArm: Ch7&Ch8 Opt cannot be same " : {severity: SEVERITY_HIGH},
+                "PreArm: Ch7&Ch8 Opt cannot be same" : {severity: SEVERITY_HIGH},
                 "PreArm: Check ANGLE_MAX" : {severity: SEVERITY_HIGH},
                 "PreArm: Check Board Voltage" : {severity: SEVERITY_HIGH},
                 "PreArm: Check FS_THR_VALUE" : {severity: SEVERITY_HIGH},
@@ -139,30 +137,27 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 "Throttle armed" : {severity: SEVERITY_HIGH},
                 "Throttle disarmed" : {severity: SEVERITY_HIGH},
                 "Triggered AUTO with pin" : {severity: SEVERITY_LOW},
-                "Trim saved" : false, //{severity: SEVERITY_HIGH},
-                "Waiting for first HIL_STATE message" : false, //{severity: SEVERITY_LOW},
-                "Warming up ADC" : false, //{severity: SEVERITY_MEDIUM},
-                "With Delay" : false, //{severity: SEVERITY_LOW},
+                "Trim saved" : false,
+                "Waiting for first HIL_STATE message" : false,
+                "Warming up ADC" : false,
+                "With Delay" : false,
                 "WP error" : {severity: SEVERITY_HIGH},
-                "barometer calibration complete" : false, //{severity: SEVERITY_LOW},
+                "barometer calibration complete" : false,
                 "flight plan received" : {severity: SEVERITY_LOW},
-                "geo-fence OK" : false, //{severity: SEVERITY_LOW},
-                "geo-fence loaded" : false, //{severity: SEVERITY_LOW},
-                "geo-fence setup error" : false, //{severity: SEVERITY_HIGH},
-                "geo-fence triggered" : false, //{severity: SEVERITY_LOW},
-                "init home" : false, //{severity: SEVERITY_LOW},
+                "geo-fence OK" : false,
+                "geo-fence loaded" : false,
+                "geo-fence setup error" : false,
+                "geo-fence triggered" : false,
+                "init home" : false,
                 "verify_conditon: Invalid or no current Condition cmd" : {severity: SEVERITY_HIGH},
                 "verify_conditon: Unsupported command" : {severity: SEVERITY_HIGH},
                 "verify_nav: Invalid or no current Nav cmd" : {severity: SEVERITY_HIGH},
-                "verify_nav: LOITER orbits complete": false, //{severity: SEVERITY_LOW},
-                "verify_nav: LOITER time complete" : false, //{severity: SEVERITY_LOW},
+                "verify_nav: LOITER orbits complete": false,
+                "verify_nav: LOITER time complete" : false,
                 "zero airspeed calibrated" : {severity: SEVERITY_LOW}
             };
 
             app.socket.on('STATUSTEXT', function(statustext) {
-                console.log("STATUSTEXT: " + statustext); // so we can find all these
-                // consider just turning these bad boys off to start with???
-                // no, because they often convey "FAILED TO ARM BECAUSE REASON".
                 var growlType = _.find(statustextRegex, function(el, index) {
                     var re = new RegExp(index);
                     return re.test(statustext);
