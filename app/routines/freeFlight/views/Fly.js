@@ -83,7 +83,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         // Show the button with name className, hide others.
         showButton: function(className) {
-            _.each(this.$el.find('#controls'), function(e) {
+            _.each(this.$el.find('#controls button'), function(e) {
                 var $e = $(e);
                 if ($e.hasClass(className)) {
                     console.log('attempting to show ' + className);
