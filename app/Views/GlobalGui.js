@@ -90,7 +90,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 "Failsafe - Short event on" : {severity: SEVERITY_LOW},
                 "Fence disabled" : {severity: SEVERITY_HIGH},
                 "Fence enabled" : {severity: SEVERITY_HIGH},
-                "GROUND START" : {severity: SEVERITY_LOW, altMessage: 'woot start'},
+                "GROUND START" : {severity: SEVERITY_LOW, altMessage: 'System is performing ground calibrations.'},
                 "Initialising APM" : false,
                 "Log erase complete" : false,
                 "Lost GPS" : {severity: SEVERITY_LOW},
