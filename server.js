@@ -482,8 +482,11 @@ function bindClientEventBridge() {
     });
 
     mavlinkParser.on('STATUSTEXT', function(message) {
-        io.emit('STATUSTEXT', message.text);
-        logger.info('status text from APM: ' + util.inspect(message.text));
+        // v8 doesnt have the regex global flags anymore, so use underscore to remove them
+        var statusText = _.filter(message.text, function(char){ return char !== '\u0000'; }).join('').toString();
+
+        io.emit('STATUSTEXT', statusText);
+        logger.info('cleaned status text from APM: ' + util.inspect(statusText));
     });
 
     uavConnectionManager.on('disconnected', function() {
