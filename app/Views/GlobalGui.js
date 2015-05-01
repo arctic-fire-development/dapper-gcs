@@ -90,7 +90,7 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 "Failsafe - Short event on" : {severity: SEVERITY_LOW},
                 "Fence disabled" : {severity: SEVERITY_HIGH},
                 "Fence enabled" : {severity: SEVERITY_HIGH},
-                "GROUND START" : {severity: SEVERITY_LOW},
+                "GROUND START" : {severity: SEVERITY_LOW, altMessage: 'woot start'},
                 "Initialising APM" : false,
                 "Log erase complete" : false,
                 "Lost GPS" : {severity: SEVERITY_LOW},
@@ -166,7 +166,11 @@ define(['backbone', 'JST', 'q', 'bootstrap', 'app'], function(Backbone, template
                 if('undefined' === typeof growlType) {
                     app.growl(statustext, 'error');
                 } else if ('object' === typeof growlType) {
-                    app.growl(statustext, growlType.severity);
+                    if (growlType.altMessage){
+                        app.growl(growlType.altMessage, growlType.severity);
+                    } else{
+                        app.growl(statustext, growlType.severity);
+                    }
                 } else if (false === growlType) {
                     // don't send a growl
                 } else {
