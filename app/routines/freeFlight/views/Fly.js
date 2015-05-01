@@ -86,10 +86,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             _.each(this.$el.find('#controls button'), function(e) {
                 var $e = $(e);
                 if ($e.hasClass(className)) {
-                    console.log('attempting to show ' + className);
                     $e.show();
                 } else {
-                    console.log('attempting to hide ' + className);
                     $e.hide();
                 }
             }, this);
@@ -99,7 +97,6 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             Q($.get('/drone/rtl')).then(_.bind(function() {
 
                 // Disable user control while craft is in RTL.
-                console.log('home button clicked');
                 this.showButton('stop');
                 this.unbindFlyToPoint();
                 this.altitudeWidget.disable();
