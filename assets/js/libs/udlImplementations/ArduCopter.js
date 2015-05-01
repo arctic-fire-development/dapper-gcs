@@ -123,7 +123,7 @@ ArduCopterUdl.prototype.arm = function() {
     protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
         if (msg.severity == mavlink.MAV_SEVERITY_ERROR) {
             log.debug('Arming rejected: %s', msg.text);
-            throw new Error('Arming rejected due to status text message error');
+            log.error('Arming rejected due to status text message error');
         }
     });
 
@@ -132,6 +132,7 @@ ArduCopterUdl.prototype.arm = function() {
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
                 protocol.removeListener('HEARTBEAT', verifyArmed);
+                protocol.removeListener('STATUSTEXT', handleStatusErrors);
                 deferred.resolve();
             } else {
                 log.verbose('Waiting on ack for arming, currently mode is %d', msg.base_mode);
