@@ -21,6 +21,6 @@
     "evispa-timo-jsclipper": "*",
     "concavehull": "~0.1.2",
     "leaflet.freedraw": "~1.1.2",
-    "leaflet": "http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.3.zip"
+    "leaflet": "~0.7.3"
   }
 }
