@@ -120,12 +120,14 @@ ArduCopterUdl.prototype.arm = function() {
 
     // More troubleshooting.  Some messages that come back from the APM
     // as status text, rather than direct failures.  TODO GH#356, see if this is always true / research.
-    protocol.on('STATUSTEXT', function handleStatusErrors(msg) {
+    var handleStatusErrors = function(msg){
         if (msg.severity == mavlink.MAV_SEVERITY_ERROR) {
             log.debug('Arming rejected: %s', msg.text);
             log.error('Arming rejected due to status text message error');
         }
-    });
+    }
+
+    protocol.on('STATUSTEXT', handleStatusErrors);
 
     protocol.on('HEARTBEAT', function verifyArmed(msg) {
         log.verbose('heartbeat.base_mode: %d', msg.base_mode);
@@ -139,7 +141,7 @@ ArduCopterUdl.prototype.arm = function() {
                 protocol.send(command_long);
             }
         } catch (e) {
-            log.error('Uncaught error in ArduCopterUdl.arm()', e);
+            log.error('Uncaught error in ArduCopterUdl.arm(): ' + e);
         }
     });
 
