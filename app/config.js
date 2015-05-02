@@ -35,7 +35,25 @@ require.config({
         graham_scan: "assets/bower/graham_scan/graham_scan.min",
         angular: "assets/bower/angular/angular",
         leaflet: "assets/bower/leaflet/dist/leaflet",
-        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src"
+        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src",
+        Distance: "assets/bower/leaflet-plugins/control/Distance",
+        "Layers.Load": "assets/bower/leaflet-plugins/control/Layers.Load",
+        Permalink: "assets/bower/leaflet-plugins/control/Permalink",
+        "Permalink.Layer": "assets/bower/leaflet-plugins/control/Permalink.Layer",
+        "Permalink.Line": "assets/bower/leaflet-plugins/control/Permalink.Line",
+        "Permalink.Marker": "assets/bower/leaflet-plugins/control/Permalink.Marker",
+        "Icon.Canvas": "assets/bower/leaflet-plugins/layer/Icon.Canvas",
+        "Layer.Deferred": "assets/bower/leaflet-plugins/layer/Layer.Deferred",
+        "Marker.Rotate": "assets/bower/leaflet-plugins/layer/Marker.Rotate",
+        "Marker.Text": "assets/bower/leaflet-plugins/layer/Marker.Text",
+        OpenStreetBugs: "assets/bower/leaflet-plugins/layer/OpenStreetBugs",
+        GPX: "assets/bower/leaflet-plugins/layer/vector/GPX",
+        "GPX.Speed": "assets/bower/leaflet-plugins/layer/vector/GPX.Speed",
+        KML: "assets/bower/leaflet-plugins/layer/vector/KML",
+        OSM: "assets/bower/leaflet-plugins/layer/vector/OSM",
+        Bing: "assets/bower/leaflet-plugins/layer/tile/Bing",
+        Google: "assets/bower/leaflet-plugins/layer/tile/Google",
+        Yandex: "assets/bower/leaflet-plugins/layer/tile/Yandex"
     },
     shim: {
         backbone: {
