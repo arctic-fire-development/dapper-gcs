@@ -26,13 +26,15 @@ define(['backbone', 'JST',
         },
 
         metersToFeet: function() {
+            var metersToFeetTemplate = _.template("<span><%= feet %></span>ft");
+
             this.$el.find('.toFeet').html(
-                _.template('<span><%= feet %></span>ft', {
+                metersToFeetTemplate({
                     feet: parseInt(this.$('#maxAltitude')[0].value * 3.28084, 10)
                 })
             );
             this.$el.find('.takeoffAltitudeToFeet').html(
-                _.template('<span><%= feet %></span>ft', {
+                metersToFeetTemplate({
                     feet: parseInt(this.$('#takeoffAltitude')[0].value * 3.28084, 10)
                 })
             );
