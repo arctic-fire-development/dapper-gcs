@@ -35,7 +35,8 @@ require.config({
         graham_scan: "assets/bower/graham_scan/graham_scan.min",
         angular: "assets/bower/angular/angular",
         leaflet: "assets/bower/leaflet/dist/leaflet",
-        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src"
+        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src",
+        "leaflet-dist": "assets/bower/leaflet-dist/leaflet"
     },
     shim: {
         backbone: {
