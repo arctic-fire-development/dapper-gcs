@@ -12,7 +12,6 @@ require.config({
         io: "assets/bower/socket.io-client/socket.io",
         jquery: "assets/bower/jquery/dist/jquery",
         underscore: "assets/bower/underscore/underscore",
-        "leaflet-dist": "assets/bower/leaflet-dist/leaflet",
         "leaflet-bing-plugin": "assets/bower/leaflet-plugins/layer/tile/Bing",
         "leaflet-rotate-marker": "assets/bower/leaflet-plugins/layer/Marker.Rotate",
         requirejs: "assets/bower/requirejs/require",
@@ -46,7 +45,7 @@ require.config({
             ],
             exports: "Backbone"
         },
-        "leaflet-dist": {
+        leaflet: {
             exports: "L"
         }
     }
