@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                     dest: 'public/fonts/'
                 }, {
                     expand: true,
-                    cwd: 'app/assets/bower/leaflet/images',
+                    cwd: 'app/assets/bower/leaflet/dist/images',
                     src: '*',
                     dest: 'public/images/leaflet/'
                 }, {
