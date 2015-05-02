@@ -1,6 +1,6 @@
 'use strict';
 /* global console */
-define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'underscore',
+define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscore',
 
     // Models
     'Models/Mission',

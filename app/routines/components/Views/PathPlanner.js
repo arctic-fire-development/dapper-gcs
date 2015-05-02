@@ -1,4 +1,4 @@
-define(['backbone', 'JST', 'leaflet-dist', 'concavehull', 'd3', 'evispa-timo-jsclipper', 'leaflet.freedraw'],
+define(['backbone', 'JST', 'leaflet', 'concavehull', 'd3', 'evispa-timo-jsclipper', 'leaflet.freedraw'],
     function(Backbone, templates, L, ConcaveHull, d3, JSClipper, LFD) {
 
     var PathPlanner = Backbone.View.extend({
