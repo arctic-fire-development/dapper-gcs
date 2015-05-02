@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone, L, LRM) {
+define(['backbone', 'leaflet', 'leaflet-rotate-marker'], function(Backbone, L, LRM) {
 
     var PlatformWidget = Backbone.View.extend({
 

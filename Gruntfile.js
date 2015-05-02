@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                     dest: 'public/fonts/'
                 }, {
                     expand: true,
-                    cwd: 'app/assets/bower/leaflet-dist/images',
+                    cwd: 'app/assets/bower/leaflet/images',
                     src: '*',
                     dest: 'public/images/leaflet/'
                 }, {
@@ -235,7 +235,7 @@ module.exports = function(grunt) {
                     "public/stylesheets/min.css": [
                         "build/less.css",
                         "assets/css/**/*.css",
-                        "app/assets/bower/leaflet-dist/leaflet.css",
+                        "app/assets/bower/leaflet/dist/leaflet.css",
                         "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css",
                         "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]
