@@ -1,32 +1,28 @@
-# No package managed stuff
+# No package managed stuff!
 node_modules/*
 app/assets/bower/*
 
 # No config files!
 config.json
 
-# No mapproxy cache
+# No mapproxy cache!
 etc/cache_data/
 
-# No upstart generated files
+# No upstart generated files!
 dapper-gcs.log
 dapper-gcs.pid
 
-# App or OS specific junk
+# No App or OS specific junk!
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
 .monitor
+
+# No log files or other temporary junk!
 logs/
 tmp/
+gcs.log
 
-# These files and/or directory contents are always rebuilt during build processes.
+# No built/generated files!
 public/
 build/
-
-# Random junk that sometimes crops up in development
-dataflash.bin
-eeprom.bin
-mav.tlog
-mav.tlog.raw
-mavlink.dev.log

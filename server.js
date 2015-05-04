@@ -38,20 +38,28 @@ var logger = module.exports = new(winston.Logger)({
             colorize: true,
             timestamp: true,
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
+        }),
+        new(winston.transports.File)({
+            filename: 'gcs.log',
+            colorize: false,
+            timestamp: true,
+            level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
         })
     ],
     levels: gcsLogConfig.levels,
     colors: gcsLogConfig.colors
 });
 
-var pathToConfig = path.resolve(__dirname, 'config.json');
-logger.info('Current working directory to config.json', pathToConfig);
-// Fetch configuration information.
-nconf.argv()
-    .env()
-    .file({
-        file: pathToConfig
-    });
+// Establish configuration information, bail if invalid
+try {
+    var pathToConfig = path.resolve(__dirname, 'config.json');
+    logger.debug('Current working directory to config.json', pathToConfig);
+    var stats = fs.statSync(pathToConfig); // throws if file missing
+    nconf.argv().env().file({ file: pathToConfig }); // throws if file syntax borked
+} catch(e) {
+    logger.error('Invalid or missing configuration file, cannot start application...');
+    process.exit();
+}
 
 // The logging path is created here if not already present;
 // do this synchronously to ensure creation before opening log streams.
