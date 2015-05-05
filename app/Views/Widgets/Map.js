@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet-dist', 'leaflet-bing-plugin', 'leaflet-touch-extend'], function(Backbone, L, LBP, LTE) {
+define(['backbone', 'leaflet', 'leaflet-bing-plugin', 'leaflet-touch-extend'], function(Backbone, L, LBP, LTE) {
 
     var MapWidget = Backbone.View.extend({
 
