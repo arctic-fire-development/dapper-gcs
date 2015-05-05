@@ -153,7 +153,15 @@ Solution:
 - wifi ap should become available that is named the same as the hostname
 - ssh into the machine
     - `reboot`
-- verify ability to browse to http://<hostname>.local and http://<hostname>.local:8080
+- verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
+
+#### Alternative Enable WiFi AP mode
+- `systemctl stop wpa_supplicant.service`
+- `systemctl disable wpa_supplicant.service`
+- `systemctl enable hostapd.service`
+- `systemctl start hostapd.service`
+- reboot
+- verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
 
 ### Switch from WiFi AP to WiFi client mode
 - login via console
