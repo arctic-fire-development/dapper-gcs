@@ -155,6 +155,21 @@ Solution:
     - `reboot`
 - verify ability to browse to http://<hostname>.local and http://<hostname>.local:8080
 
+### Switch from WiFi AP to WiFi client mode
+- login via console
+    - su to root if needed
+- `systemctl status hostapd.service`
+    - should see that it is active
+- `systemctl status wpa_supplicant.service`
+    - should see that is it not active/disabled
+- `systemctl stop hostapd.service`
+- `configure_edison --wifi`
+    - select the network
+    - provide credentials
+- test connection
+    - `opkg update` or
+    - `ping www.google.com`
+
 ## Troubleshooting
 
 ### I Hosed my system and want to start from scratch
