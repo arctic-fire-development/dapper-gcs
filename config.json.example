@@ -36,7 +36,7 @@
   },
 
   "serial" : {
-    "device" : "/dev/tty.usbserial-A900XUV3",
+    "device" : "auto",
     "baudrate" : 57600
   },
 
