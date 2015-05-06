@@ -47,7 +47,6 @@ define(['backbone', 'JST',
             $('#equipmentChecklist').click(function() {
                 window.open('/checklist', 'Equipment Checklist');
             });
-            console.log(this.options);
             this.pathPlanner = new PathPlannerView({
                 model: this.options.path
             });
