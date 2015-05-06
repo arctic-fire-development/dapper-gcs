@@ -74,7 +74,7 @@ There is no quick and easy way to install software binaries ala apt-get
 Solution:
 
 - `vi /etc/opkg/base-feeds.conf`
-    ```
+    ```bash
     ===/etc/opkg/base-feeds.conf contents below===
     src/gz all http://repo.opkg.net/edison/repo/all
     src/gz edison http://repo.opkg.net/edison/repo/edison
@@ -84,6 +84,30 @@ Solution:
     ```
 - `opkg update`
 - `opkg upgrade`
+
+## Use new kernel and modules
+- `cd /boot`
+- `ls -l`
+- `cp vmlinuz vmlinuz.original.ww05`
+- `cp bzImage-3.10.17-yocto-standard vmlinuz`
+- `opkg install kernel-modules`
+- `opkg install --force-reinstall kernel-module-bcm4334x`
+    - `modprobe: FATAL: Module bcm4334x not found.`
+    - ignore this, everything is fine
+- `reboot`
+- `uname -a`
+    - `3.10.17-yocto-standard`
+- `lsmod`
+```bash
+Module                  Size  Used by
+bcm4334x              574851  0
+ftdi_sio               40121  0
+usb_f_acm              14335  1
+u_serial               18582  6 usb_f_acm
+g_multi                70813  0
+libcomposite           39245  2 usb_f_acm,g_multi
+bcm_bt_lpm             13676  0
+```
 
 ## Install Base Distribution
 
@@ -131,7 +155,7 @@ Solution:
 
     ```bash
       "serial" : {
-        "device" : "/dev/tty.usbserial-A900XUV3",
+        "device" : "auto",
     }
     ```
 - `cp dapper-gcs.service /lib/systemd/system/`
@@ -155,12 +179,12 @@ Solution:
     - `reboot`
 - verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
 
-#### Alternative Enable WiFi AP mode
+#### Alternative/Better Enable WiFi AP mode
 - `systemctl stop wpa_supplicant.service`
 - `systemctl disable wpa_supplicant.service`
 - `systemctl enable hostapd.service`
 - `systemctl start hostapd.service`
-- reboot
+- `reboot`
 - verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
 
 ### Switch from WiFi AP to WiFi client mode
