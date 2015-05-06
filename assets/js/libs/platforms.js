@@ -63,7 +63,7 @@ var platforms = [{
         topSpeed: 15 // kph
     }
 }, {
-    name: '3DR Iris',
+    name: '3DR Iris+',
     type: 'quadcopter',
     payloads: ['GoPro'],
     missions: [
