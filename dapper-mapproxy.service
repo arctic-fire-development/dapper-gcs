@@ -3,7 +3,7 @@ Description=Mapproxy for Dapper GCS
 After=network.target
 
 [Service]
-ExecStart=/bin/sh -c "/usr/bin/mapproxy-util serve-develop -b `/bin/hostname`.local:8080 /home/root/dapper-gcs/etc/bing.yaml"
+ExecStart=/usr/bin/mapproxy-util serve-develop -b 0.0.0.0:8080 /home/root/dapper-gcs/etc/bing.yaml
 
 [Install]
 WantedBy=multi-user.target
