@@ -525,6 +525,7 @@ UavConnection.prototype.write = function(data) {
     switch (config.get('connection:type')) {
         case 'tcp': // fallthrough
         case 'serial':
+            log.debug("Sending packet:", data);
             sentBinaryLog.write(data);
             connection.write(data);
             break;
