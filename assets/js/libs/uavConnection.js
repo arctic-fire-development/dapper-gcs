@@ -532,7 +532,6 @@ UavConnection.prototype.write = function(data) {
                 log.error("Error in UavConnection: ", e);
             }
             break;
-        }
         case 'udp':
             // special case, don't do anything.
             break;
