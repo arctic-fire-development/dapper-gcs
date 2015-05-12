@@ -1,5 +1,5 @@
 'use strict';
-/*global require, events, Buffer, exports */
+/*global require, events, Buffer, mavlink, exports */
 
 /*
 This module is responsible for managing the overall status and health of the UAV connection.
@@ -101,7 +101,19 @@ var lastError;
 // log is a Winston logger, already configured + ready to use
 function UavConnection(configObject, protocolParser, logObject) {
 
-    _.bindAll(this, 'closeConnection', 'handleDataEvent', 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'write');
+    _.bindAll(this,
+        'closeConnection',
+        'handleDataEvent',
+        'changeState',
+        'heartbeat',
+        'invokeState',
+        'start',
+        'getState',
+        'updateHeartbeat',
+        'disconnected',
+        'connecting',
+        'connected',
+        'write');
 
     log = logObject;
     config = configObject;
@@ -394,6 +406,7 @@ UavConnection.prototype.connecting = function() {
                         }
                     }, this))
                     .fail(function(e) {
+                        log.silly('connecting() mavparam.get(SYSID_THISMAV).fail');
                         log.error(util.inspect(e));
                     });
 
@@ -419,6 +432,7 @@ UavConnection.prototype.connecting = function() {
                     }
                 }, this))
                 .fail(function(e) {
+                    log.silly('connecting() mavparam.get(SYSID_MYGCS).fail');
                     log.error(util.inspect(e));
                 });
         }
