@@ -107,6 +107,8 @@ function UavConnection(configObject, protocolParser, logObject) {
     config = configObject;
     protocol = protocolParser;
 
+    log.silly('initializing UavConnection');
+
     // name of current state of object, keep this an instance
     // variable because it may well be thought of as 'public'
     this.state = 'disconnected';
@@ -125,7 +127,7 @@ UavConnection.prototype.hasStarted = function() {
 
 // Establish the binary receive/send logs.
 UavConnection.prototype.startLogging = function() {
-
+    log.silly('starting to log');
     var logTime = moment().format('-MM-DD-YYYY-HH-mm-ss');
     receivedBinaryLog = fs.createWriteStream(config.get('logging:root') + config.get('logging:receivedBinary') + logTime);
     receivedBinaryLog.on('error', function(err) {
@@ -141,6 +143,7 @@ UavConnection.prototype.startLogging = function() {
 
 // Explicitly close the streams to ensure all data is flushed to disk.
 UavConnection.prototype.stopLogging = function() {
+    log.silly('stopping logging');
     receivedBinaryLog.end();
     latestBinaryLog.end();
     sentBinaryLog.end();
@@ -168,7 +171,7 @@ UavConnection.prototype.heartbeat = function() {
 
 UavConnection.prototype.getTimeSinceLastHeartbeat = function() {
     return timeSinceLastHeartbeat;
-}
+};
 
 // Convenience function to make the meaning of the awkward syntax more clear.
 UavConnection.prototype.invokeState = function() {
@@ -186,6 +189,7 @@ UavConnection.prototype.start = function() {
     started = true;
 
     this.changeState('disconnected');
+    log.silly('start: changeState set to disconnected');
 };
 
 // Accessor for private variable (stateName)
@@ -207,9 +211,9 @@ UavConnection.prototype.updateHeartbeat = function() {
             this.changeState('connected');
         }
     } catch (e) {
-        console.log('***')
-        console.log(e.stack);
-        console.log(e);
+        log.silly('***');
+        log.silly(e.stack);
+        log.silly(e);
         log.error('error when updating heartbeat: ' + util.inspect(e));
         //throw (e);
     }
@@ -233,6 +237,7 @@ UavConnection.prototype.sendHeartbeat = function() {
             // We set mavlink_version to 3 because it matches the magic we see elsewhere in incoming packets :) it's Mavlink 1.0.
         );
     }
+    log.silly('sendHeartbeat(): Sending GCS heartbeat to UAV...');
     log.heartbeat('Sending GCS heartbeat to UAV...');
     this.sendAsGcs(heartbeatMessage);
 };
@@ -242,14 +247,16 @@ UavConnection.prototype.getUSBSerial = function() {
 
     if (config.get('serial:device') === 'auto'){
         log.silly('[UavConnection] usb serial: auto-detecting');
+        log.silly('[UavConnection] using: ' + glob.sync(usbSerialPath)[0]);
         return glob.sync(usbSerialPath)[0];
 
     }else{
         log.silly('[UavConnection] usb serial: reading from config file');
-        return config.get('serial:device')
+        log.silly('[UavConnection] using: ' + config.get('serial:device'));
+        return config.get('serial:device');
     }
 
-}
+};
 
 UavConnection.prototype.disconnected = function() {
 
@@ -360,7 +367,7 @@ UavConnection.prototype.connecting = function() {
         if (true === attachDataEventListener && false === isAttached) {
 
             isAttached = true;
-            log.silly('attaching data event listener & connection bindings in UavConnection')
+            log.silly('attaching data event listener & connection bindings in UavConnection');
             protocol.file = connection;
 
             // One time, wait for a heartbeat then set the srcSystem / srcComponent
@@ -429,10 +436,12 @@ UavConnection.prototype.connecting = function() {
             protocol.removeListener('HEARTBEAT', this.updateHeartbeat);
             connection.removeListener(dataEventName, this.handleDataEvent);
             this.closeConnection();
+            log.silly('connecting(): closeConnection() called');
 
         }
 
     } catch (e) {
+        log.silly('connecting(): try/catch error');
         log.error(e);
         throw (e);
     }
@@ -462,6 +471,7 @@ UavConnection.prototype.closeConnection = function() {
             log.error('Unknown connection type attempted in UavConnection.closeConnection()');
             this.changeState('disconnected');
     }
+    log.silly('closeConnection(): connection has been closed');
 };
 
 UavConnection.prototype.handleDataEvent = function(message) {
@@ -484,10 +494,11 @@ UavConnection.prototype.requestDataStream = _.once(function() {
 });
 
 UavConnection.prototype.startSendingHeartbeats = _.once(function() {
+    log.silly('startSendingHeartbeats(): starting to send heartbeats');
     return setInterval(
         _.bind(this.sendHeartbeat, this),
         config.get('connection:updateIntervals:sendHeartbeatMs')
-    )
+    );
 });
 
 // Upon connection for the first time, request all MAVLink data streams available.
@@ -514,6 +525,7 @@ UavConnection.prototype.connected = function() {
         log.warn('Connection lost.');
         lostConnection = true;
         this.changeState('connecting');
+        log.silly('connected(): attempting to regain connection');
     }
 
     hasConnected = true;
@@ -522,10 +534,11 @@ UavConnection.prototype.connected = function() {
 // Log and write to binary log/transport layer.
 // Data is expected to be of type Buffer.
 UavConnection.prototype.write = function(data) {
+    log.silly('sending a data packet');
     switch (config.get('connection:type')) {
         case 'tcp': // fallthrough
         case 'serial':
-            log.debug("Sending packet:", data);
+            //log.debug("Sending packet:", data);
             sentBinaryLog.write(data);
             connection.write(data);
             break;
@@ -542,6 +555,7 @@ UavConnection.prototype.write = function(data) {
 // Log and write to binary log/transport layer.
 // Parameter is a mavlink message object instance. (TODO GH#124)
 UavConnection.prototype.sendAsGcs = function(message) {
+    log.silly('sendAsGcs() called');
     var buf = new Buffer(message.pack(protocol.seq, config.get('identities:gcsId'), config.get('identities:gcsComponent')));
     this.write(buf);
     // TODO GH#195 -- we need to move this code by refactoring the Mavlink JS generator
