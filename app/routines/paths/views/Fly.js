@@ -1,4 +1,3 @@
-'use strict';
 /* global console */
 define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscore',
 
@@ -23,9 +22,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
     BatteryWidget,
     PlatformWidget
 ) {
-
+    'use strict';
     var FreeFlightFlyView = Backbone.View.extend({
-
         model: Mission,
         el: '#fly',
         template: templates['app/routines/paths/Templates/fly'],
@@ -83,7 +81,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
 
         // Show the button with name className, hide others.
         showButton: function(className) {
-            _.each(this.$el.find('button:not(.postflight)'), function(e) {
+            _.each(this.$el.find('#controls button'), function(e) {
                 var $e = $(e);
                 if ($e.hasClass(className)) {
                     $e.show();
@@ -104,8 +102,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
                 // Detect when system has landed, then instruct disarm.
                 this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
-                        this.showButton('launch');
-                        this.$el.find('button.launch').removeAttr('disabled');
+                        this.showButton('postflight');
+                        this.$el.find('button.postflight').attr('disabled', false);
                     }, this));
                 }, this);
 
@@ -382,6 +380,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
             this.mapWidget = new MapWidget({
                 model: this.model.platform
             });
+            this.mapWidget.mission = this.model;
 
             this.platformWidget = new PlatformWidget({
                 model: this.model.platform
