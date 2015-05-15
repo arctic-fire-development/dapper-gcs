@@ -527,7 +527,7 @@ UavConnection.prototype.write = function(data) {
         case 'serial':
             try {
                 sentBinaryLog.write(data);
-                connection.write(data);
+                protocol.send(data);
             } catch(e) {
                 log.error("Error in UavConnection: ", e);
             }
