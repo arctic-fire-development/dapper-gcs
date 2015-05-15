@@ -525,8 +525,12 @@ UavConnection.prototype.write = function(data) {
     switch (config.get('connection:type')) {
         case 'tcp': // fallthrough
         case 'serial':
-            sentBinaryLog.write(data);
-            connection.write(data);
+            try {
+                sentBinaryLog.write(data);
+                protocol.send(data);
+            } catch(e) {
+                log.error("Error in UavConnection: ", e);
+            }
             break;
         case 'udp':
             // special case, don't do anything.

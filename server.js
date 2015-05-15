@@ -151,7 +151,7 @@ app.get('/connection/start', function(req, res) {
 Start of code to handle droneUDL REST API and plugin-specific hacked-starting code.
 ***************/
 
-var quad = new quadUdl(logger, nconf);
+var quad = new quadUdl(logger, nconf, uavConnectionManager);
 quad.setProtocol(mavlinkParser);
 
 // Very hacky code below, the point of which is to get a 'current routine' hacked in place on the server side,
