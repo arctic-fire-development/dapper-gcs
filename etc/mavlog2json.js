@@ -23,7 +23,7 @@ mavlinkParser.on('message', function(message) {
 	_.each(message.fieldnames, function(field) {
 		nonce[field] = message[field]; // make a temp object with just the properties we want
 	});
-  console.log(message.name, ':', stringify(nonce));
+  console.log(message.name, ':', stringify(message));
 });
 
 mavlinkParser.pushBuffer(messages);

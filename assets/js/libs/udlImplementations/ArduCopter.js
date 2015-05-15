@@ -115,8 +115,7 @@ ArduCopterUdl.prototype.arm = function() {
     // to handle edge cases around it.
     protocol.on('COMMAND_ACK', function verifyArmingAck(msg) {
         if (msg.result !== 0) {
-            log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
-            throw new Error('Result of COMMAND_ACK for arming failed');
+            log.error('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
         }
     });
 
@@ -124,7 +123,6 @@ ArduCopterUdl.prototype.arm = function() {
     // as status text, rather than direct failures.  TODO GH#356, see if this is always true / research.
     var handleStatusErrors = function(msg){
         if (msg.severity == mavlink.MAV_SEVERITY_ERROR) {
-            log.debug('Arming rejected: %s', msg.text);
             log.error('Arming rejected due to status text message error');
         }
     }
@@ -140,7 +138,7 @@ ArduCopterUdl.prototype.arm = function() {
                 deferred.resolve();
             } else {
                 log.verbose('Waiting on ack for arming, currently mode is %d', msg.base_mode);
-                connection.send(command_long);
+                connection.write(command_long);
             }
         } catch (e) {
             log.error('Uncaught error in ArduCopterUdl.arm(): ' + e);
@@ -188,7 +186,7 @@ ArduCopterUdl.prototype.disarm = function() {
                 deferred.resolve();
             } else {
                 log.verbose('Waiting on ack for disarming, currently mode is %d', msg.base_mode);
-                connection.send(command_long);
+                connection.write(command_long);
             }
         } catch (e) {
             log.error('Uncaught error in ArduCopterUdl.disarm()', e);
@@ -223,7 +221,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         APM.custom_modes.AUTO // magic number for guided mode!  APM-specific.
     );
-    connection.send(set_mode);
+    connection.write(set_mode);
 
     return deferred.promise;
 
@@ -258,7 +256,7 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
         }
     });
 
-    connection.send(set_mode);
+    connection.write(set_mode);
     return deferred;
 };
 
@@ -276,7 +274,7 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
             mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
             APM.custom_modes.GUIDED
         );
-        connection.send(set_mode);
+        connection.write(set_mode);
         return deferred.promise;
 
     }
@@ -334,7 +332,7 @@ ArduCopterUdl.prototype.rtl = function() {
         }
     });
 
-    connection.send(set_mode);
+    connection.write(set_mode);
     return deferred.promise;
 
 };
@@ -358,10 +356,10 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
             .then(function() {
-                connection.send(guided_mission_item);
+                connection.write(guided_mission_item);
             });
     } else {
-        connection.send(guided_mission_item);
+        connection.write(guided_mission_item);
     }
 
 };
@@ -389,7 +387,7 @@ ArduCopterUdl.prototype.guidedLoiter = function() {
     }
 
     protocol.once('MISSION_ACK', confirmedGuidedLoiter);
-    connection.send(guided_loiter_unlimited);
+    connection.write(guided_loiter_unlimited);
     return deferred.promise;
 
 };
@@ -417,7 +415,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
                 .then(function() {
                     deferred.resolve();
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
-                    connection.send(guided_mission_item);
+                    connection.write(guided_mission_item);
                 });
         } catch (e) {
             log.error('Uncaught exception in ArduCopterUdl.flyToPoint', e);
@@ -425,7 +423,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         }
     } else {
         deferred.resolve();
-        connection.send(guided_mission_item);
+        connection.write(guided_mission_item);
     }
     return deferred.promise;
 };
