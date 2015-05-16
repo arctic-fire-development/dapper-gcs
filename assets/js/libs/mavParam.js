@@ -119,7 +119,7 @@ MavParam.prototype.get = function(name) {
         if (name == msg.param_id) {
             try {
                 mavlinkParser.removeListener('PARAM_VALUE', parameterVerifier);
-                log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...\n\n', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
+                log.silly('Removing paramVerifier listener, [%d] remaining listeners on PARAM_VALUE...', EventEmitter.listenerCount(mavlinkParser, 'PARAM_VALUE'));
                 deferred.resolve(msg.param_value);
             } catch(e) {
                 log.error(e);
