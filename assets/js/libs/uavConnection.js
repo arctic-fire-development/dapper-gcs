@@ -510,7 +510,7 @@ UavConnection.prototype.connected = function() {
         ) && true === hasConnected
     ) {
         this.emit('connection:lost');
-        log.warn('Connection lost, time since last heartbeat was [%d], soft timeout is [%d].', timeSinceLastHeartbeat, config.get('connection:timeout:soft');
+        log.warn('Connection lost, time since last heartbeat was [%d], soft timeout is [%d].', timeSinceLastHeartbeat, config.get('connection:timeout:soft'));
         lostConnection = true;
         this.changeState('connecting');
     }
