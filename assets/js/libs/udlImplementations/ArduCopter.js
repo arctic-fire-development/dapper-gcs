@@ -30,15 +30,17 @@ var APM = {
 
 var log; // populated when object is created, expects Winston log object
 var config; // set when object is instantiated, nconf instance
+var connection; // UavConnectionManager object
 
-function ArduCopterUdl(logger, configObject) {
+function ArduCopterUdl(logger, configObject, connectionObject) {
     log = logger;
     config = configObject;
+    connection = connectionObject;
 }
 
 util.inherits(ArduCopterUdl, udlInterface);
 
-// MAVLink protocol implementation for parsing/sending messages over the wire
+// MAVLink protocol implementation for parsing messages over the wire
 var protocol;
 
 ArduCopterUdl.prototype.setProtocol = function(protocolParser) {
@@ -77,7 +79,7 @@ ArduCopterUdl.prototype.takeoff = function() {
 
         // We need to send this message with a special header
         // so that APM will respect it.
-        protocol.connection.sendAsGcs(throttle);
+        connection.sendAsGcs(throttle);
 
         // When system is shown to be "Active," we're in business.
         protocol.on('HEARTBEAT', function confirmSystemActive(msg) {
@@ -111,39 +113,31 @@ ArduCopterUdl.prototype.arm = function() {
     // The APM returns a command result of '3' when some pre-arm checks continue to fail.
     // So we need to examine the command ack relative to this arming request and be prepared
     // to handle edge cases around it.
-    protocol.on('COMMAND_ACK', function verifyArmingAck(msg) {
-        if (msg.result !== 0) {
-            log.debug('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
-            throw new Error('Result of COMMAND_ACK for arming failed');
+    var verifyArmingAck = function(msg) {
+        if (msg.result !== mavlink.MAV_RESULT_ACCEPTED) {
+            log.error('COMMAND_ACK rejected; command [%d] result [%d]', msg.command, msg.result);
+        } else {
+            log.info('Command to arm motors acknowledged.')
         }
-    });
+    };
+    protocol.on('COMMAND_ACK', verifyArmingAck);
 
-    // More troubleshooting.  Some messages that come back from the APM
-    // as status text, rather than direct failures.  TODO GH#356, see if this is always true / research.
-    var handleStatusErrors = function(msg){
-        if (msg.severity == mavlink.MAV_SEVERITY_ERROR) {
-            log.debug('Arming rejected: %s', msg.text);
-            log.error('Arming rejected due to status text message error');
-        }
-    }
-
-    protocol.on('STATUSTEXT', handleStatusErrors);
-
-    protocol.on('HEARTBEAT', function verifyArmed(msg) {
+    protocol.on('HEARTBEAT', function verifyOrRequestArmed(msg) {
         log.verbose('heartbeat.base_mode: %d', msg.base_mode);
         try {
             if (msg.base_mode & mavlink.MAV_MODE_FLAG_DECODE_POSITION_SAFETY) {
-                protocol.removeListener('HEARTBEAT', verifyArmed);
-                protocol.removeListener('STATUSTEXT', handleStatusErrors);
+                log.warn('Motors armed.');
+                protocol.removeListener('COMMAND_ACK', verifyArmingAck);
+                protocol.removeListener('HEARTBEAT', verifyOrRequestArmed);
                 deferred.resolve();
             } else {
                 log.verbose('Waiting on ack for arming, currently mode is %d', msg.base_mode);
-                protocol.send(command_long);
             }
         } catch (e) {
-            log.error('Uncaught error in ArduCopterUdl.arm(): ' + e);
+            log.error('Uncaught error in ArduCopterUdl.arm(): ' + util.inspect(e));
         }
     });
+    connection.sendAsGcs(command_long);
 
     return deferred.promise;
 
@@ -186,7 +180,7 @@ ArduCopterUdl.prototype.disarm = function() {
                 deferred.resolve();
             } else {
                 log.verbose('Waiting on ack for disarming, currently mode is %d', msg.base_mode);
-                protocol.send(command_long);
+                connection.sendAsGcs(command_long);
             }
         } catch (e) {
             log.error('Uncaught error in ArduCopterUdl.disarm()', e);
@@ -221,7 +215,7 @@ ArduCopterUdl.prototype.setAutoMode = function() {
         mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
         APM.custom_modes.AUTO // magic number for guided mode!  APM-specific.
     );
-    protocol.send(set_mode);
+    connection.sendAsGcs(set_mode);
 
     return deferred.promise;
 
@@ -256,7 +250,7 @@ ArduCopterUdl.prototype.setLoiterMode = function() {
         }
     });
 
-    protocol.send(set_mode);
+    connection.sendAsGcs(set_mode);
     return deferred;
 };
 
@@ -274,7 +268,7 @@ ArduCopterUdl.prototype.setGuidedMode = function() {
             mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, // instruct to enable a custom mode
             APM.custom_modes.GUIDED
         );
-        protocol.send(set_mode);
+        connection.sendAsGcs(set_mode);
         return deferred.promise;
 
     }
@@ -332,7 +326,7 @@ ArduCopterUdl.prototype.rtl = function() {
         }
     });
 
-    protocol.send(set_mode);
+    connection.sendAsGcs(set_mode);
     return deferred.promise;
 
 };
@@ -356,10 +350,10 @@ ArduCopterUdl.prototype.changeAltitude = function(alt, platform) {
         log.verbose('Switching to Guided more before transmitting fly-to-point nav mission item');
         Q.fcall(this.setGuidedMode)
             .then(function() {
-                protocol.send(guided_mission_item);
+                connection.sendAsGcs(guided_mission_item);
             });
     } else {
-        protocol.send(guided_mission_item);
+        connection.sendAsGcs(guided_mission_item);
     }
 
 };
@@ -387,7 +381,7 @@ ArduCopterUdl.prototype.guidedLoiter = function() {
     }
 
     protocol.once('MISSION_ACK', confirmedGuidedLoiter);
-    protocol.send(guided_loiter_unlimited);
+    connection.sendAsGcs(guided_loiter_unlimited);
     return deferred.promise;
 
 };
@@ -415,7 +409,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
                 .then(function() {
                     deferred.resolve();
                     log.verbose('Switched to GUIDED, now transmitting mission item.');
-                    protocol.send(guided_mission_item);
+                    connection.sendAsGcs(guided_mission_item);
                 });
         } catch (e) {
             log.error('Uncaught exception in ArduCopterUdl.flyToPoint', e);
@@ -423,7 +417,7 @@ ArduCopterUdl.prototype.flyToPoint = function(lat, lon, platform) {
         }
     } else {
         deferred.resolve();
-        protocol.send(guided_mission_item);
+        connection.sendAsGcs(guided_mission_item);
     }
     return deferred.promise;
 };

@@ -47,7 +47,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
         initialize: function() {
             _.bindAll(this, 'render', 'renderLayout', 'launch', 'home', 'stop', 'postflightConfirmation', 'endRoutine',
                 'showControls', 'enableAltitudeSlider', 'enableFlyToPoint', 'renderWidgets',
-                'regenerateGuiState');
+                'regenerateGuiState', 'renderPath');
 
             this.myIcon = L.icon({
                 iconUrl: '/images/target.png',
@@ -192,12 +192,19 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscor
         },
 
         renderPath: function() {
-            this.freeDraw = new L.FreeDraw({
-                multiplePolygons: false
-            });
-            this.mapWidget.map.addLayer(this.freeDraw);
-            this.freeDraw.predefinedPolygon(this.path.get('latLngs'));
-            this.mapWidget.map.fitBounds(this.freeDraw.polygons[0].getBounds());
+            try {
+                this.pather = new L.Pather({
+                    mode: L.Pather.MODE.VIEW,
+                    pathColour: 'red'
+                });
+                this.mapWidget.map.addLayer(this.pather);
+
+                this.pather.createPath(this.path.get('latLngs'));
+                this.mapWidget.map.fitBounds(this.pather.getPaths()[0].polyline.getBounds());
+            } catch(e) {
+                console.log(e);
+                console.log(e.getStack());
+            }
         },
 
         regenerateGuiState: function() {

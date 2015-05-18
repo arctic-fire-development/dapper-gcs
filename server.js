@@ -123,7 +123,7 @@ mavlinkParser.silentBadPrefix = true;
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
 
 // MavParams are for handling loading parameters
-var mavParams = new MavParams(mavlinkParser, logger);
+var mavParams = new MavParams(mavlinkParser, uavConnectionManager, logger);
 app.set('mavParams', mavParams);
 
 var platform = {},
@@ -151,7 +151,7 @@ app.get('/connection/start', function(req, res) {
 Start of code to handle droneUDL REST API and plugin-specific hacked-starting code.
 ***************/
 
-var quad = new quadUdl(logger, nconf);
+var quad = new quadUdl(logger, nconf, uavConnectionManager);
 quad.setProtocol(mavlinkParser);
 
 // Very hacky code below, the point of which is to get a 'current routine' hacked in place on the server side,
@@ -424,9 +424,6 @@ function bindClientEventBridge() {
     // TODO GH#180
     // Bind this in the same scope as the other client/server connections so we can be sure we're not
     // flooding event handlers.
-    mavlinkParser.on('message', function(m) {
-     // logger.silly('Got MAVLink message %s', m.name);
-    });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
@@ -440,7 +437,7 @@ function bindClientEventBridge() {
 
     // This won't scale =P still
     // But it's closer to what we want to do.
-    mavlinkParser.on('HEARTBEAT', function(message) {
+    mavlinkParser.on('HEARTBEAT', function serverHandleHeartbeat(message) {
         platform = _.extend(platform, {
             type: message.type,
             base_mode: message.base_mode,

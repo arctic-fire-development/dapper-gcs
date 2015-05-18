@@ -41,7 +41,7 @@ define([
         initialize: function() {
             this.set('path', new Path());
             BaseRoutine.prototype.initialize.apply(this);
-            console.log(this);
+
             // Assign views that will be invoked by the base class here.
             this.PreflightView = PreflightView;
         },

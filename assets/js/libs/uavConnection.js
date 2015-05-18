@@ -101,7 +101,7 @@ var lastError;
 // log is a Winston logger, already configured + ready to use
 function UavConnection(configObject, protocolParser, logObject) {
 
-    _.bindAll(this, 'closeConnection', 'handleDataEvent', 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'write');
+    _.bindAll(this, 'closeConnection', 'handleDataEvent', 'changeState', 'heartbeat', 'invokeState', 'start', 'getState', 'updateHeartbeat', 'disconnected', 'connecting', 'connected', 'sendAsGcs');
 
     log = logObject;
     config = configObject;
@@ -207,11 +207,7 @@ UavConnection.prototype.updateHeartbeat = function() {
             this.changeState('connected');
         }
     } catch (e) {
-        console.log('***')
-        console.log(e.stack);
-        console.log(e);
-        log.error('error when updating heartbeat: ' + util.inspect(e));
-        //throw (e);
+        log.error('error when updating heartbeat in UavConnectionManager.updateHeartbeat(): ' + util.inspect(e));
     }
 };
 
@@ -347,7 +343,6 @@ UavConnection.prototype.disconnected = function() {
 // The heartbeat monitor will switch the connection to 'connected' when it sees heartbeats.
 UavConnection.prototype.connecting = function() {
     try {
-
         isConnected = false;
 
         log.silly('establishing MAVLink connection...', {
@@ -359,13 +354,16 @@ UavConnection.prototype.connecting = function() {
         // to avoid attaching too many callbacks.
         if (true === attachDataEventListener && false === isAttached) {
 
+            protocol.on('HEARTBEAT', function heartbeatListener(m) {
+                log.silly('Got a heartbeat from the APM');
+            });
+
             isAttached = true;
             log.silly('attaching data event listener & connection bindings in UavConnection')
-            protocol.file = connection;
 
             // One time, wait for a heartbeat then set the srcSystem / srcComponent
             // Possible loose ends here.  TODO GH#195.
-            protocol.once('HEARTBEAT', function(msg) {
+            protocol.once('HEARTBEAT', function handleFirstHeartbeat(msg) {
 
                 uavSysId = msg.header.srcSystem;
                 uavComponentId = msg.header.srcComponent;
@@ -399,7 +397,7 @@ UavConnection.prototype.connecting = function() {
             // handler for decoding.
             connection.on(dataEventName, this.handleDataEvent);
 
-            var mavParam = new MavParams(protocol, log);
+            var mavParam = new MavParams(protocol, this, log);
 
             // With the connection established, fetch and set the GCS SysID and UAV SysIDs,
             // both here and on the protocol itself.
@@ -480,7 +478,7 @@ UavConnection.prototype.requestDataStream = _.once(function() {
         1 // start sending this stream (0=stop)
     );
     log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
-    protocol.send(request);
+    this.sendAsGcs(request);
 });
 
 UavConnection.prototype.startSendingHeartbeats = _.once(function() {
@@ -507,31 +505,17 @@ UavConnection.prototype.connected = function() {
     // Have we lost link?  True if we're timing out and have connected previously.
     if (
         (
-            timeSinceLastHeartbeat > config.get('connection:timeout:soft') || true === _.isNaN(timeSinceLastHeartbeat)
+            timeSinceLastHeartbeat > config.get('connection:timeout:soft')
+            || true === _.isNaN(timeSinceLastHeartbeat)
         ) && true === hasConnected
     ) {
         this.emit('connection:lost');
-        log.warn('Connection lost.');
+        log.warn('Connection lost, time since last heartbeat was [%d], soft timeout is [%d].', timeSinceLastHeartbeat, config.get('connection:timeout:soft');
         lostConnection = true;
         this.changeState('connecting');
     }
 
     hasConnected = true;
-};
-
-// Log and write to binary log/transport layer.
-// Data is expected to be of type Buffer.
-UavConnection.prototype.write = function(data) {
-    switch (config.get('connection:type')) {
-        case 'tcp': // fallthrough
-        case 'serial':
-            sentBinaryLog.write(data);
-            connection.write(data);
-            break;
-        case 'udp':
-            // special case, don't do anything.
-            break;
-    }
 };
 
 // We have a special case with APM/MAVLink where two message types will be checked for the specific
@@ -542,7 +526,8 @@ UavConnection.prototype.write = function(data) {
 // Parameter is a mavlink message object instance. (TODO GH#124)
 UavConnection.prototype.sendAsGcs = function(message) {
     var buf = new Buffer(message.pack(protocol.seq, config.get('identities:gcsId'), config.get('identities:gcsComponent')));
-    this.write(buf);
+    sentBinaryLog.write(buf);
+    connection.write(buf);
     // TODO GH#195 -- we need to move this code by refactoring the Mavlink JS generator
     protocol.seq = (protocol.seq + 1) % 255;
     protocol.total_packets_sent += 1;

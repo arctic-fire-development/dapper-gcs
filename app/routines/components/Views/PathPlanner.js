@@ -1,5 +1,5 @@
-define(['backbone', 'JST', 'leaflet', 'concavehull', 'd3', 'evispa-timo-jsclipper', 'leaflet.freedraw'],
-    function(Backbone, templates, L, ConcaveHull, d3, JSClipper, LFD) {
+define(['backbone', 'JST', 'leaflet', 'd3', 'leaflet-pather'],
+    function(Backbone, templates, L, d3, LP) {
 
     var PathPlanner = Backbone.View.extend({
 
@@ -22,11 +22,14 @@ define(['backbone', 'JST', 'leaflet', 'concavehull', 'd3', 'evispa-timo-jsclippe
         },
 
         setPanMode: function() {
-            this.freeDraw.setMode(L.FreeDraw.MODES.VIEW);
+            this.pather.setMode(L.Pather.MODE.VIEW);
         },
 
         setDrawMode: function() {
-            this.freeDraw.setMode(L.FreeDraw.MODES.ALL ^ L.FreeDraw.MODES.DELETE);
+            this.pather.setMode(
+                L.Pather.MODE.ALL
+                ^L.Pather.MODE.DELETE
+            );
         },
 
         render: function() {
@@ -40,9 +43,6 @@ define(['backbone', 'JST', 'leaflet', 'concavehull', 'd3', 'evispa-timo-jsclippe
         },
 
         addBaseMap: function() {
-
-            // Define specific path to default Leaflet images
-            L.Icon.Default.imagePath = '/images/leaflet';
 
             // create a map in the "map" div, set the view to a given place and zoom
             this.map = L.map('pathPlannerMapWidget', {
@@ -72,14 +72,14 @@ define(['backbone', 'JST', 'leaflet', 'concavehull', 'd3', 'evispa-timo-jsclippe
         addDrawingLayer: function() {
 
             // Hook in the drawing layers
-            this.freeDraw = new L.FreeDraw({
-                multiplePolygons: false
+            this.pather = new L.Pather({
+                mode: L.Pather.MODE.VIEW
             });
-            this.map.addLayer(this.freeDraw);
+            this.map.addLayer(this.pather);
 
             // When the path is edited, save it
-            this.freeDraw.on('markers', _.bind(function getMarkers(eventData) {
-                this.model.set('latLngs', eventData.latLngs[0]);
+            this.pather.on('created', _.bind(function getMarkers(eventData) {
+                this.model.set('latLngs', eventData.latLngs);
             }, this));
 
         }
