@@ -57,9 +57,7 @@ var mavlink;
 // Reference to the instantiated mavlink object, for access to target system/component.
 var mavlinkParser;
 
-// This really needs to not be here.
-// TODO really?
-// GH#159
+// Reference to connection object for sending data over the transport
 var uavConnection;
 
 // See comments in header for where this comes from.
@@ -93,7 +91,7 @@ function missionRequestHandler(missionItemRequest) {
         throw new Error('APM asked to send undefined mission packet');
     }
 
-    mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
+    uavConnection.sendAsGcs(missionItems[missionItemRequest.seq], uavConnection);
 }
 
 // Mission object constructor
@@ -118,7 +116,7 @@ MavMission.prototype.sendToPlatform = function() {
     // send mission_count
     // TODO see GH#95
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
-    mavlinkParser.send(missionCount, uavConnection);
+    uavConnection.sendAsGcs(missionCount, uavConnection);
 
     // attach mission_request handler, let it cook
     mavlinkParser.on('MISSION_REQUEST', missionRequestHandler);
@@ -160,7 +158,7 @@ MavMission.prototype.fetchFromPlatform = function() {
     // Request mission item #n
     var sendMissionRequest = function(n) {
         var missionRequest = new mavlink.messages.mission_request(mavlinkParser.srcSystem, mavlinkParser.srcComponent, n);
-        mavlinkParser.send(missionRequest);
+        uavConnection.sendAsGcs(missionRequest);
     };
 
     mavlinkParser.once('MISSION_COUNT', function fetchWaypoints(msg) {
@@ -184,7 +182,7 @@ MavMission.prototype.fetchFromPlatform = function() {
         } else {
             // Done, send final ack
             var missionAck = new mavlink.messages.mission_ack(mavlinkParser.srcSystem, mavlinkParser.srcComponent, mavlink.MAV_MISSION_ACCEPTED);
-            mavlinkParser.send(missionAck);
+            uavConnection.sendAsGcs(missionAck);
             mavlinkParser.removeListener('MISSION_ITEM', handleMissionItem);
             log.info('Downloaded mission items from platform.');
             deferred.resolve(this);
@@ -193,7 +191,7 @@ MavMission.prototype.fetchFromPlatform = function() {
 
     // This starts the process off.
     var waypointRequestList = new mavlink.messages.mission_request_list(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
-    mavlinkParser.send(waypointRequestList);
+    uavConnection.sendAsGcs(waypointRequestList);
     log.verbose('Requesting mission from UAV...');
 
     return deferred.promise;
@@ -223,7 +221,7 @@ MavMission.prototype.clearMission = function() {
 
     missionItems = [];
     var missionClearAll = new mavlink.messages.mission_clear_all(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
-    mavlinkParser.send(missionClearAll);
+    uavConnection.sendAsGcs(missionClearAll);
 
     return deferred.promise;
 };

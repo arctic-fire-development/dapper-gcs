@@ -31,6 +31,9 @@ var deferreds = {};
 // Reference to the active mavlink parser/link object in use
 var mavlinkParser;
 
+// Reference to the UAV Connection object for sending messages
+var uavConnection;
+
 function trim(string, chars) {
     string = baseToString(string);
     if (!string) {
@@ -61,10 +64,11 @@ function trim(string, chars) {
 }
 
 // Log object is assumed to be a winston object.
-function MavParam(mavlinkParserObject, logger) {
+function MavParam(mavlinkParserObject, uavConnectionObject, logger) {
 
     log = logger;
     mavlinkParser = mavlinkParserObject;
+    uavConnection = uavConnectionObject;
 
 }
 
@@ -83,7 +87,7 @@ MavParam.prototype.set = function(name, value) {
     var paramSetter = function() {
         var deferred = deferreds[name] = Q.defer();
         var param_set = new mavlink.messages.param_set(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, value, 0); // extra zero = don't care about type
-        mavlinkParser.send(param_set);
+        uavConnection.sendAsGcs(param_set);
         return deferred.promise;
     };
 
@@ -134,7 +138,7 @@ MavParam.prototype.get = function(name) {
     mavlinkParser.on('PARAM_VALUE', parameterVerifier);
     var index = -1; // this will use the name as the lookup method
     var param_request_read = new mavlink.messages.param_request_read(mavlinkParser.srcSystem, mavlinkParser.srcComponent, name, index);
-    mavlinkParser.send(param_request_read);
+    uavConnection.sendAsGcs(param_request_read);
 
     return deferred.promise;
 };
@@ -162,7 +166,7 @@ MavParam.prototype.loadParameters = function(parameters) {
 
 MavParam.prototype.getAll = function() {
     var param_request_list = new mavlink.messages.param_request_list(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
-    mavlinkParser.send(param_request_list);
+    uavConnection.sendAsGcs(param_request_list);
 };
 
 module.exports = MavParam;
