@@ -1,6 +1,6 @@
 {
   "bugs": {
-    "url": "https://github.com/arctic-fire-development/unbase-gcs/issues"
+    "url": "https://github.com/arctic-fire-development/dapper-gcs/issues"
   },
   "dependencies": {
     "backbone": "1.1.2",
@@ -49,17 +49,17 @@
   "engines": {
     "node": ">= 0.10.29"
   },
-  "homepage": "https://github.com/arctic-fire-development/unbase-gcs",
+  "homepage": "https://github.com/arctic-fire-development/dapper-gcs",
   "keywords": [
     "drone",
     "mavlink",
     "geospatial"
   ],
   "name": "dapper",
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
-    "url": "git://github.com/arctic-fire-development/unbase-gcs.git"
+    "url": "git://github.com/arctic-fire-development/dapper-gcs.git"
   },
   "scripts": {
     "test": "grunt test"
