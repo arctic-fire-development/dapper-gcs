@@ -1,5 +1,5 @@
 'use strict';
-/*global require, events, Buffer, exports */
+/*global require, events, Buffer, exports, mavlink, clearInterval, setInterval */
 
 /*
 This module is responsible for managing the overall status and health of the UAV connection.
@@ -168,7 +168,7 @@ UavConnection.prototype.heartbeat = function() {
 
 UavConnection.prototype.getTimeSinceLastHeartbeat = function() {
     return timeSinceLastHeartbeat;
-}
+};
 
 // Convenience function to make the meaning of the awkward syntax more clear.
 UavConnection.prototype.invokeState = function() {
@@ -242,10 +242,10 @@ UavConnection.prototype.getUSBSerial = function() {
 
     }else{
         log.silly('[UavConnection] usb serial: reading from config file');
-        return config.get('serial:device')
+        return config.get('serial:device');
     }
 
-}
+};
 
 UavConnection.prototype.disconnected = function() {
 
@@ -277,14 +277,7 @@ UavConnection.prototype.disconnected = function() {
 
                 connection = new SerialPort(
                     serialDevice, {
-                        baudrate: config.get('serial:baudrate'),
-                        // See:
-                        // https://github.com/voodootikigod/node-serialport/issues/284
-                        //
-                        // We need this callback specified both here and with the 'close' event until that
-                        // issue is resolved, because it's unclear where they may differ in internal
-                        // execution.
-                        disconnectedCallback: _.bind(this.changeState, this, 'disconnected')
+                        baudrate: config.get('serial:baudrate')
                     }
                 );
 
@@ -335,7 +328,7 @@ UavConnection.prototype.disconnected = function() {
                 log.error('Connection type not understood (%s)', config.get('connection:type'));
         }
     } catch (e) {
-        log.error('error', util.inspect(e));
+        log.error('UavConnection.prototype.disconnected error', util.inspect(e));
     }
 };
 
@@ -359,7 +352,7 @@ UavConnection.prototype.connecting = function() {
             });
 
             isAttached = true;
-            log.silly('attaching data event listener & connection bindings in UavConnection')
+            log.silly('attaching data event listener & connection bindings in UavConnection');
 
             // One time, wait for a heartbeat then set the srcSystem / srcComponent
             // Possible loose ends here.  TODO GH#195.
@@ -385,7 +378,7 @@ UavConnection.prototype.connecting = function() {
                         }
                     }, this))
                     .fail(function(e) {
-                        log.error(util.inspect(e));
+                        log.error('UavConnection.prototype.connecting error: ' + util.inspect(e));
                     });
 
             });
@@ -431,8 +424,8 @@ UavConnection.prototype.connecting = function() {
         }
 
     } catch (e) {
-        log.error(e);
-        throw (e);
+        log.error('UavConnection.prototype.connecting error: ' + util.inspect(e));
+        //throw (e);
     }
 };
 
@@ -469,30 +462,38 @@ UavConnection.prototype.handleDataEvent = function(message) {
 };
 
 // Helper method to request the data stream, needs to be bound in this scope to avoid being called often.
-UavConnection.prototype.requestDataStream = _.once(function() {
+UavConnection.prototype.requestDataStream = function(options) {
+
     var request = new mavlink.messages.request_data_stream(
         uavSysId, // target system
         uavComponentId, // target component
-        mavlink.MAV_DATA_STREAM_ALL, // get all data streams
-        config.get('connection:updateIntervals:streamHz'), // rate, Hz
+        options.streamId, //mavlink.MAV_DATA_STREAM_ALL, // get all data streams
+        options.Hz,//config.get('connection:updateIntervals:streamHz'), // rate, Hz
         1 // start sending this stream (0=stop)
     );
-    log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
+    log.silly('Requesting data ID [%d] at interval %d...', options.streamId, options.Hz);
     this.sendAsGcs(request);
-});
+};
 
 UavConnection.prototype.startSendingHeartbeats = _.once(function() {
     return setInterval(
         _.bind(this.sendHeartbeat, this),
         config.get('connection:updateIntervals:sendHeartbeatMs')
-    )
+    );
 });
 
 // Upon connection for the first time, request all MAVLink data streams available.
 // Also switch back to 'connecting' state in case we lose the link.
 UavConnection.prototype.connected = function() {
 
-    this.requestDataStream();
+    if(false === hasConnected){
+        this.requestDataStream({'streamId': mavlink.MAV_DATA_STREAM_EXTENDED_STATUS, 'Hz': 2});
+        this.requestDataStream({'streamId': mavlink.MAV_DATA_STREAM_POSITION, 'Hz': 3});
+        this.requestDataStream({'streamId': mavlink.MAV_DATA_STREAM_EXTRA1, 'Hz': 10});
+        this.requestDataStream({'streamId': mavlink.MAV_DATA_STREAM_EXTRA2, 'Hz': 10});
+        this.requestDataStream({'streamId': mavlink.MAV_DATA_STREAM_EXTRA3, 'Hz': 3});
+    }
+
     sendHeartbeatInterval = this.startSendingHeartbeats();
 
     // If connection has been regained, signal the client.
