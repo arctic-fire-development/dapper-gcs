@@ -471,7 +471,7 @@ UavConnection.prototype.requestDataStream = function(options) {
         options.Hz,//config.get('connection:updateIntervals:streamHz'), // rate, Hz
         1 // start sending this stream (0=stop)
     );
-    log.silly('Requesting data streams at interval %d...', config.get('connection:updateIntervals:streamHz'));
+    log.silly('Requesting data ID [%d] at interval %d...', options.streamId, options.Hz);
     this.sendAsGcs(request);
 };
 
