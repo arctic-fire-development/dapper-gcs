@@ -32,9 +32,8 @@ define(['backbone', 'leaflet', 'leaflet-rotate-marker'], function(Backbone, L, L
                     zIndexOffset: 1000
                 }).addTo(this.map);
 
-                // Do once;
-                this.map.panTo(LatLng);
-                this.map.setZoom(18);
+                // Do once.
+                this.map.setView(LatLng, 18);
 
                 this.hasRendered = true;
             }
