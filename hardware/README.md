@@ -189,9 +189,15 @@ bcm_bt_lpm             13676  0
 
 ### Enable USB-Ethernet bridging
 - connect to edison via the console, not ssh
+- turn on wifi client mode
+    - `sysctl stop hostapd.service`
+    - `sysctl start wpa_supplicant.service`
+    - `configure_edison --wifi`
 - build bridge-utils
     - `wget http://sourceforge.net/projects/bridge/files/bridge/bridge-utils-1.5.tar.gz`
     - `wget http://www.linuxfromscratch.org/patches/blfs/svn/bridge-utils-1.5-linux_3.8_fix-1.patch`  
+    - `tar zxvf bridge-utils-1.5.tar.gz`
+    - `cd bridge-utils`
     - `patch -Np1 -i ../bridge-utils-1.5-linux_3.8_fix-1.patch &&
     autoconf -o configure configure.in                      &&
     ./configure --prefix=/usr                               &&
