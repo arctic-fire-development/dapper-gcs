@@ -41,6 +41,8 @@ at this point you can continue from an ssh connection. this sometimes helps with
 - `chmod +x ./setup.sh`
 - `./setup.sh`
   - follow the on-screen instructions
+- Note: this script performs a git clone of the dapper repo.
+  - Do not run it from within a cloned repo
 
 # Install and Setup Dapper-GCS from the command line
 
