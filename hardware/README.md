@@ -16,7 +16,8 @@
 - `configure_edison --version`
   - 146
 - `configure_edison --setup`
-- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh --no-check-certificates`
+- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh --no-check-certificate`
+- `./setup.sh`
 
 later, install it manually
 have the script auto-detect what stage of the setup it’s in
