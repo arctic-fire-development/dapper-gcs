@@ -1,44 +1,31 @@
 # Setup and Installation on Intel Edison
 
-## Flashing Edison with latest OS (Linux)
-Ideally you'd be able to do this from OS X, however the reality is there is still something wonky with re-flashing from this os.
-Use a Linux system to do the re-flash.
+## Flashing Edison with latest OS from OS X
+- install [horndis](http://joshuawise.com/downloads/HoRNDIS-rel7.pkg)
+- restart os x
+- download latest intel [flashing software](http://downloadmirror.intel.com/24910/eng/PhoneFlashToolLite_5.2.4.22_mac64.pkg) for edison
+- download [latest edison image](http://downloadmirror.intel.com/24910/eng/edison-image-ww18-15.zip)
+- point the intel flashing software to use the new firmware image
+- connect the edison to the laptop via OTG port
+- ensure intel flashing software detects the edison
+- click ‘start to flash’
+- will need to unplug the edison and replug in
+- this will take a few minutes
+- connect to the console port
+- login using `bloop c`
+- `configure_edison --version`
+  - 146
+- `configure_edison --setup`
+- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh --no-check-certificates`
+- `chmod +x ./setup.sh`
+- `wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificates`
 
-These steps involve a bit of bouncing back and forth between shells.
-- download the latest os distribution [from intel](http://www.intel.com/support/edison/sb/CS-035180.htm)
-    - unpack it
-- connect the edison via usb otg to the linux box...
-    - this shell will be called OTG
-    - it's where you will run flash.sh
-- connect the console to the linux box...
-    - this shell will be called CONSOLE
-    - it's where you will intterupt the boot sequence, and monitor the progress
-- from CONSOLE
-    - login as root
-    - `reboot`
-    - as the system reboots, it will give a VERY BRIEF opportunity to interrupt the boot sequence
-        - hit <ENTER> to interrupt
-    - you should now be at a prompt like this: `boot > `
-- from OTG
-    - cd into where the stock intel flash image is located
-        - something like `cd edison-image-ww05-15`
-    - run `sudo ./flashall.sh`
-    - it will pause while waiting for the edison, this is good
-- from CONSOLE
-    - `run do_flash`
-    - now the magic is happening
-    - don't touch anything until everything finishes and you're at the login prompt
-        - it will reboot a few times
-        - process takes 5-10 minutes
-    - once everything has settled down, login as root
-    - `configure_edison --version`
-        - `120`
+later, install it manually
+have the script auto-detect what stage of the setup it’s in
 
 at this point you can continue from an ssh connection. this sometimes helps with the package downloads.
 
 # Install and Setup Dapper-GCS from the "setup" script
-- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh`
-- `chmod +x ./setup.sh`
 - `./setup.sh`
   - follow the on-screen instructions
 - Note: this script performs a git clone of the dapper repo.
