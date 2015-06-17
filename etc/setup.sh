@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Configuring Machine"
-configure_edison --setup;
 echo "Here is your ip address"
 curl -4 icanhazip.com;
 
