@@ -68,7 +68,7 @@ rm setup_in_progress
 echo "Installing wifi kernel module"
 if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
 then
-  opkg install --force-reinstall ./kernel-module-bcm4334x_1.141-r47_edison.ipk
+  opkg install --force-reinstall kernel-module-bcm4334x_1.141-r47_edison.ipk
   echo "    ignore the FATAL, it's ok"
 else
   echo "kernel wifi module was not present"
