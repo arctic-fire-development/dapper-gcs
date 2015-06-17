@@ -11,7 +11,7 @@ echo "Here is your ip address"
 curl -4 icanhazip.com;
 
 cd
-wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificates
+wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificate
 if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
 then
   echo "successfully downloaded kernel wifi module"
