@@ -36,7 +36,17 @@ These steps involve a bit of bouncing back and forth between shells.
 
 at this point you can continue from an ssh connection. this sometimes helps with the package downloads.
 
-## Setup Wifi and Ethernet over USB
+# Install and Setup Dapper-GCS from the "setup" script
+- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh`
+- `chmod +x ./setup.sh`
+- `./setup.sh`
+  - follow the on-screen instructions
+- Note: this script performs a git clone of the dapper repo.
+  - Do not run it from within a cloned repo
+
+# Install and Setup Dapper-GCS from the command line
+
+## Setup Wifi
 - now that the latest os is installed, it's time to get networking going
 - run `configure_edison --setup`
     - give a password
