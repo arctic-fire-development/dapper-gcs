@@ -12,6 +12,14 @@ curl -4 icanhazip.com;
 
 cd
 wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificates
+if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
+then
+  echo "successfully downloaded kernel wifi module"
+else
+  echo "kernel module was not downloaded successfully"
+  echo "please troubleshoot before continuing"
+  exit
+fi
 
 BOOT_SIZE=$(df -h | grep mmcblk0p7 | sed 's/\s\+/ /g' | cut -d' ' -f2 | sed 's/M//g')
 echo $BOOT_SIZE
@@ -58,10 +66,15 @@ echo "Continuing Setup and Installation"
 rm setup_in_progress
 
 echo "Installing wifi kernel module"
-#opkg install --force-reinstall kernel-module-bcm4334x
-opkg install --force-reinstall ./kernel-module-bcm4334x_1.141-r47_edison.ipk
-echo "    ignore the FATAL, it's ok"
-
+if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
+then
+  opkg install --force-reinstall ./kernel-module-bcm4334x_1.141-r47_edison.ipk
+  echo "    ignore the FATAL, it's ok"
+else
+  echo "kernel wifi module was not present"
+  echo "please troubleshoot before continuing"
+  exit
+fi
 
 #let's get back onto the wifi
 configure_edison --wifi
