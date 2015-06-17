@@ -1,8 +1,17 @@
 #!/bin/bash
 
+# Stage 1
+
+Stage1 ()
+{
+touch setup_in_progress
+
 echo "Configuring Machine"
 echo "Here is your ip address"
 curl -4 icanhazip.com;
+
+cd
+wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificates
 
 BOOT_SIZE=$(df -h | grep mmcblk0p7 | sed 's/\s\+/ /g' | cut -d' ' -f2 | sed 's/M//g')
 echo $BOOT_SIZE
@@ -34,13 +43,28 @@ echo "Setting up new kernel for next boot"
 cd /boot
 cp vmlinuz vmlinuz.original.$(configure_edison --version)
 cp bzImage* vmlinuz
-ls -l
+
 opkg install kernel-modules
-opkg install --force-reinstall kernel-module-bcm4334x
+
+echo "Restarting the system"
+echo "Run setup.sh again to continue"
+reboot
+}
+
+# Stage 2
+Stage2 ()
+{
+echo "Continuing Setup and Installation"
+rm setup_in_progress
+
+echo "Installing wifi kernel module"
+#opkg install --force-reinstall kernel-module-bcm4334x
+opkg install --force-reinstall ./kernel-module-bcm4334x_1.141-r47_edison.ipk
 echo "    ignore the FATAL, it's ok"
 
-echo "Back in the home directory"
-cd
+
+#let's get back onto the wifi
+configure_edison --wifi
 
 echo "Installing dapper-gcs pre-reqs"
 echo "    installing npm@latest"
@@ -91,4 +115,13 @@ systemctl disable wpa_supplicant.service
 systemctl enable hostapd.service
 systemctl start hostapd.service
 
+echo ""
 echo "All Done"
+}
+
+if [ -e ./setup_in_progress ]
+	then
+    Stage2
+	else
+	  Stage1
+fi
