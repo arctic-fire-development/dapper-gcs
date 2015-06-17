@@ -53,6 +53,8 @@ cp vmlinuz vmlinuz.original.$(configure_edison --version)
 cp bzImage* vmlinuz
 
 opkg install kernel-modules
+opkg install --force-reinstall kernel-module-bcm4334x
+echo "ignore the FATAL, it's ok"
 
 echo "Restarting the system"
 echo "Run setup.sh again to continue"
@@ -65,16 +67,16 @@ Stage2 ()
 echo "Continuing Setup and Installation"
 rm setup_in_progress
 
-echo "Installing wifi kernel module"
-if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
-then
-  opkg install --force-reinstall kernel-module-bcm4334x_1.141-r47_edison.ipk
-  echo "    ignore the FATAL, it's ok"
-else
-  echo "kernel wifi module was not present"
-  echo "please troubleshoot before continuing"
-  exit
-fi
+#echo "Installing wifi kernel module"
+##if [ -f kernel-module-bcm4334x_1.141-r47_edison.ipk ]
+#then
+#  opkg install --force-reinstall kernel-module-bcm4334x_1.141-r47_edison.ipk
+#  echo "    ignore the FATAL, it's ok"
+#else
+#  echo "kernel wifi module was not present"
+#  echo "please troubleshoot before continuing"
+#  exit
+#fi
 
 #let's get back onto the wifi
 configure_edison --wifi
