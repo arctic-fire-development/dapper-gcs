@@ -4,7 +4,7 @@
         "backbone": "1.1.2",
         "bootstrap": "3.2.0",
         "bootstrap-growl": "1.1.0",
-        "d3": "3.4.13",
+        "d3": "3.5.5",
         "fuelux": "3.0.2",
         "jade": "1.5.0",
         "jquery": "2.1.1",
