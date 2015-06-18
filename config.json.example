@@ -40,7 +40,7 @@
   },
 
   "logging": {
-    "root": "./logs/",
+    "root": "/var/log/dapper-gcs/",
     "receivedBinary": "received",
     "sentBinary": "sent"
   },
