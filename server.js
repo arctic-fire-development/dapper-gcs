@@ -40,7 +40,7 @@ var logger = module.exports = new(winston.Logger)({
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
         }),
         new(winston.transports.File)({
-            filename: 'gcs.log',
+            filename: '/var/log/dapper-gcs/gcs.log',
             colorize: false,
             timestamp: true,
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
