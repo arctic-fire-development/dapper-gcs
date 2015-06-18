@@ -61,6 +61,10 @@ rm setup_in_progress
 #let's get back onto the wifi
 configure_edison --wifi
 
+echo "creating the log directory /var/log/dapper-gcs"
+mkdir -p /var/log/dapper-gcs
+chmod 777 /var/log/dapper-gcs
+
 echo "Installing dapper-gcs pre-reqs"
 echo "    installing npm@latest"
 npm install -g npm@latest
@@ -91,7 +95,6 @@ cd
 echo "Installing mapproxy and friends"
 wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
 python get-pip.py
-pip install --upgrade pip
 opkg install vim python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6
 pip install pyproj PyYAML
 pip install MapProxy
