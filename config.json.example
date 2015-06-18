@@ -11,12 +11,12 @@
   "connection" : {
     "type": "tcp",
     "timeout": {
-        "soft": 10000,
-        "hard": 20000
+        "soft": 20000,
+        "hard": 40000
       },
       "updateIntervals" : {
-        "heartbeatMs" : 2500,
-        "sendHeartbeatMs" : 1000
+        "heartbeatMs" : 2501,
+        "sendHeartbeatMs" : 3000
       }
     },
 
