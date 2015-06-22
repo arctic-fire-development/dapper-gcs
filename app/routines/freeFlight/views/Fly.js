@@ -1,6 +1,6 @@
 'use strict';
 /* global console */
-define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'underscore',
+define(['app', 'backbone', 'JST', 'q', 'leaflet', 'bootstrap-slider', 'underscore',
 
     // Models
     'Models/Mission',
@@ -83,7 +83,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
 
         // Show the button with name className, hide others.
         showButton: function(className) {
-            _.each(this.$el.find('#controls button:not(.postflight)'), function(e) {
+            _.each(this.$el.find('#controls button'), function(e) {
                 var $e = $(e);
                 if ($e.hasClass(className)) {
                     $e.show();
@@ -104,8 +104,8 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
                 // Detect when system has landed, then instruct disarm.
                 this.model.platform.on('status:standby', function() {
                     Q($.get('/drone/disarm')).then(_.bind(function() {
-                        this.showButton('launch');
-                        this.$el.find('button.launch').removeAttr('disabled');
+                        this.showButton('postflight');
+                        this.$el.find('button.postflight').attr('disabled', false);
                     }, this));
                 }, this);
 
@@ -359,6 +359,7 @@ define(['app', 'backbone', 'JST', 'q', 'leaflet-dist', 'bootstrap-slider', 'unde
             this.mapWidget = new MapWidget({
                 model: this.model.platform
             });
+            this.mapWidget.mission = this.model;
 
             this.platformWidget = new PlatformWidget({
                 model: this.model.platform

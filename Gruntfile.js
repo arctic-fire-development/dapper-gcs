@@ -29,7 +29,7 @@ module.exports = function(grunt) {
                     mainConfigFile: "./app/config.js",
                     out: "public/javascripts/required.js",
                     name: "main",
-                    optimize: "uglify2",
+                    optimize: "none",
                     findNestedDependencies: true, // for dynamic local includes
                     generateSourceMaps: false,
                     useStrict: true
@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                     dest: 'public/fonts/'
                 }, {
                     expand: true,
-                    cwd: 'app/assets/bower/leaflet-dist/images',
+                    cwd: 'app/assets/bower/leaflet/dist/images',
                     src: '*',
                     dest: 'public/images/leaflet/'
                 }, {
@@ -143,7 +143,7 @@ module.exports = function(grunt) {
 
             templates: {
                 files: ['./app/Templates/**/*.jade', './app/routines/**/*.jade'],
-                tasks: ['jade', 'requirejs', 'develop'],
+                tasks: ['jade', 'requirejs:dev', 'develop'],
                 options: {
                     interrupt: true,
                     nospawn: true
@@ -235,7 +235,7 @@ module.exports = function(grunt) {
                     "public/stylesheets/min.css": [
                         "build/less.css",
                         "assets/css/**/*.css",
-                        "app/assets/bower/leaflet-dist/leaflet.css",
+                        "app/assets/bower/leaflet/dist/leaflet.css",
                         "app/assets/bower/seiyria-bootstrap-slider/css/bootstrap-slider.css",
                         "app/assets/bower/fuelux/dist/css/fuelux.css"
                     ]

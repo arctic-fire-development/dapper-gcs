@@ -12,7 +12,6 @@ require.config({
         io: "assets/bower/socket.io-client/socket.io",
         jquery: "assets/bower/jquery/dist/jquery",
         underscore: "assets/bower/underscore/underscore",
-        "leaflet-dist": "assets/bower/leaflet-dist/leaflet",
         "leaflet-bing-plugin": "assets/bower/leaflet-plugins/layer/tile/Bing",
         "leaflet-rotate-marker": "assets/bower/leaflet-plugins/layer/Marker.Rotate",
         requirejs: "assets/bower/requirejs/require",
@@ -28,7 +27,10 @@ require.config({
         modernizr: "assets/bower/modernizr/modernizr",
         "seiyria-bootstrap-slider": "assets/bower/seiyria-bootstrap-slider/js/bootstrap-slider",
         "jquery-bridget": "assets/bower/jquery-bridget/jquery.bridget",
-        "leaflet.freedraw": "assets/bower/leaflet.freedraw/dist/leaflet.freedraw"
+        d3: "assets/bower/d3/d3",
+        leaflet: "assets/bower/leaflet/dist/leaflet",
+        "leaflet-pather": "assets/bower/leaflet-pather/dist/pather",
+        "leaflet-src": "assets/bower/leaflet/dist/leaflet-src"
     },
     shim: {
         backbone: {
@@ -38,7 +40,7 @@ require.config({
             ],
             exports: "Backbone"
         },
-        "leaflet-dist": {
+        leaflet: {
             exports: "L"
         }
     }

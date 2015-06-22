@@ -57,9 +57,7 @@ var mavlink;
 // Reference to the instantiated mavlink object, for access to target system/component.
 var mavlinkParser;
 
-// This really needs to not be here.
-// TODO really?
-// GH#159
+// Reference to connection object for sending data over the transport
 var uavConnection;
 
 // See comments in header for where this comes from.
@@ -93,7 +91,7 @@ function missionRequestHandler(missionItemRequest) {
         throw new Error('APM asked to send undefined mission packet');
     }
 
-    mavlinkParser.send(missionItems[missionItemRequest.seq], uavConnection);
+    uavConnection.sendAsGcs(missionItems[missionItemRequest.seq], uavConnection);
 }
 
 // Mission object constructor
@@ -110,12 +108,15 @@ util.inherits(MavMission, events.EventEmitter);
 
 // http://qgroundcontrol.org/mavlink/waypoint_protocol
 MavMission.prototype.sendToPlatform = function() {
+
+    var deferred = Q.defer();
+
     log.silly('Sending mission to platform...');
 
     // send mission_count
     // TODO see GH#95
     var missionCount = new mavlink.messages.mission_count(mavlinkParser.srcSystem, mavlinkParser.srcComponent, missionItems.length);
-    mavlinkParser.send(missionCount, uavConnection);
+    uavConnection.sendAsGcs(missionCount, uavConnection);
 
     // attach mission_request handler, let it cook
     mavlinkParser.on('MISSION_REQUEST', missionRequestHandler);
@@ -131,12 +132,15 @@ MavMission.prototype.sendToPlatform = function() {
             self.writeToQgcFormat();
 
             mavlinkParser.removeListener('MISSION_ACK', ackMission);
-            self.emit('mission:loaded');
+            deferred.resolve();
+
         } else {
             log.error('Unexpected MISSION_ACK type received: %d', ack.type);
             throw new Error('Unexpected mission acknowledgement received in mavMission.js');
         }
     });
+
+    return deferred.promise;
 };
 
 // Read the current mission from the UAV, into this instance of MavMission.
@@ -154,7 +158,7 @@ MavMission.prototype.fetchFromPlatform = function() {
     // Request mission item #n
     var sendMissionRequest = function(n) {
         var missionRequest = new mavlink.messages.mission_request(mavlinkParser.srcSystem, mavlinkParser.srcComponent, n);
-        mavlinkParser.send(missionRequest);
+        uavConnection.sendAsGcs(missionRequest);
     };
 
     mavlinkParser.once('MISSION_COUNT', function fetchWaypoints(msg) {
@@ -178,7 +182,7 @@ MavMission.prototype.fetchFromPlatform = function() {
         } else {
             // Done, send final ack
             var missionAck = new mavlink.messages.mission_ack(mavlinkParser.srcSystem, mavlinkParser.srcComponent, mavlink.MAV_MISSION_ACCEPTED);
-            mavlinkParser.send(missionAck);
+            uavConnection.sendAsGcs(missionAck);
             mavlinkParser.removeListener('MISSION_ITEM', handleMissionItem);
             log.info('Downloaded mission items from platform.');
             deferred.resolve(this);
@@ -187,7 +191,7 @@ MavMission.prototype.fetchFromPlatform = function() {
 
     // This starts the process off.
     var waypointRequestList = new mavlink.messages.mission_request_list(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
-    mavlinkParser.send(waypointRequestList);
+    uavConnection.sendAsGcs(waypointRequestList);
     log.verbose('Requesting mission from UAV...');
 
     return deferred.promise;
@@ -217,7 +221,7 @@ MavMission.prototype.clearMission = function() {
 
     missionItems = [];
     var missionClearAll = new mavlink.messages.mission_clear_all(mavlinkParser.srcSystem, mavlinkParser.srcComponent);
-    mavlinkParser.send(missionClearAll);
+    uavConnection.sendAsGcs(missionClearAll);
 
     return deferred.promise;
 };
@@ -235,15 +239,12 @@ MavMission.prototype.loadMission = function(mission) {
                 this.addMissionItem(missionItem);
             }, this);
 
-            this.sendToPlatform();
+            this.sendToPlatform().then(function() {
+                deferred.resolve();
+            });
 
         }, this))
         .done(); // rethrow errors
-
-    this.on('mission:loaded', function() {
-        log.info('Mission loaded successfully!');
-        deferred.resolve();
-    });
 
     return deferred.promise;
 
@@ -255,7 +256,11 @@ MavMission.prototype.getMissionItems = function() {
 
 // Given lat/lon, build a two-item mission that takes off and hovers.
 // Returns an array of mission items.
-MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
+MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt, ifContinue) {
+
+    // Default to not continue to the next waypoints.
+    ifContinue = (ifContinue) ? 1 : 0;
+
     if (!lat || !lon || !alt) {
         log.error('Lat [%d], lon [%d], alt [%d] zero or undefined in buildTakeoffThenHoverMission', lat, lon, alt);
         throw new Error('Lat, Lon, or Altitude were zero/undefined when asked to build takeoff mission');
@@ -284,7 +289,7 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
         mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
         mavlink.MAV_CMD_NAV_TAKEOFF,
         APM.mission_current.inactive,
-        0, // end of mission, platform should hover after this.
+        ifContinue, // end of mission, platform should hover after this.
         0, // 4 params, unused for this message type
         0,
         0,
@@ -295,6 +300,40 @@ MavMission.prototype.buildTakeoffThenHoverMission = function(lat, lon, alt) {
     );
 
     return [takeoff, hover];
+};
+
+// Given a home location and a list of lat/lons (array of arrays), build a list of MAVLink mission items.
+MavMission.prototype.buildAutoMission = function(currentLocation, latLngs, takeoffAltitude) {
+
+    // Build the takeoff component of the path flight, with the flag to continue to subsequent items
+    var missionItems = this.buildTakeoffThenHoverMission(currentLocation[0], currentLocation[1], takeoffAltitude, true);
+
+    // Append subsequent items
+    _.each(latLngs, function(latLng, index) {
+
+        // If this is the last mission item, don't auto-continue
+        var ifContinue = (index === missionItems.length - 1) ? 0 : 1;
+
+            missionItems.push(new mavlink.messages.mission_item(
+            mavlinkParser.srcSystem,
+            mavlinkParser.srcComponent,
+            missionItems.length, // sequence number,
+            mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+            mavlink.MAV_CMD_NAV_WAYPOINT,
+            APM.mission_current.inactive,
+            ifContinue, // end of mission, platform should hover after this.
+            0, // 4 params, unused for this message type
+            0,
+            0,
+            0,
+            latLng[0].toFixed(7),
+            latLng[1].toFixed(7),
+            takeoffAltitude
+        ));
+    });
+
+    return missionItems;
+
 };
 
 // Dumps current mission plan to console in QGC format, should be able
@@ -334,6 +373,55 @@ MavMission.prototype.writeToQgcFormat = function(filename) {
     } catch (e) {
         log.error(e);
     }
+};
+
+
+// Dumps current mission plan to console in QGC format, should be able
+// to copy/paste and load in APM planner to check the mission out.
+MavMission.prototype.readFromQgcFormat = function(filename) {
+    var deferred = Q.defer();
+
+    try {
+        log.verbose('Reading QGC format mission items from %s', filename);
+
+        var fs = require('fs');
+        var parse = require('csv-parse');
+        var mavlinkMissionItems = [];
+
+        var parser = parse({delimiter: '\t', comment: 'Q'}, function(err, data){
+
+            _.each(data, function(missionItem) {
+                // The strange order below is to map the QGC format into the constructor format
+                // for the mission_item MAVLink packet.
+                mavlinkMissionItems.push(new mavlink.messages.mission_item(
+                    mavlinkParser.srcSystem,
+                    mavlinkParser.srcComponent,
+                    missionItem[0],
+                    missionItem[2],
+                    missionItem[3],
+                    missionItem[1],
+                    missionItem[11],
+                    missionItem[4],
+                    missionItem[5],
+                    missionItem[6],
+                    missionItem[7],
+                    missionItem[8],
+                    missionItem[9],
+                    missionItem[10]
+                ));
+            });
+
+            deferred.resolve(mavlinkMissionItems);
+        });
+
+        fs.createReadStream("copter_mission.txt").pipe(parser);
+
+    } catch (e) {
+        log.error(e);
+        console.log(util.inspect(e));
+    }
+    return deferred.promise;
+
 };
 
 module.exports = MavMission;

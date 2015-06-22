@@ -2,12 +2,15 @@
 // Dumps a mavlink binary file into json-formatted text.
 // (not strict JSON, but enough to parse with JS and stuff)
 
-var mavlink = require("mavlink_ardupilotmega_v1.0"),
+var MAVLink = require("mavlink_ardupilotmega_v1.0"),
     fs = require('fs'),
-    sprintf = require("sprintf-js").sprintf;
+    sprintf = require("sprintf-js").sprintf,
+    stringify = require('node-stringify'),
+    _ = require('underscore');
+
 
 var messages = fs.readFileSync(process.argv[2]);
-var mavlinkParser = new mavlink();
+var mavlinkParser = new MAVLink();
 
 // Example of doing cheap/fast log analysis here: we just want some values from mission items.
 // mavlinkParser.on('MISSION_ITEM', function(message) {
@@ -16,7 +19,11 @@ var mavlinkParser = new mavlink();
 
 // Example of converting the entire file at once
 mavlinkParser.on('message', function(message) {
-  console.log(message);
+	var nonce = {};
+	_.each(message.fieldnames, function(field) {
+		nonce[field] = message[field]; // make a temp object with just the properties we want
+	});
+  console.log(message.name, ':', stringify(message));
 });
 
 mavlinkParser.pushBuffer(messages);

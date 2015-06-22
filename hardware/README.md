@@ -1,337 +1,326 @@
-Dapper-HW
-=========
+# Setup and Installation on Intel Edison
 
-Hardware related to the Ground Control Station
+## Flashing Edison with latest OS from OS X
+- install [horndis](http://joshuawise.com/downloads/HoRNDIS-rel7.pkg)
+- restart os x
+- download latest intel [flashing software](http://downloadmirror.intel.com/24910/eng/PhoneFlashToolLite_5.2.4.22_mac64.pkg) for edison
+- download [latest edison image](http://downloadmirror.intel.com/24910/eng/edison-image-ww18-15.zip)
+- point the intel flashing software to use the new firmware image
+- connect the edison to the laptop via OTG port
+- ensure intel flashing software detects the edison
+- click ‘start to flash’
+- will need to unplug the edison and replug in
+- this will take a few minutes
+- connect to the console port
+- login using `bloop c`
+- `configure_edison --version`
+  - 146
+- `configure_edison --setup`
+- `wget https://raw.githubusercontent.com/arctic-fire-development/dapper-gcs/paths/etc/setup.sh --no-check-certificate`
+- `./setup.sh`
 
+later, install it manually
+have the script auto-detect what stage of the setup it’s in
 
-##Beagle Bone Black Installation
+at this point you can continue from an ssh connection. this sometimes helps with the package downloads.
 
-We are going to set this up to do everything from the sd card.
+# Install and Setup Dapper-GCS from the "setup" script
+- `./setup.sh`
+  - follow the on-screen instructions
+- Note: this script performs a git clone of the dapper repo.
+  - Do not run it from within a cloned repo
 
-This will require:
+# Install and Setup Dapper-GCS from the command line
 
-    - flashing the eMMC to RobertCNelson's modified uBoot
-    - installing ubuntu on the uSD card
+## Setup Wifi
+- now that the latest os is installed, it's time to get networking going
+- run `configure_edison --setup`
+    - give a password
+    - give a new hostname
+        - should be gcsXX, a label on the device should have this
+    - connect to a wifi
+- verify your connection
+    - `curl -4 icanhazip.com`
 
-1. Download the eMMC Flasher image
-    - [BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb](http://rcn-ee.net/deb/flasher/trusty/BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb.img.xz)
-    - install to a micro SD card
-        - `sudo xz -cd BBB-eMMC-flasher-ubuntu-14.04.1-console-armhf-2014-10-29-2gb.img.xz > /dev/sdb`
-    - insert micro SD card into unpowered BBB
-    - hold the USER/BOOT button and apply power to BBB
-        - LEDs will begin blinking
-        - wait until all LEDs are stable
-    - unpower BBB and remove micro SD card
+## Fix /boot partition
 
-2. Download the regular uSD image
-    - [ubuntu-14.04.1-console-armhf-2014-10-29](https://rcn-ee.net/deb/rootfs/trusty/ubuntu-14.04.1-console-armhf-2014-10-29.tar.xz)
-    - install to a micro SD card
-        - For OS X: [Pi Filler](http://ivanx.com/raspberrypi/)
-        - on ubuntu vm:
-            - `tar xvf ubuntu-14.04*`
-            - `cd ubuntu-14.04*`
-            - `sudo fdisk -l`
-                - look for where the uSD card is, eg /dev/sdb
-            - `sudo ./setup_sdcard.sh --mmc /dev/sdb --dtb beaglebone`
-            - grab a sandwich
-    - insert micro SD card into unpowered BBB
-    - apply power to BBB (do NOT hold the USER/BOOT button)
-        - LEDs will begin blinking
+Problem:
 
-3. login to the BBB
-    - over usb:
-        - `ssh ubuntu@192.168.7.2`
-    - over ethernet:
-        - `ssh ubuntu@arm.local`
-    - u: ubuntu
-    - p: temppwd
+The /boot partition vfat filesystem is not created correctly by the Yocto packages. The edison-image-edison.hddimg is about 6MB, but the partition is 32MB, with the vfat partition only created the same size as the hddimg rather than the size of the partition.
 
-4. Expand the uSD file system
+Solution:
+- if commented, uncomment the line in /etc/fstab for partition 7 (/boot)
+- mount /boot
+- mkdir /tmp/boot
+- cp /boot/* /tmp/boot
+- umount /boot
+- mkfs.vfat /dev/mmcblk0p7
+- mount /boot
+- cp /tmp/boot/* /boot
+- df -h
+
+You should now have a 32MB /boot partition, plenty big enough for larger kernels
+
+## Add repo
+
+Problem:
+
+There is no quick and easy way to install software binaries ala apt-get
+
+Solution:
+
+- `vi /etc/opkg/base-feeds.conf`
     ```bash
-    $ sudo fdisk /dev/mmcblk0
-    p
-    d
-    2
-    n
-    p
-    2
-    <enter>
-    <enter>
-    w
-    $ sudo reboot
+    ===/etc/opkg/base-feeds.conf contents below===
+    src/gz all http://repo.opkg.net/edison/repo/all
+    src/gz edison http://repo.opkg.net/edison/repo/edison
+    src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32
 
-    # once the system is rebooted, ssh back in
-    $ sudo resize2fs /dev/mmcblk0p2
+    ===end of /etc/opkg/base-feeds.conf contents===
     ```
+- `opkg update`
+- `opkg upgrade`
 
-5. configure ethernet
-    - `sudo nano /etc/network/interfaces`
+## Use new kernel and modules
+- `cd /boot`
+- `ls -l`
+- `cp vmlinuz vmlinuz.original.ww05`
+- `cp bzImage-3.10.17-yocto-standard vmlinuz`
+- `opkg install kernel-modules`
+- `opkg install --force-reinstall kernel-module-bcm4334x`
+    - `modprobe: FATAL: Module bcm4334x not found.`
+    - ignore this, everything is fine
+- `reboot`
+- `uname -a`
+    - `3.10.17-yocto-standard`
+- `lsmod`
+```bash
+Module                  Size  Used by
+bcm4334x              574851  0
+ftdi_sio               40121  0
+usb_f_acm              14335  1
+u_serial               18582  6 usb_f_acm
+g_multi                70813  0
+libcomposite           39245  2 usb_f_acm,g_multi
+bcm_bt_lpm             13676  0
+```
 
-        ```bash
-        auto eth0
-        allow-hotplug eth0
-        iface eth0 inet dhcp
+## Install Base Distribution
 
-        allow hotplug wlan0
-        auto wlan0
-        iface wlan0 inet static
-          address 192.168.42.1
-          netmask 255.255.255.0
-          gateway 192.168.42.1
-          dns-search local
-          dns-nameservers 192.168.42.1
-        ```
-    - `sudo vim /etc/nsswitch.conf`
+### Install GCS
+- `npm install -g npm@latest`
+- `npm install -g forever bower grunt-cli`
+- `opkg install git`
+    - `git config --global user.name "John Doe"`
+    - `git config --global user.email johndoe@example.com`
+    - `git config --global url."https://".insteadOf git://`
+        - this makes it punch through timeout issues when behind a firewall
+- `git clone https://github.com/arctic-fire-development/dapper-gcs.git`
+- `cd dapper-gcs`
+- `npm install`
+    - this will take a while, be patient
+- `bower install --allow-root`
+    - this also will take a bit
+- `grunt`
 
-        ```bash
-        hosts:          files mdns4_minimal mdns4 dns
-        ```
+### Create log directory
+- `mkdir -p /var/log/dapper-gcs`
+- `chmod 755 /var/log/dapper-gcs`
 
-6. set hostname
-    - `sudo nano /etc/hostname`
-        - gcs or gcs0001
-    - `sudo nano /etc/hosts`
-        - ```bash
-            127.0.0.1       localhost
-            192.168.42.1    gcs gcs.local
-            ```
+### Install mapproxy
+- `wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate`
+- `python get-pip.py`
+- `opkg install vim python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6`
+- `pip install pyproj PyYAML`
+    - this seems to take abnormally log to install once downloaded
+    - be patient
+- `pip install MapProxy`
 
-7. configure avahi-daemon
-    - ```sudo apt-get install avahi-daemon```
-    - ```sudo update-rc.d avahi-daemon defaults```
-    - Create a configuration file containing information about the server. Run ```sudo nano /etc/avahi/services/afpd.service```. Enter (or copy/paste) the following
-
-        ```xml
-        <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
-        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-        <service-group>
-            <name replace-wildcards="yes">%h</name>
-            <service>
-                <type>_afpovertcp._tcp</type>
-                <port>548</port>
-            </service>
-            <service>
-                <type>_device-info._tcp</type>
-                <port>0</port>
-                <txt-record>model=RackMac</txt-record>
-            </service>
-        </service-group>
-        ```
-    - Restart Avahi: ```sudo /etc/init.d/avahi-daemon restart```
-
-8. install packages
-    - update repos
-        - ```sudo apt-get update```
-    - bash autocompletion
-        - ```sudo apt-get install bash-completion```
-    - vim
-        - ```sudo apt-get install vim```
-    - nodejs and npm
-        - ```sudo apt-get install nodejs npm```
-        - ```sudo ln -s /usr/bin/nodejs /usr/bin/node```
-    - GCS software prerequisites
-        - ```sudo npm install -g grunt-cli```
-        - ```sudo npm install -g bower```
-        - ```sudo npm install -g forever```
-        - ```sudo npm install -g nodemon```
-    - Adafruit BBB Python IO Library
-        - ```sudo apt-get install build-essential python-dev python-setuptools python-pip python-smbus```
-        - ```sudo pip install Adafruit_BBIO```
-            - test that it works
-                ```bash
-                ubuntu@arm:~$ sudo python -c "import Adafruit_BBIO.GPIO as GPIO; print GPIO"
-
-                you should see this or similar:
-                <module 'Adafruit_BBIO.GPIO' from '/usr/local/lib/python2.7/dist-packages/Adafruit_BBIO/GPIO.so'>
-                ```
-
-10. install gpsd and ntp
-    `sudo apt-get install gpsd gpsd-clients ntp`
-
-11. edit gpsd and ntp
+### Config Scripts
+- `cd dapper-gcs`
+- `cp config.json.example config.json`
+- `vim config.json`
 
     ```bash
-    ubuntu@arm:~$ sudo dpkg-reconfigure gpsd
-    ubuntu@arm:~$ cat /etc/default/gpsd
-
-    # Default settings for gpsd.
-    # Please do not edit this file directly - use `dpkg-reconfigure gpsd' to
-    # change the options.
-    START_DAEMON="true"
-    GPSD_OPTIONS="-n -G"
-    DEVICES="/dev/ttyO4"
-    BAUDRATE="9600"
-    USBAUTO="false"
-    GPSD_SOCKET="/var/run/gpsd.sock"
-    ```
-12. connect gps unit to the following pins
-    - tx -> P9.11
-    - rx -> P9.13
-    - ground -> P9.1
-    - power -> P9.3
-
-13. edit uEnv.txt
-    - `sudo vim /boot/uEnv.txt`
-    - edit the optargs line, adding this line if required:
-        ```bash
-        cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN,BB-BONE-EMMC-2G
-        cape_enable=capemgr.enable_partno=BB-UART4
-        ```
-    - `mkdir mmcblk0p1`
-    - `sudo mount /dev/mmcblk0p1 ./mmcblk0p1`
-    - `sudo cp /boot/uEnv.txt ./mmcblk0p1/`
-
-14. verify gpsd is working
-    - `ubuntu@arm:~$ cgps`
-    - you should see a table output with something updating roughly every second
-
-15. hostapd
-    - [follow these instructions from adafruit](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software)
-        - [custom build hostapd from here](https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/compiling-hostapd)
-        - will need to `sudo apt-get install unzip`
-        - configure /etc/dhcp/dhcpd.conf
-            - ```bash
-            subnet 192.168.42.0 netmask 255.255.255.0 {
-              range 192.168.42.10 192.168.42.100;
-              option broadcast-address 192.168.42.255;
-              option subnet-mask 255.255.255.0;
-              option routers 192.168.42.1;
-              default-lease-time 600;
-              max-lease-time 7200;
-              option domain-name "local";
-              option domain-name-servers 192.168.42.1;
-              host gcs {
-                fixed-address 192.168.42.1;
-              }
-            }
-            ```
-16. turn off apache
-    - `sudo update-rc.d -f apache2 disable`
-    - `sudo reboot`
-    - `sudo ps -aux | grep apache | grep -v grep`
-        - should come back empty
-
-### Post System Installation
-
-1. set some preferences
-    - `vim .bashrc`
-        - uncomment `#force_color_prompt=yes`
-    - `vim .profile`
-        - add the following:
-            ```bash
-            if ! shopt -oq posix; then
-                if [ -f /etc/bash_completion.d/git-prompt ]; then
-                    . /etc/bash_completion.d/git-prompt
-                    export PS1='[\@] \[\033[0;32m\]\u@\h\[\033[00m\]:\[\033[0;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
-                    export GIT_PS1_SHOWDIRTYSTATE=1
-                    export GIT_PS1_SHOWSTASHSTATE=1
-                    export GIT_PS1_SHOWUNTRACKEDFILES=1
-                    export GIT_PS1_SHOWUPSTREAM="auto"
-                fi
-            fi
-            ```
-2. setup gcs
-    - add your github public and private keys to ~/.ssh
-    - test that you can connect to github
-        - `ssh -T git@github.com`
-        - or follow the guide from [github](https://help.github.com/articles/generating-ssh-keys)
-    - clone the directory
-        - `git clone git@github.com:arctic-fire-development/dapper-gcs.git`
-
-        ```bash
-        cd dapper-gcs
-        git submodule init
-        git submodule update
-        npm install
-        bower install
-        grunt
-        ```
-    - copy over the upstart script
-        - `sudo cp dapper-gcs.conf /etc/init/`
-        - `cp config.json config`
-        - `vim config.json`
-            ```bash
-            "connection" : {
-                "type": "serial",`
-            ```
-
-            ```bash
-              "serial" : {
-                "device" : "/dev/tty.usbserial-A900XUV3",
-            ```
-        - `sudo start dapper-gcs`
-
-3. clean up any ssh files
-    - delete .ssh directory
-    - delete .gitconfig
-
-### Backup uSD card
-We are going to load up a usb flash drive to the BBB, and then use dd and bzip2 to make a compressed image of the uSD card
-
-1. bootup the BBB
-2. insert the usb drive
-3. ```sudo fdisk -l```
-    ```output```
-    notice the usb is located at /dev/sda1
-    notice the uSD card is /dev/mmcblk0
-4. from home directory
-    ```mkdir usb0```
-5. become root
-    ```sudo su -```
-6. mount the usb drive to the folder we just made
-    ```
-    mount -t vfat -o uid=ubuntu,gid=ubuntu /dev/sda1 /home/ubuntu/usb0
-    exit
-    ```
-7. make the image
-    ```sudo dd if=/dev/mmcblk0 | pv -s 2G -petr | gzip -1 > ./usb0/BBB-ubuntu-14.04-ArcticFireGCS.img.gz```
-8. remove the usb drive
-    ```sudo umount /home/ubuntu/usb0```
-9. profit
-
-### Resources
-    - [GPS integration](http://the8thlayerof.net/2013/12/08/adafruit-ultimate-gps-cape-creating-custom-beaglebone-black-device-tree-overlay-file/)
-
-### Troubleshooting
-
-#### OS X doesn't recognize the BBB in network interfaces anymore
-
-##### First go around
-
-    ```
-    Today i started configuring my beaglebone board. While the first time after installing the USB driver and the tethering HoRNDIS driver, it soon stopped working. I ended up getting multiple entries in my network configuration.
-
-    This will fix the issue:
-
-    Edit these two files and remove all entries containing beagleboard (beginning with <key>, including the following <dict> entry until </dict>). Do  this for every key/dict pair that holds a “Beagle” propery/string. – After removing all these from the two .plist files, i rebooted, and it was immediately working again! if i would have known this, i would have saved lots of time reinstalling the drivers again and again … ;-)
-
-    /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist
-
-    /Library/Preferences/SystemConfiguration/preferences.plist
+    "mapproxy": {
+        "url":"http://<HOSTNAME>.local:8080/service"
+    }    be sure to set this to the correct hostname
     ```
 
-[Source](http://blog.b-nm.at/2014/02/12/beagleboard-beaglebone-no-connection-via-usbnetwork-anymore-on-osx-10-9-mavericks/)
-
-##### Second go around
-
-    ```
-    I have solved this problem by resetting the SMC and the PRAM. Here are the details if someone needs it:
-
-    Reset the SMC and PRAM
-    - SMC Reset:
-        - Shut down the MacBook Pro.
-        - Plug in the MagSafe power adapter to a power source, connecting it to the Mac if its not already connected.
-        - On the built-in keyboard, press the (left side) Shift-Control-Option keys and the power button at the same time.
-        - Release all the keys and the power button at the same time.
-        - Press the power button to turn on the computer.
-    - PRAM:
-        - Shut down the MacBook Pro.
-        - Locate the following keys on the keyboard: Command, Option, P, and R.
-        - Turn on the computer.
-        - Press and hold the Command-Option-P-R keys. You must press this key combination before the gray screen appears.
-        - Hold the keys down until the computer restarts and you hear the startup sound for the second time.
-        - Release the keys.
-    - After following the above two steps I plugged in the beaglebone and it was detected in the network interface. I was then able to successfully ssh into it.
+    ```bash
+    "connection" : {
+        "type": "serial",
+    }
     ```
 
-[Source](http://stackoverflow.com/questions/23318071/beagle-bone-black-not-detected-in-network-interface-on-mac)
+    ```bash
+      "serial" : {
+        "device" : "auto",
+    }
+    ```
+- `cp dapper-gcs.service /lib/systemd/system/`
+- `cp dapper-mapproxy.service /lib/systemd/system/`
+- verify they work
+    - `systemctl stop edison_config.service`
+        - this frees up port 80
+    - `systemctl start dapper-mapproxy.service`
+    - `systemctl start dapper-gcs.service`
+- enable them to come up during boot
+    - `systemctl enable dapper-mapproxy.service`
+    - `systemctl enable dapper-gcs.service`
+    - `systemctl disable edison_config.service`
+- `netstat -tulpn | grep 80`
+    - verify port 80 is node and 8080 is python
+
+### Enable WiFi AP mode
+- press and hold power button for 4-7seconds
+- wifi ap should become available that is named the same as the hostname
+- ssh into the machine
+    - `reboot`
+- verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
+
+#### Alternative/Better Enable WiFi AP mode
+- `systemctl stop wpa_supplicant.service`
+- `systemctl disable wpa_supplicant.service`
+- `systemctl enable hostapd.service`
+- `systemctl start hostapd.service`
+- `reboot`
+- verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
+
+### Switch from WiFi AP to WiFi client mode
+- login via console
+    - su to root if needed
+- `systemctl status hostapd.service`
+    - should see that it is active
+- `systemctl status wpa_supplicant.service`
+    - should see that is it not active/disabled
+- `systemctl stop hostapd.service`
+- `configure_edison --wifi`
+    - select the network
+    - provide credentials
+- test connection
+    - `opkg update` or
+    - `ping www.google.com`
+
+## Troubleshooting
+
+### I Hosed my system and want to start from scratch
+Ideally you'd be able to do this from OS X, however the reality is there is still something wonky with reflashing from this os.
+Use a Linux system to do the re-flash. These steps involve a bit of bouncing back and forth between shells.
+- connect the edison via usb otg to the linux box...
+    - this shell will be called OTG
+    - it's where you will run flash.sh
+- connect the console to the linux box...
+    - this shell will be called CONSOLE
+    - it's where you will intterupt the boot sequence, and monitor the progress
+- from CONSOLE
+    - login as root
+    - `reboot`
+    - as the system reboots, it will give a VERY BRIEF opportunity to interrupt the boot sequence
+        - hit <ENTER> to interrupt
+    - you should now be at a prompt like this: `boot > `
+- from OTG
+    - cd into where the stock intel flash image is located
+        - something like `cd edison-image-ww05-15`
+    - run `sudo ./flashall.sh`
+    - it will pause while waiting for the edison, this is good
+- from CONSOLE
+    - `run do_flash`
+    - now the magic is happening
+    - don't touch anything until everything finishes and you're at the login prompt
+        - it will reboot a few times
+        - process takes 5-10 minutes
+    - once everything has settled down, login as root
+    - `configure_edison --version`
+        - `120`
+- congratulations!! now you can start over
+
+## Connecting to and upgrading Edison (from OS X)
+note that this will not re-partition the hard drive
+
+- install bloop
+    - `npm install -g bloop`
+- attach the edison to laptop with two micro-usb cables
+- run `bloop sniff`
+    - should get something like this `screen /dev/cu.usbserial-DA01LQHR 115200 -L`
+- run that command to bring up the console
+- press Enter a few times to bring up the console
+    - type *root* and press *Enter*
+        - there is no password
+- connect the edison to your laptop with both cables
+    - this enables the console and the mounted drive
+- download the latest os distribution [from intel](http://www.intel.com/support/edison/sb/CS-035180.htm)
+- unpack it
+- cd into that folder
+- upgrade the stock OS by pushing zip contents onto the mounted partition
+- from the console
+    - `reboot ota`
+- once rebooted, log back in via `ssh root@192.168.2.15` or `ssh root@<MACHINE_NAME>.local`
+- `configure_edison --version`
+    - `120`
+
+
+## Links:
+- [yocto repo](http://alextgalileo.altervista.org/edison-package-repo-configuration-instructions.html)
+- [install base intel provided image](https://communities.intel.com/docs/DOC-23193)
+- [BSP users guide](https://communities.intel.com/docs/DOC-23159)
+- [enable wifi ap mode](https://communities.intel.com/docs/DOC-23137)
+- expand / repartition
+- [clean up journaling bug](https://communities.intel.com/thread/55612?start=15&tstart=0)
+- [increase root partition size](https://communities.intel.com/docs/DOC-23449)
+
+## Notes:
+
+### Using USB-serial FTDI adapters with Intel Edison
+This has been RESOLVED with version 120!
+
+The current Yocto kernel distro available for the Intel Edison (version 68 by configure_edison --version) does not include the FTDI driver. Thus when you plug a USB-serial adapter into the USB OTG host port, you’ll see it partially recognized in dmesg tail upon plugin, but you won’t see an assignment to a /dev/ttyUSB_ device.
+
+You need to install the FTDI kernel module first.
+- `opkg install kernel-module-ftdi-sio`
+This assumes you have already setup the unofficial opkg repository.
+
+Now when you type dmesg tail you’ll see the line something like
+usb: FTDI USB Serial Device converter now attached to ttyUSB0
+
+### Steps to build from scratch on ec2
+- Fresh install of Ubuntu Server 14.04.1 x64
+  - type: c4.8xlarge
+  - storage: 100GB general ssd
+- Refresh the repository lists with the command
+  - `sudo apt-get update`
+- Update your OS install
+  - `sudo apt-get dist-upgrade`
+- Get the pre-reqs
+  - `sudo apt-get install build-essential git diffstat gawk chrpath texinfo libtool gcc-multilib`
+- Configure git
+  - `git config --global user.name "Your git user name"`
+  - `git config --global user.email you@somedomain.whatever`
+- Get the Edison Linux source files archive [here](http://www.intel.com/support/edison/sb/CS-035180.htm)
+- Untar the archive.
+  - `tar zxvf edison-src-ww*****`
+  - I put it in my home directory.
+- run setup
+  - `cd edison-src`
+  - `./device-software/setup.sh`
+- Get the number of processor cores available in your system
+  - `getconf _NPROCESSORS_ONLN`
+- Edit the ./build/conf/local.conf file
+  - set BB_NUMBER_THREADS equal to the number returned by `getconf _NPROCESSORS_ONLN` multiplied by 2
+  - set the number after PARALLEL_MAKE equal to the number returned by `getconf _NPROCESSORS_ONLN` multiplied by 1.5
+- Run command `source poky/oe-init-build-env`
+- Run command `bitbake edison-image`
+- Sit back and let your system pull the necessary files and compile them, mine took 10 minutes on c4.2xlarge  but most systems will take a few hours.
+- create flash
+  - `cd /edison-src/device-software/utils/flash`
+  - `./postBuild.sh`
+    - You may get some errors about "No such file or directory" which can be ignored as long as you don't want to use `reboot ota`
+- use scp to copy /edison-src/build/toFlash to local linux box
+- now on your local linux box
+- Install the DFU utilities
+  - `sudo apt-get install dfu-util`
+- If your Edison is plugged into your Linux system then unplug both USB cables from it so your Edison is powered off
+- Flash your Edison with your newly compiled firmware with the command "sudo ./flashall.sh" which will prompt you to plug in your Edison board with the two USB connections.
+- Flashing will take awhile and the Edison will be reset twice so be patient
+- Open a serial terminal connection to your Edison and log in as root with no password
+- Configure some basic settings on your Edison with the command "configure_edison --setup" which should now allow you to connect to your Edison over WiFi with SSH.

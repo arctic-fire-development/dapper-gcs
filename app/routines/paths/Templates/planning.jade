@@ -1,0 +1,45 @@
+.col-md-12
+  h2 Flight planning
+  .row
+    .col-md-6
+      h3 Plan the path for this flight
+      form(role="form")
+        .form-group
+          button.btn.btn-info.btn-info(type="button", data-toggle="modal", data-target="#pathPlannerModal") Plan path
+
+      h3 Flight parameters
+      form(role="form")
+        div.form-group.has-feedback
+          label(for="rtlBehavior") Takeoff to what altitude? (meters)
+          input(type="text", class="form-control", id="takeoffAltitude", name="takeoffAltitude", value="#{takeoffAltitude}")
+          span.feet.takeoffAltitudeToFeet.form-control-feedback
+          p.help-block When the mission starts, the platform will fly straight up until it reaches this altitude.
+        div.form-group.has-feedback
+          label(for="maxAltitude") Maximum altitude (meters)
+          input(type="text", class="form-control", id="maxAltitude", name="maxAltitude", value="#{maxAltitude}")
+          span.toFeet.feet.form-control-feedback
+          p.help-block The platform won't be allowed to exceed this height.  If it does, it will enter a failsafe mode.
+        div.form-group
+          label(for="failsafeBehavior") Failsafe behavior
+          select(id="failsafeBehavior", name="failsafeBehavior").form-control
+            option(selected, value="rtl") Return to home and <strong>land</strong>
+            option(value="ignore")
+              strong.danger Ignore failsafe
+              | , continue with mission
+          p.help-block Failsafe behavior kicks in when radio control is lost, power is low or the platform goes too high or far away.
+
+    .col-md-6
+      h3 Preparation
+      form(role="form")
+        .form-group
+          p Want a recommended equipment list for this flight?
+          a#equipmentChecklist.btn.btn-info Show equipment checklist
+
+  .row
+    .col-md-12
+      hr
+      form(role="form")
+        div.form-group
+          a.pull-right.continue.btn.btn-primary.btn-lg Continue to preflight
+
+#pathPlanner

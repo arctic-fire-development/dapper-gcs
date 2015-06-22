@@ -26,7 +26,7 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app', 'Models/Connecti
     var EngineeringView = Backbone.View.extend({
 
         el: '#engineering',
-        template: templates['app/Templates/engineering'],
+        template: templates['app/Templates/Engineering'],
 
         initialize: function() {
             _.bindAll(this, 'render', 'updatePlatform', 'updateConnection');
@@ -36,10 +36,9 @@ define(['jquery', 'backbone', 'underscore', 'io', 'JST', 'app', 'Models/Connecti
             this.startConnection();
         },
         startConnection: function() {
-            this.socket = app.socket;
-            this.socket.emit('startConnection');
-            this.socket.on('platform', this.updatePlatform);
-            this.socket.on('linkStatus', this.updateConnection);
+            app.socket.emit('startConnection');
+            app.socket.on('platform', this.updatePlatform);
+            app.socket.on('linkStatus', this.updateConnection);
         },
 
         updatePlatform: function(platformData) {

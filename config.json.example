@@ -5,45 +5,42 @@
   },
 
   "mapproxy": {
-    "url":"http://gcs.local:8080/service"
+    "url":"http://gcsXX.local:8080/service"
   },
 
   "connection" : {
-    "type": "tcp",
+    "type": "serial",
     "timeout": {
-        "soft": 5000,
-        "hard": 20000
+        "soft": 20000,
+        "hard": 40000
       },
       "updateIntervals" : {
-        "streamHz" : 2,
-        "heartbeatMs" : 251,
-        "sendHeartbeatMs" : 1000
+        "heartbeatMs" : 2501,
+        "sendHeartbeatMs" : 3000
       }
     },
 
   "tcp" : {
     "host" : "127.0.0.1",
-    "port" : 5760
+    "port" : 5760,
+    "sitl" : {
+      "active" : false,
+      "port" : 5501,
+      "bypassGps": false
+    }
   },
 
   "udp" : {
     "port" : 14550
   },
 
-  "sitl" : {
-    "active" : false,
-    "host" : "172.16.76.100",
-    "port" : 5501,
-    "bypassGps": false
-  },
-
   "serial" : {
-    "device" : "/dev/tty.usbserial-A900XUV3",
+    "device" : "auto",
     "baudrate" : 57600
   },
 
   "logging": {
-    "root": "./logs/",
+    "root": "/var/log/dapper-gcs/",
     "receivedBinary": "received",
     "sentBinary": "sent"
   },

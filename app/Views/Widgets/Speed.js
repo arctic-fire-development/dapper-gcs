@@ -3,7 +3,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
     var SpeedWidget = Backbone.View.extend({
 
         el: '#speedWidget',
-        template: templates['app/Templates/speedWidget'],
+        template: templates['app/Templates/Widgets/Speed'],
         className: 'widget',
 
         initialize: function() {

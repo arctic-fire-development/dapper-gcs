@@ -1,6 +1,6 @@
 'use strict';
 /*global require, module, process, __dirname, console */
-var mavlink = require('mavlink_ardupilotmega_v1.0'),
+var MAVLink = require('mavlink_ardupilotmega_v1.0'),
     UavConnection = require('./assets/js/libs/uavConnection.js'),
     MavParams = require('./assets/js/libs/mavParam.js'),
     express = require('express'),
@@ -31,6 +31,17 @@ requirejs.config({
     baseUrl: './app'
 });
 
+// Establish configuration information, bail if invalid
+try {
+    var pathToConfig = path.resolve(__dirname, 'config.json');
+    console.log('Current working directory to config.json', pathToConfig);
+    var stats = fs.statSync(pathToConfig); // throws if file missing
+    nconf.argv().env().file({ file: pathToConfig }); // throws if file syntax borked
+} catch(e) {
+    console.error('Invalid or missing configuration file, cannot start application...');
+    process.exit();
+}
+
 // Configure Winston
 var logger = module.exports = new(winston.Logger)({
     transports: [
@@ -38,18 +49,17 @@ var logger = module.exports = new(winston.Logger)({
             colorize: true,
             timestamp: true,
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
+        }),
+        new(winston.transports.File)({
+            filename: nconf.get('logging:root') + '/gcs.log',
+            colorize: false,
+            timestamp: true,
+            level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
         })
     ],
     levels: gcsLogConfig.levels,
     colors: gcsLogConfig.colors
 });
-
-// Fetch configuration information.
-nconf.argv()
-    .env()
-    .file({
-        file: 'config.json'
-    });
 
 // The logging path is created here if not already present;
 // do this synchronously to ensure creation before opening log streams.
@@ -105,15 +115,15 @@ server.listen(app.get('port'), function() {
     logger.info('Express server listening on port ' + app.get('port'));
 });
 
-// Establish parser
-var mavlinkParser = new mavlink(logger);
+// Establish parser, disable bad_data messages
+var mavlinkParser = new MAVLink(logger);
+mavlinkParser.silentBadPrefix = true;
 
 // Connection to UAV.  Started/stopped by client.
 var uavConnectionManager = new UavConnection.UavConnection(nconf, mavlinkParser, logger);
-mavlinkParser.setConnection(uavConnectionManager);
 
 // MavParams are for handling loading parameters
-var mavParams = new MavParams(mavlinkParser, logger);
+var mavParams = new MavParams(mavlinkParser, uavConnectionManager, logger);
 app.set('mavParams', mavParams);
 
 var platform = {},
@@ -141,7 +151,7 @@ app.get('/connection/start', function(req, res) {
 Start of code to handle droneUDL REST API and plugin-specific hacked-starting code.
 ***************/
 
-var quad = new quadUdl(logger, nconf);
+var quad = new quadUdl(logger, nconf, uavConnectionManager);
 quad.setProtocol(mavlinkParser);
 
 // Very hacky code below, the point of which is to get a 'current routine' hacked in place on the server side,
@@ -204,24 +214,33 @@ app.get('/drone/params/load', function(req, res) {
 
 });
 
-// TODO GH#164
-// This code is a prototype for when we properly bind this into the client GUI.
-app.get('/drone/mission/load', function(req, res) {
+// This function takes a query parameter (latLngs), generates a MAVLink mission, and loads it into the APM.
+app.post('/drone/mission/load', function(req, res) {
 
-    var lat = parseFloat(req.query.lat);
-    var lng = parseFloat(req.query.lng);
     var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
-    var mission = mm.buildTakeoffThenHoverMission(lat, lng, routine.mission.get('takeoffAltitude'));
-    var promise = mm.loadMission(mission);
+    var deferred = Q.defer();
 
-    Q.when(promise, function() {
+    var cleanLatLngs = _.map(req.body.latLngs, function(latLng) {
+        return [parseFloat(latLng[0]), parseFloat(latLng[1])];
+    });
+    logger.debug('cleanLatLngs:', util.inspect(cleanLatLngs));
+
+    quad.getLatLon()
+        .then(function(currentLocation) {
+
+            var mission = mm.buildAutoMission(currentLocation, cleanLatLngs, routine.mission.get('takeoffAltitude'));
+            mm.loadMission(mission)
+                .then(function() {
+                    deferred.resolve();
+                });
+        });
+
+    // Make this a qRetry GH#265
+    Q.when(deferred.promise, function() {
         res.send(200);
     });
 });
 
-// TODO GH#164
-// This is just a stub to handle getting the home/armed location to the
-// mission-build-takeoff section.
 function loadTakeoffMission() {
 
     var deferred = Q.defer();
@@ -247,6 +266,31 @@ function loadTakeoffMission() {
     return deferred.promise;
 }
 
+app.get('/drone/mission/read', function(req, res) {
+    var mm = new MavMission(mavlink, mavlinkParser, uavConnectionManager, logger);
+    mm.readFromQgcFormat();
+});
+
+// # TODO combine + refactor this functionality with /drone/launch  before finishing branch
+app.get('/drone/launch/path', function(req, res) {
+    logger.debug('launching paths mission');
+
+    try {
+
+        // Assumption: the mission has already been loaded.
+        Q.fcall(quad.arm)
+            .then(quad.setAutoMode)
+            .then(quad.takeoff)
+            .then(function() {
+                res.send(200);
+            })
+            .done(); // calling 'done' should rethrow any uncaught errors in the promise chain.
+
+    } catch (e) {
+        logger.error('error caught in server:path:launch:trycatch', e);
+    }
+});
+
 app.get('/drone/launch', function(req, res) {
 
     logger.debug('launching freeflight mission');
@@ -254,8 +298,9 @@ app.get('/drone/launch', function(req, res) {
     try {
 
         Q.fcall(loadTakeoffMission)
-            .then(quad.setAutoMode)
+            .then(quad.setLoiterMode)
             .then(quad.arm)
+            .then(quad.setAutoMode)
             .then(quad.takeoff)
             .then(function() {
                 res.send(200);
@@ -379,9 +424,6 @@ function bindClientEventBridge() {
     // TODO GH#180
     // Bind this in the same scope as the other client/server connections so we can be sure we're not
     // flooding event handlers.
-    // mavlinkParser.on('message', function(m) {
-    //   logger.silly('Got MAVLink message %s', m.name);
-    // });
 
     mavlinkParser.on('GLOBAL_POSITION_INT', function(message) {
         platform = _.extend(platform, {
@@ -395,7 +437,7 @@ function bindClientEventBridge() {
 
     // This won't scale =P still
     // But it's closer to what we want to do.
-    mavlinkParser.on('HEARTBEAT', function(message) {
+    mavlinkParser.on('HEARTBEAT', function serverHandleHeartbeat(message) {
         platform = _.extend(platform, {
             type: message.type,
             base_mode: message.base_mode,
@@ -445,8 +487,11 @@ function bindClientEventBridge() {
     });
 
     mavlinkParser.on('STATUSTEXT', function(message) {
-        io.emit('STATUSTEXT', message.text);
-        logger.info('status text from APM: ' + util.inspect(message.text));
+        // v8 doesnt have the regex global flags anymore, so use underscore to remove them
+        var statusText = _.filter(message.text, function(char){ return char !== '\u0000'; }).join('').toString();
+
+        io.emit('STATUSTEXT', statusText);
+        logger.info('cleaned status text from APM: ' + util.inspect(statusText));
     });
 
     uavConnectionManager.on('disconnected', function() {

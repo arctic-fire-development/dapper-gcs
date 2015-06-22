@@ -56,22 +56,19 @@ var platforms = [{
     name: 'ArduCopter (SITL)',
     type: 'quadcopter',
     payloads: [],
-    missions: ['Free Flight'],
+    missions: ['Free Flight', 'Paths'],
     id: 0,
     parameters: sitlCopterParams,
     defaults: {
         topSpeed: 15 // kph
     }
 }, {
-    name: '3DR Iris',
+    name: '3DR Iris+',
     type: 'quadcopter',
     payloads: ['GoPro'],
     missions: [
         'Free flight',
-        'Search and rescue',
-        'Infrastructure inspection',
-        'High-resolution mapping',
-        'Digital elevation model'
+        'Paths'
     ],
     id: 1,
     parameters: false,

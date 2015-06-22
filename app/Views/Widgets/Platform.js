@@ -1,4 +1,4 @@
-define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone, L, LRM) {
+define(['backbone', 'leaflet', 'leaflet-rotate-marker'], function(Backbone, L, LRM) {
 
     var PlatformWidget = Backbone.View.extend({
 
@@ -28,11 +28,12 @@ define(['backbone', 'leaflet-dist', 'leaflet-rotate-marker'], function(Backbone,
 
                 this.marker = L.marker([64.9, -147.1], {
                     icon: this.myIcon,
-                    iconAngle: 0
+                    iconAngle: 0,
+                    zIndexOffset: 1000
                 }).addTo(this.map);
 
-                // Do once;
-                this.map.panTo(LatLng);
+                // Do once.
+                this.map.setView(LatLng, 18);
 
                 this.hasRendered = true;
             }
