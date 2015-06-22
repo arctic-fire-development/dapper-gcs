@@ -273,8 +273,7 @@ app.get('/drone/mission/read', function(req, res) {
 
 // # TODO combine + refactor this functionality with /drone/launch  before finishing branch
 app.get('/drone/launch/path', function(req, res) {
-    logger.error('LAUNCH LAUNCH FFIRE FIRE LAUNCH');
-    logger.debug('launching freeflight mission');
+    logger.debug('launching paths mission');
 
     try {
 
