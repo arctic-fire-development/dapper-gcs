@@ -286,7 +286,7 @@ app.get('/drone/launch/path', function(req, res) {
             .done(); // calling 'done' should rethrow any uncaught errors in the promise chain.
 
     } catch (e) {
-        logger.error('error caught in server:freeglight:launch:trycatch', e);
+        logger.error('error caught in server:path:launch:trycatch', e);
     }
 });
 
