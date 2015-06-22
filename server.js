@@ -31,6 +31,17 @@ requirejs.config({
     baseUrl: './app'
 });
 
+// Establish configuration information, bail if invalid
+try {
+    var pathToConfig = path.resolve(__dirname, 'config.json');
+    console.log('Current working directory to config.json', pathToConfig);
+    var stats = fs.statSync(pathToConfig); // throws if file missing
+    nconf.argv().env().file({ file: pathToConfig }); // throws if file syntax borked
+} catch(e) {
+    console.error('Invalid or missing configuration file, cannot start application...');
+    process.exit();
+}
+
 // Configure Winston
 var logger = module.exports = new(winston.Logger)({
     transports: [
@@ -40,7 +51,7 @@ var logger = module.exports = new(winston.Logger)({
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
         }),
         new(winston.transports.File)({
-            filename: 'gcs.log',
+            filename: nconf.get('logging:root') + '/gcs.log',
             colorize: false,
             timestamp: true,
             level: process.env.GCS_LOG_LEVEL // if undefined, will be 'info'.
@@ -49,17 +60,6 @@ var logger = module.exports = new(winston.Logger)({
     levels: gcsLogConfig.levels,
     colors: gcsLogConfig.colors
 });
-
-// Establish configuration information, bail if invalid
-try {
-    var pathToConfig = path.resolve(__dirname, 'config.json');
-    logger.debug('Current working directory to config.json', pathToConfig);
-    var stats = fs.statSync(pathToConfig); // throws if file missing
-    nconf.argv().env().file({ file: pathToConfig }); // throws if file syntax borked
-} catch(e) {
-    logger.error('Invalid or missing configuration file, cannot start application...');
-    process.exit();
-}
 
 // The logging path is created here if not already present;
 // do this synchronously to ensure creation before opening log streams.
