@@ -278,8 +278,9 @@ app.get('/drone/launch/path', function(req, res) {
 
     try {
 
-        Q.fcall(quad.setLoiterMode)
-            .then(quad.arm)
+        // Assumption: the mission has already been loaded.
+        Q.fcall(quad.arm)
+            .then(quad.setAutoMode)
             .then(quad.takeoff)
             .then(function() {
                 res.send(200);
