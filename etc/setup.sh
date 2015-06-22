@@ -11,11 +11,10 @@ echo "Here is your ip address"
 curl -4 icanhazip.com;
 
 cd
-wget http://repo.opkg.net/edison/repo/edison/kernel-module-bcm4334x_1.141-r47_edison.ipk --no-check-certificates
 
 BOOT_SIZE=$(df -h | grep mmcblk0p7 | sed 's/\s\+/ /g' | cut -d' ' -f2 | sed 's/M//g')
 echo $BOOT_SIZE
-if [[ $BOOT_SIZE > 5.0 ]]; then
+if [[ $BOOT_SIZE < 6.0 ]]; then
   echo "Fixing the boot partition"
   mkdir /tmp/boot;
   cp /boot/* /tmp/boot/;
@@ -45,6 +44,8 @@ cp vmlinuz vmlinuz.original.$(configure_edison --version)
 cp bzImage* vmlinuz
 
 opkg install kernel-modules
+opkg install --force-reinstall kernel-module-bcm4334x
+echo "ignore the FATAL, it's ok"
 
 echo "Restarting the system"
 echo "Run setup.sh again to continue"
@@ -57,14 +58,12 @@ Stage2 ()
 echo "Continuing Setup and Installation"
 rm setup_in_progress
 
-echo "Installing wifi kernel module"
-#opkg install --force-reinstall kernel-module-bcm4334x
-opkg install --force-reinstall ./kernel-module-bcm4334x_1.141-r47_edison.ipk
-echo "    ignore the FATAL, it's ok"
-
-
 #let's get back onto the wifi
 configure_edison --wifi
+
+echo "creating the log directory /var/log/dapper-gcs"
+mkdir -p /var/log/dapper-gcs
+chmod 755 /var/log/dapper-gcs
 
 echo "Installing dapper-gcs pre-reqs"
 echo "    installing npm@latest"
@@ -96,7 +95,6 @@ cd
 echo "Installing mapproxy and friends"
 wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate
 python get-pip.py
-pip install --upgrade pip
 opkg install vim python-imaging python-sqlite3 python-dev libyaml-0-dev libjpeg-dev libz-dev libfreetype6
 pip install pyproj PyYAML
 pip install MapProxy

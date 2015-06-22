@@ -5,11 +5,11 @@
   },
 
   "mapproxy": {
-    "url":"http://gcs.local:8080/service"
+    "url":"http://gcsXX.local:8080/service"
   },
 
   "connection" : {
-    "type": "tcp",
+    "type": "serial",
     "timeout": {
         "soft": 20000,
         "hard": 40000
@@ -40,7 +40,7 @@
   },
 
   "logging": {
-    "root": "./logs/",
+    "root": "/var/log/dapper-gcs/",
     "receivedBinary": "received",
     "sentBinary": "sent"
   },

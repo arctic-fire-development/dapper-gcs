@@ -123,6 +123,10 @@ bcm_bt_lpm             13676  0
     - this also will take a bit
 - `grunt`
 
+### Create log directory
+- `mkdir -p /var/log/dapper-gcs`
+- `chmod 755 /var/log/dapper-gcs`
+
 ### Install mapproxy
 - `wget https://bootstrap.pypa.io/get-pip.py --no-check-certificate`
 - `python get-pip.py`
