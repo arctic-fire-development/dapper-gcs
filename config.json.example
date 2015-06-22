@@ -5,11 +5,11 @@
   },
 
   "mapproxy": {
-    "url":"http://gcs.local:8080/service"
+    "url":"http://gcsXX.local:8080/service"
   },
 
   "connection" : {
-    "type": "tcp",
+    "type": "serial",
     "timeout": {
         "soft": 10000,
         "hard": 20000
