@@ -63,7 +63,7 @@ configure_edison --wifi
 
 echo "creating the log directory /var/log/dapper-gcs"
 mkdir -p /var/log/dapper-gcs
-chmod 777 /var/log/dapper-gcs
+chmod 755 /var/log/dapper-gcs
 
 echo "Installing dapper-gcs pre-reqs"
 echo "    installing npm@latest"
