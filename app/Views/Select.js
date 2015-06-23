@@ -35,6 +35,7 @@ define(['backbone', 'JST'], function(Backbone, templates) {
                 mission: this.$el.find('#routineSelection')[0].value,
                 payload: payload
             });
+            this.$el.find('#currentMissionImg').attr('src', '/images/'+appConfig.missions[this.$el.find('#routineSelection')[0].value].preview).show();
         }
     });
 

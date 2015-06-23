@@ -96,7 +96,9 @@ app.configure('development', function() {
 });
 
 // Shunt client configs into place.  Rendered in the route.  Not ideal (#122)
-app.set('platforms', platforms);
+app.set('platforms', platforms.platforms);
+console.log(platforms.missions);
+app.set('missions', platforms.missions);
 app.set('config', nconf);
 app.set('APM', APM);
 
