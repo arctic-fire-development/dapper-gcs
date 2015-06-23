@@ -1,3 +1,4 @@
 {
-  "directory": "./app/assets/bower"
+  "directory": "./app/assets/bower",
+  "analytics": false
 }
