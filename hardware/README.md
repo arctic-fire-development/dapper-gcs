@@ -187,6 +187,79 @@ bcm_bt_lpm             13676  0
 - `reboot`
 - verify ability to browse to http://gcsXX.local and http://gcsXX.local:8080
 
+### Enable USB-Ethernet bridging
+- connect to edison via the console, not ssh
+- turn on wifi client mode
+    - `sysctl stop hostapd.service`
+    - `sysctl start wpa_supplicant.service`
+    - `configure_edison --wifi`
+- build bridge-utils
+    - `wget http://sourceforge.net/projects/bridge/files/bridge/bridge-utils-1.5.tar.gz`
+    - `wget http://www.linuxfromscratch.org/patches/blfs/svn/bridge-utils-1.5-linux_3.8_fix-1.patch`  
+    - `tar zxvf bridge-utils-1.5.tar.gz`
+    - `cd bridge-utils`
+    - `patch -Np1 -i ../bridge-utils-1.5-linux_3.8_fix-1.patch &&
+    autoconf -o configure configure.in                      &&
+    ./configure --prefix=/usr                               &&
+    make`
+
+- `cd /etc/systemd/network/`
+- create the bridge device and network
+    - `vim br0.netdev`
+
+        ```bash
+        [NetDev]
+        Name=br0
+        Kind=bridge
+        ```
+    - `vim br0.network`
+        ```
+        [Match]
+        Name=br0
+
+        [Network]
+        DHCP=ipv4
+        ```
+- change usb0.network to use the bridge
+- `vim usb0.network`
+    ```
+    [Match]
+    Name=usb0
+
+    [Network]
+    Bridge=br0
+    ```
+- make hostapd use the bridge
+    - `vim /etc/hostapd/hostapd.conf`
+    - uncomment the line for `bridge=br0`
+- copy over the udhcp client service file
+    - `cd ~/dapper-gcs`
+    - `cp udhcpc-for-br0.service /lib/systemd/system/`
+- enable the service file
+    - `systemctl enable udhcpc-for-br0.service`
+- reboot the system and verify bridge is working
+    - connect a usb ethernet device to th OTG port  
+    - `reboot`
+    - `brctl show`
+        ```bash
+        bridge name     bridge id               STP enabled     interfaces
+        br0             8000.0200860edb75       no              usb0
+                                                                wlan0
+        ```
+    - `ifconfig br0`
+        ```bash
+        br0       Link encap:Ethernet  HWaddr 02:00:86:0e:db:75  
+      inet addr:192.168.2.4  Bcast:0.0.0.0  Mask:255.255.255.0
+      UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+      RX packets:77 errors:0 dropped:0 overruns:0 frame:0
+      TX packets:379 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:0
+      RX bytes:13645 (13.3 KiB)  TX bytes:22073 (21.5 KiB)  
+      ```
+    - `curl -4 icanhazip.com`
+        - connect laptop to the gcs approx
+        - browse to web page you never use, like www.yahoo.com =P
+
 ### Switch from WiFi AP to WiFi client mode
 - login via console
     - su to root if needed
