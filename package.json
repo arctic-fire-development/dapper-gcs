@@ -56,6 +56,7 @@
     "geospatial"
   ],
   "name": "dapper",
+  "license" : "GPL-3.0",
   "private": false,
   "repository": {
     "type": "git",
