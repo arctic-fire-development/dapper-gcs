@@ -226,6 +226,17 @@ define([
                 status: 'fly',
                 active: true
             });
+
+            // We can arrive at this step as an observer without
+            // going through the preflight stage, so we need to
+            // reify the Routine.  Was GH#505.
+            if( _.isUndefined(this.routine)) {
+                var Routine = require(this.getRoutineName());
+                this.routine = new Routine({
+                    mission: this.mission
+                });
+            }
+
             this.routine.fly().then(_.bind(function() {
                 this.navigate('mission/postflight', {
                     trigger: true
