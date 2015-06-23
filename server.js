@@ -34,7 +34,6 @@ requirejs.config({
 // Establish configuration information, bail if invalid
 try {
     var pathToConfig = path.resolve(__dirname, 'config.json');
-    console.log('Current working directory to config.json', pathToConfig);
     var stats = fs.statSync(pathToConfig); // throws if file missing
     nconf.argv().env().file({ file: pathToConfig }); // throws if file syntax borked
 } catch(e) {
@@ -97,7 +96,6 @@ app.configure('development', function() {
 
 // Shunt client configs into place.  Rendered in the route.  Not ideal (#122)
 app.set('platforms', platforms.platforms);
-console.log(platforms.missions);
 app.set('missions', platforms.missions);
 app.set('config', nconf);
 app.set('APM', APM);
