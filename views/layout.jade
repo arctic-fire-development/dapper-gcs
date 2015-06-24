@@ -1,48 +1,48 @@
 doctype html
 html(lang='en')
-	head
-		meta(charset='utf-8')
-		meta(http-equiv='X-UA-Compatible', content='IE=edge')
-		meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui')
-		meta(name="apple-mobile-web-app-capable", content="DapperGCS")
-		title= title
-		link(rel='stylesheet', href='/stylesheets/min.css')
-		link(rel='icon', type='image/png', href='/images/afdc.png')
-		script(type="text/javascript", data-main="/javascripts/required", charset="utf-8", src="/javascripts/require.js")
-		script.
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui')
+    meta(name="apple-mobile-web-app-capable", content="DapperGCS")
+    title= title
+    link(rel='stylesheet', href='/stylesheets/min.css')
+    link(rel='icon', type='image/png', href='/images/afdc.png')
+    script(type="text/javascript", data-main="/javascripts/required", charset="utf-8", src="/javascripts/require.js")
+    script.
 
-			// Interpolate some server-side configs into the client setup.
-			// For development mode, consider setting bypassGps to "true"
-			var appConfig = appConfig || {};
-			appConfig.platforms = !{JSON.stringify(platforms)};
-			appConfig.APM = !{JSON.stringify(APM)};
-			appConfig.mapProxyUrl = "#{mapProxyUrl}";
-			appConfig.bypassGps = #{bypassGps}
+      // Interpolate some server-side configs into the client setup.
+      // For development mode, consider setting bypassGps to "true"
+      var appConfig = appConfig || {};
+      appConfig.platforms = !{JSON.stringify(platforms)};
+      appConfig.APM = !{JSON.stringify(APM)};
+      appConfig.mapProxyUrl = "#{mapProxyUrl}";
+      appConfig.bypassGps = #{bypassGps}
 
-	body.fuelux
-		nav#main-navbar.navbar.navbar-default(role="navigation")
-			.container-fluid
-				.navbar-header
-					button.navbar-toggle(type="button", data-toggle="collapse", data-target="#bs-example-navbar-collapse-1")
-						span.sr-only Toggle Navigation
-						span.icon-bar
-						span.icon-bar
-						span.icon-bar
-					a.navbar-brand(href="#") Routine.ly
+  body.fuelux
+    nav#main-navbar.navbar.navbar-default(role="navigation")
+      .container-fluid
+        .navbar-header
+          button.navbar-toggle(type="button", data-toggle="collapse", data-target="#bs-example-navbar-collapse-1")
+            span.sr-only Toggle Navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href="#") Routine.ly
 
-				#navbar.collapse.navbar-collapse
-					ul.nav.navbar-nav
-						li(data-name="mission").active
-							a(href="/mission/current") Mission
-						li(data-name="engineering")
-							a(href="/engineering") Engineering
+        #navbar.collapse.navbar-collapse
+          ul.nav.navbar-nav
+            li(data-name="mission").active
+              a(href="/mission/current") Mission
+            li(data-name="engineering")
+              a(href="/engineering") Engineering
 
-					ul#indicators.nav.navbar-nav.navbar-right
-						li.isOperator
-							a
-								span.glyphicon.glyphicon-cloud-upload
-						li.isObserver
-							a
-								span.glyphicon.glyphicon-eye-open
+          ul#indicators.nav.navbar-nav.navbar-right
+            li.isOperator
+              a
+                span.glyphicon.glyphicon-cloud-upload
+            li.isObserver
+              a
+                span.glyphicon.glyphicon-eye-open
 
-	block content
+  block content
