@@ -6,9 +6,9 @@ html(lang='en')
     meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui')
     meta(name="apple-mobile-web-app-capable", content="DapperGCS")
     title= title
+    link(rel='stylesheet', href='/stylesheets/loader.css')
     link(rel='stylesheet', href='/stylesheets/min.css')
     link(rel='icon', type='image/png', href='/images/afdc.png')
-    script(type="text/javascript", data-main="/javascripts/required", charset="utf-8", src="/javascripts/require.js")
     script.
 
       // Interpolate some server-side configs into the client setup.
@@ -20,6 +20,12 @@ html(lang='en')
       appConfig.bypassGps = #{bypassGps}
 
   body.fuelux
+    #loader-banner
+      h1 Loading DapperGCS&hellip;
+    #loader-wrapper
+      #loader
+      .loader-section.section-left
+      .loader-section.section-right
     nav#main-navbar.navbar.navbar-default(role="navigation")
       .container-fluid
         .navbar-header
@@ -46,3 +52,4 @@ html(lang='en')
                 span.glyphicon.glyphicon-eye-open
 
   block content
+  script(type="text/javascript", data-main="/javascripts/required", charset="utf-8", src="/javascripts/require.js")

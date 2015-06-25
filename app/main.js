@@ -17,7 +17,9 @@ require([
         root: app.root
     });
 
+    // At this point, the app has loaded; hide the loading screen.
     $('body').addClass('loaded');
+
     // All navigation that is relative should be passed through the navigate
     // method, to be processed by the router. If the link has a `data-bypass`
     // attribute, bypass the delegation completely.
