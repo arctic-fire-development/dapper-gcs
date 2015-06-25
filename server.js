@@ -22,7 +22,8 @@ var MAVLink = require('mavlink_ardupilotmega_v1.0'),
     platforms = require('./assets/js/libs/platforms.js'),
     _ = require('underscore'),
     Users = require('./assets/js/libs/Users.js'),
-    RoutineObj = require('./assets/js/libs/Routine.js');
+    RoutineObj = require('./assets/js/libs/Routine.js'),
+    GCSBattery = require('./assets/js/libs/gcsBattery.js');
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -141,6 +142,10 @@ io.on('connection', function(socket) {
         } // end if-connection-manager-has-started
     });
 });
+
+// start monitoring the gcs battery state
+var gcsBattery = new GCSBattery(logger, io);
+gcsBattery.startMonitor();
 
 app.get('/connection/start', function(req, res) {
     uavConnectionManager.start();
