@@ -128,9 +128,9 @@ tree -L 3 -I "node_modules|bower|*.svg|*.less|*."
 
 
 
-## Working with APM hardware & SITL
+## Working with ArduPilot hardware & SITL
 
-(OSX) You'll need to install the [FTDI Arduino MegaPilot driver](http://www.ftdichip.com/Drivers/VCP.htm) before the system will recognize the system.
+(OSX) You'll need to install the [FTDI Arduino MegaPilot driver](http://www.ftdichip.com/Drivers/VCP.htm) before the OS X will recognize the ArduPilot.
 
 if connecting via the usb, be sure to set the baudrate in config.json:
 
@@ -148,18 +148,19 @@ Assuming you're able to get the [SITL guide on this page](http://dev.ardupilot.c
 
  1. Start the ArduPlane simulator: ```/tmp/ArduPlane.build/ArduPlane.elf &```
  2. Start JSBSim: ```python ./ardupilot/Tools/autotest/jsbsim/runsim.py --home=-35.362938,149.165085,584,270 &```
- 3. Change the config file for your ground station to be ```tcp```, and to connect to the correct IP/port on  the machine running the ArduPlane and JSBSim.
- 4. Start the ground station: ```grunt && nodemon server.js```
+ 3. Change the config.json file for your ground station to be ```tcp```, and to connect to the correct IP/port on  the machine running the ArduPlane/ArduCopter and JSBSim.
+ 4. Start the ground station: ```grunt```
  5. Open a web page to ```localhost:3000```
 
 ### Installing offline tile cache system
 
- 1. ```sudo pip install MapProxy```
- 2. To launch the cache:
+ 1. ```sudo pip install pyproj PyYAML```
+ 2. ```sudo pip install MapProxy```
+ 3. To launch the cache:
 
 ```javascript
 cd /path/to/repo
-mapproxy-util serve-develop --debug etc/bing.yaml
+mapproxy-util serve-develop -b 0.0.0.0:8080 etc/bing.yaml
 ```
 
 ### Testing
