@@ -158,7 +158,7 @@ Assuming you're able to get the [SITL guide on this page](http://dev.ardupilot.c
  2. ```sudo pip install MapProxy```
  3. To launch the cache:
 
-```javascript
+```
 cd /path/to/repo
 mapproxy-util serve-develop -b 0.0.0.0:8080 etc/bing.yaml
 ```
