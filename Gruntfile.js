@@ -135,6 +135,11 @@ module.exports = function(grunt) {
                     cwd: 'assets/fonts/',
                     src: '**/*.woff',
                     dest: 'public/fonts/'
+                }, {
+                    expand: true,
+                    cwd: 'assets/css/',
+                    src: 'loader.css',
+                    dest: 'public/stylesheets/'
                 }]
             }
         },
@@ -169,7 +174,7 @@ module.exports = function(grunt) {
             },
 
             styles: {
-                files: ['assets/less/**/*.less', 'assets/css/**/*.css', './app/routines/**/*.less'],
+                files: ['assets/less/**/*.less', './app/routines/**/*.less'],
                 tasks: ['less', 'cssmin', 'develop'],
                 options: {
                     interrupt: true,
