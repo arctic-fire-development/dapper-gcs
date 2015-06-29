@@ -67,7 +67,7 @@ var platforms = [{
     type: 'quadcopter',
     payloads: ['GoPro'],
     missions: [
-        'Free flight',
+        'Free Flight',
         'Paths'
     ],
     id: 1,
@@ -77,4 +77,14 @@ var platforms = [{
     }
 }];
 
-module.exports = platforms;
+var missions = {
+  'Free Flight': {
+    'preview': 'freeFlight.min.svg'
+  },
+  'Paths': {
+    'preview': 'paths.min.svg'
+  }
+};
+
+module.exports.platforms =platforms;
+module.exports.missions = missions;

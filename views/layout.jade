@@ -15,6 +15,7 @@ html(lang='en')
 			// For development mode, consider setting bypassGps to "true"
 			var appConfig = appConfig || {};
 			appConfig.platforms = !{JSON.stringify(platforms)};
+			appConfig.missions = !{JSON.stringify(missions)};
 			appConfig.APM = !{JSON.stringify(APM)};
 			appConfig.mapProxyUrl = "#{mapProxyUrl}";
 			appConfig.bypassGps = #{bypassGps}
