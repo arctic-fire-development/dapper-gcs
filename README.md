@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/arctic-fire-development/dapper-gcs.png?label=ready&title=Ready)](https://waffle.io/arctic-fire-development/dapper-gcs)
 ## Dapper - Unmanned Ground Control Station
 
 node.js + HTML5 UAV ground station software emphasizing data collection and mission operations.
