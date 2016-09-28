@@ -28,6 +28,8 @@ npm install
 bower install
 mkdir logs
 mkdir tmp
+sudo mkdir /var/log/dapper-gcs
+sudo chmod -R 777 /var/log/dapper-gcs
 cp config.json.example config.json
 grunt
 ```
