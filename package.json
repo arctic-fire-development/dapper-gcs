@@ -5,7 +5,7 @@
   "dependencies": {
     "backbone": "1.1.2",
     "csv-parse": "0.0.6",
-    "express": "3.5.3",
+    "express": "4.17.1",
     "glob": "5.0.5",
     "jade": "1.5.0",
     "jspack": "0.0.4",
