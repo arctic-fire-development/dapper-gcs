@@ -11,7 +11,7 @@
     "jspack": "0.0.4",
     "less-middleware": "1.0.4",
     "mavlink_ardupilotmega_v1.0": "file:./etc/mavlink_ardupilotmega_v1.0.tgz",
-    "moment": "2.7.0",
+    "moment": "2.24.0",
     "nconf": "0.6.9",
     "node-stringify": "0.0.18",
     "q": "1.0.1",
